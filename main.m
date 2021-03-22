@@ -76,10 +76,13 @@ fig_pp_anim = figure(2);
 
 for k = 2 : k_max
     VIS.DYNPLOT(dom.size,pp.d,pp.r)
-    drawnow;
+    drawnow;  % draw the plot each time step
+    
+    % TO DO: This loop can be vectorized. 
+    % TO DO: Cant he properties by calculated outside the loop (no because depend on aggregate size?).
     for i = 1 : n_pp
-        time(k) = time(k-1) + del_t;
-        tau_pp = MOV.PROPS(pp.d(i),rho_pp,fl.temp,fl.p);
+        time(k) = time(k-1) + del_t;  % step time
+        tau_pp = MOV.PROPS(pp.d(i),rho_pp,fl.temp,fl.p);  % get particle properties
         [r_pp_new, v_pp_new] = MOV.MARCH(pp.r(i,:),pp.v(i,:),pp.d(i),...
             rho_pp,tau_pp,fl.temp,del_t);
         pp.r(i,:) = r_pp_new;
