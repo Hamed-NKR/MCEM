@@ -2,6 +2,9 @@ clc
 clear
 close all
 
+%%%%%%
+
+
 %% Program description
 
 % The present code generates soot fractal aggregates based on...
