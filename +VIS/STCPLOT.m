@@ -5,14 +5,12 @@ function STCPLOT(dom_size,pp)
 % dom_size is the computational domain dimensions array.
 % pp is the primary particles' structure.
 
-n_pp = size(pp.ind,1);
+VIS.DYNPLOT(dom_size,pp.d,pp.r);
 
 subplot(2,2,1)
-for j = 1:n_pp
-    VIS.CIRCLE(pp.r(j,1),pp.r(j,2),pp.d(j)/2);
-    hold on
-end
+hold on;
 quiver(pp.r(:,1),pp.r(:,2),pp.v(:,1),pp.v(:,2));
+hold off;
 axis equal
 title('xy view')
 xlabel('x (m)')
@@ -21,11 +19,9 @@ xlim([0 dom_size(1)])
 ylim([0 dom_size(2)])
 
 subplot(2,2,2)
-for j = 1:n_pp
-    VIS.CIRCLE(pp.r(j,1),pp.r(j,3),pp.d(j)/2);
-    hold on
-end
+hold on;
 quiver(pp.r(:,1),pp.r(:,3),pp.v(:,1),pp.v(:,3));
+hold off;
 axis equal
 title('xz view')
 xlabel('x (m)')
@@ -34,11 +30,9 @@ xlim([0 dom_size(1)])
 ylim([0 dom_size(3)])
 
 subplot(2,2,3)
-for j = 1:n_pp
-    VIS.CIRCLE(pp.r(j,2),pp.r(j,3),pp.d(j)/2);
-    hold on
-end
+hold on;
 quiver(pp.r(:,2),pp.r(:,3),pp.v(:,2),pp.v(:,3));
+hold off;
 axis equal
 title('yz view')
 xlabel('y (m)')
@@ -51,9 +45,9 @@ subplot(2,2,4)
 %     VIS.SPHERE(pp.r(j,1),pp.r(j,2),pp.r(j,3),pp.d(j)/2);
 %     hold on
 % end
-scatter3(pp.r(:,1),pp.r(:,2),pp.r(:,3),(pp.d(:)/2)*10^9);
 hold on
 quiver3(pp.r(:,1),pp.r(:,2),pp.r(:,3),pp.v(:,1),pp.v(:,2),pp.v(:,3))
+hold off;
 axis equal
 title('xyz view')
 xlabel('x (m)')

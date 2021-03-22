@@ -75,8 +75,8 @@ del_t = (10^-9) * MOV.PROPS(min(pp.d),rho_pp,fl.temp,fl.p); % Marching time step
 fig_pp_anim = figure(2);
 
 for k = 2 : k_max
-    VIS.DYNPLOT(dom.size,n_pp,pp.d,pp.r)
-    pause(0.001)
+    VIS.DYNPLOT(dom.size,pp.d,pp.r)
+    drawnow;
     for i = 1 : n_pp
         time(k) = time(k-1) + del_t;
         tau_pp = MOV.PROPS(pp.d(i),rho_pp,fl.temp,fl.p);
