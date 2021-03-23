@@ -16,14 +16,14 @@ mu_f = 2 * sqrt(mm_f*R_u*temp_f) / (3*sqrt(pi)*N_a*sig_col); % Viscosity
 lambda_f = mu_f / (0.499*p_f*sqrt(8*mm_f/(pi*R_u*temp_f))); % Mean free path 
 
 % Calculating the particle slip-related properties
-kn = 2 * lambda_f / d_par; % Knudsen number
+kn = 2 .* lambda_f ./ d_par; % Knudsen number
 alpha = 1.254;
 beta = 0.4;
 gamma = 1.1;
-cc = 1 + kn * (alpha + beta * exp(-gamma/kn)); % Cunningham correction factor
+cc = 1 + kn .* (alpha + beta .* exp(-gamma ./ kn)); % Cunningham correction factor
 
 % Particle response (relaxation) time
-tau_par = rho_par * (d_par^2) * cc / (18 * mu_f);
+tau_par = rho_par .* (d_par.^2) .* cc ./ (18 .* mu_f);
 
 end
 

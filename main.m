@@ -74,15 +74,39 @@ del_t = (10^-9) * MOV.PROPS(min(pp.d),rho_pp,fl.temp,fl.p); % Marching time step
 
 fig_pp_anim = figure(2);
 
+% CHANGE: This did not need to be in the loop.
+time = 0:del_t:(k_max * del_t);  % times to be looped over
+
+disp('Simulating:');
+UTILS.TEXTBAR([0, k_max]);  % initialize textbar
+UTILS.TEXTBAR([1, k_max]);  % indicate initial postions are set
 for k = 2 : k_max
-    VIS.DYNPLOT(dom.size,n_pp,pp.d,pp.r)
-    pause(0.001)
-    for i = 1 : n_pp
-        time(k) = time(k-1) + del_t;
-        tau_pp = MOV.PROPS(pp.d(i),rho_pp,fl.temp,fl.p);
-        [r_pp_new, v_pp_new] = MOV.MARCH(pp.r(i,:),pp.v(i,:),pp.d(i),...
-            rho_pp,tau_pp,fl.temp,del_t);
-        pp.r(i,:) = r_pp_new;
-        pp.v(i,:) = v_pp_new;
+    
+    % CHANGE: Vectorized the particle loop. The program is extremely fast
+    % is it doesn't have to plot. 
+    
+    % TO DO: There are probably too many inputs here. Can this be simplified?
+    tau_pp = MOV.PROPS(pp.d,rho_pp,fl.temp,fl.p);  % get particle properties
+    [pp.r, pp.v] = MOV.MARCH(pp.r,pp.v,pp.d,...
+    	rho_pp,tau_pp,fl.temp,del_t);
+    % CHANGE: Assign r and v directly. The multi-step is slower and
+    % wastes memory. 
+    
+    % CHANGE: You should plot after you update the results, or the last
+    % step is not plotted. Especially given the VIS.STCPLOT at the
+    % beginning plots the original points.
+    % CHANGE: Plot every t_plot time steps. Change to t_plot = 1 to plot
+    % every step (much slower).
+    t_plot = 10;
+    if mod(k-1, t_plot)==0
+        VIS.DYNPLOT(dom.size,pp.d,pp.r)
+        drawnow;  % draw the plot each time step
     end
+    
+    % CHANGE: I added this textbar utility to indicate progress in command
+    % line.
+    UTILS.TEXTBAR([k, k_max]);  % update textbar
+    
+    % TO DO: The particles seem to disappear over time. Likely a bug in
+    % applying periodic boundary conditions. 
 end
