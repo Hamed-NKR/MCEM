@@ -1,21 +1,19 @@
+%% Description
+
+% This script:
+% 1. reads the aggregation input parameters,
+% 2. randomly initializes the monomers' locations and velocities,
+% 3. moves the particles based on brownian motions and drag,
+% 4. imposes periodic conditions on the boundaries,
+% 5. checks for the particles' collisions over time,
+% 6. merge the collided particles as larger clusters,
+% 7. maintians the volume fraction by emlargin the main domain upon
+% clusteraions,
+% 8. exports and plots the aggregation data.
+
 clc
 clear
 close all
-
-%%%%%%
-
-
-%% Program description
-
-% The present code generates soot fractal aggregates based on...
-% diffusion-limited cluster-cluster aggregation (DLCA) approach.
-
-% The numerical algorithm includes transport and aggloneration of...
-% nascent primary particles using discrete-element modeling (DEM)...
-% in a Langevin dynamics framework.
-
-% Coding by: Hamed Nikookar, PhD candiate in Mechanical Engineering,
-% Aerosol lab, University of British Columbia (UBC)
 
 %% Importing the user-defined parameters
 
