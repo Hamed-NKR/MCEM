@@ -67,7 +67,7 @@ VIS.PLOTPP(dom.size,pp,1)
 
 %% Solving equation of motion for the particles
 
-k_max = 20; % Marching index limit
+k_max = 100; % Marching index limit
 time = zeros(k_max,1);
 
 fig_pp_anim = figure(2);

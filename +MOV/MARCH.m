@@ -18,7 +18,7 @@ delt_par = ((0.02 .* (par_old.d)).^2) ./ (2 .* diff_par);
 % Preliminary time steps
 delt_base = min(delt_par); % baseline time step from the smallest particle
 z_par = ceil(delt_par./delt_base); % Integer marching coefficients
-delt_par = delt_base .* z_par; 
+delt_par = delt_base .* z_par; % This is to avoid numerical instabilities.
 
 % Computing random position and velocity components.
 k_b = 1.381e-23; % Boltzmann's constant
@@ -38,10 +38,10 @@ r_par_rand = (sig_vr./sqrt(sig_v2)) .* y(:,1:3) + ...
 v_par_rand = sqrt(sig_v2) .* y(:,1:3); % Random velocity component
 
 % Finding the new position and velocity vectors
-v_par_new = (v_par_rand + (par_old.v) .* exp(-delt_par ./ tau_par))...
-    ./ z_par;
-r_par_new = (r_par_rand + (par_old.r) + (par_old.v) .* tau_par .* ...
+v_par_new = (v_par_rand + (par_old.v) .* exp(-delt_par ./ tau_par));
+r_par_new = par_old.r + (r_par_rand + (par_old.v) .* tau_par .* ...
     (1 - exp(-delt_par ./ tau_par))) ./ z_par;
+v_par_new = par_old.v + (v_par_new - (par_old.v)) ./ z_par; 
 
 end
 
