@@ -69,11 +69,6 @@ VIS.PLOTPP(dom.size,pp,1)
 
 k_max = 10000; % Marching index limit
 time = zeros(k_max,1);
-delt_par = MOV.STEP(pp.d,fl); 
-% Primaries characteristic time, dissusivity, fluid viscosity, and...
-% ...mean free path
-
-delt_base = min
 
 fig_pp_anim = figure(2);
 disp('Simulating:');
@@ -82,16 +77,16 @@ UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 
 for k = 2 : k_max
     
-    [pp.r, pp.v] = MOV.MARCH(pp,delt,fl);
+    [pp.r, pp.v, delt] = MOV.MARCH(pp,fl);
     
     t_plot = 10;
-    if mod(k-1, t_plot)==0
+    if mod(k-1,t_plot) == 0
         VIS.PLOTPP(dom.size,pp,0) % Plotting every 10 time steps 
         drawnow; % Drawing the plot at the desired time steps
     end
     
     time(k) = time(k-1) + delt;
     
-    UTILS.TEXTBAR([k, k_max]);  % update textbar
+    UTILS.TEXTBAR([k, k_max]);  % Updating textbar
     
 end
