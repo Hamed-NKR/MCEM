@@ -7,7 +7,7 @@ function [r_par_new, v_par_new] = MARCH(par_old, delt_par, fl)
 
 rho_par = 1.8e3; % Primaries density ~ Black carbon's bulk density
 
-[tau_par, ~, ~, ~] = PROPS(par_old.d,fl);
+[~, tau_par] = PROPS(par_old.d,fl);
 
 % Computing random position and velocity components; for more detail,...
 % see Heine & Pratsinis, 2007, "Brownian Coagulation at High Concentration"

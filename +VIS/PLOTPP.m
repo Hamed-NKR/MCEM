@@ -1,4 +1,3 @@
-
 function PLOTPP(dom_size,pp,vis_vel)
 % This function plots the instantaneous location of primary particles.
 
@@ -69,7 +68,8 @@ scatter3(pp_r(:,1),pp_r(:,2),pp_r(:,3),((pp.d)./2)*10^9,...
     cm1,'filled');
 if vis_vel
     hold on
-    quiver3(pp.r(:,1),pp.r(:,2),pp.r(:,3),pp.v(:,1),pp.v(:,2),pp.v(:,3))
+    quiver3(pp.r(:,1),pp.r(:,2),pp.r(:,3),pp.v(:,1),pp.v(:,2),pp.v(:,3),...
+        'Color',cm2)
     hold off;
 end
 axis equal

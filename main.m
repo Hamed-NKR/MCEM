@@ -39,8 +39,10 @@ dom.size = dom_size;
 % Input is the domain size array.
 
 % Loading the fluid properties
-fl = struct('temp',temp_f,'v',v_f,'p',p_f);
+fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 % fl is the fluid information structure for particle-fluid interactions.
+[fl.mu, fl.lambda] = CPL.KINETIC(fl.temp,fl.p); % fluid viscosity and...
+% ...mean free path
 
 % Declaring the primary particles structure
 pp = struct('ind',[1:n_pp]','ind_agg',zeros(n_pp,1),'d',[],...
@@ -67,36 +69,29 @@ VIS.PLOTPP(dom.size,pp,1)
 
 k_max = 10000; % Marching index limit
 time = zeros(k_max,1);
-[delt_pp, tau_pp, mu_f, lambda_f] = MOV.PROPS(pp.d,fl); 
-% Marching time step, primaries characteristic time, fluid viscosity and...
-% mean free path
+delt_par = MOV.STEP(pp.d,fl); 
+% Primaries characteristic time, dissusivity, fluid viscosity, and...
+% ...mean free path
+
+delt_base = min
 
 fig_pp_anim = figure(2);
 disp('Simulating:');
-UTILS.TEXTBAR([0, k_max]);  % initializing textbar
-UTILS.TEXTBAR([1, k_max]);  % indicating start of marching
+UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
+UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 
-for k = 2 : k_max    
-    % TO DO: There are probably too many inputs here. Can this be simplified?
-    [pp.r, pp.v] = MOV.MARCH(pp,delt_pp,fl);
-    % CHANGE: Assign r and v directly. The multi-step is slower and
-    % wastes memory. 
+for k = 2 : k_max
     
-    % CHANGE: You should plot after you update the results, or the last
-    % step is not plotted. Especially given the VIS.STCPLOT at the
-    % beginning plots the original points.
-    % CHANGE: Plot every t_plot time steps. Change to t_plot = 1 to plot
-    % every step (much slower).
+    [pp.r, pp.v] = MOV.MARCH(pp,delt,fl);
+    
     t_plot = 10;
     if mod(k-1, t_plot)==0
-        VIS.PLOTPP(dom.size,pp,0)
-        drawnow;  % draw the plot each time step
+        VIS.PLOTPP(dom.size,pp,0) % Plotting every 10 time steps 
+        drawnow; % Drawing the plot at the desired time steps
     end
     
-    % CHANGE: I added this textbar utility to indicate progress in command
-    % line.
+    time(k) = time(k-1) + delt;
+    
     UTILS.TEXTBAR([k, k_max]);  % update textbar
     
-    % TO DO: The particles seem to disappear over time. Likely a bug in
-    % applying periodic boundary conditions. 
 end
