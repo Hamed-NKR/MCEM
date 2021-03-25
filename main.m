@@ -53,40 +53,32 @@ pp = struct('ind',[1:n_pp]','ind_agg',zeros(n_pp,1),'d',[],...
 pp.d = PP.INIT.DIAM(n_pp,d_pp);
 
 % Assigning the primary particle initial locations
-pp.r = PP.INIT.LOC(dom_size,n_pp,pp.d);
+pp.r = PP.INIT.LOC(dom_size,pp.d);
 
 % Assigning the primary particle initial velocities
-pp.v = PP.INIT.VEL(n_pp,pp.d,fl.temp);
+pp.v = PP.INIT.VEL(pp.d,fl.temp);
 
 disp("The computational domain is successfully initialized...")
 
 fig_pp_init = figure(1);
-VIS.STCPLOT(dom.size,pp)
+VIS.PLOTPP(dom.size,pp,1)
 
 %% Solving equation of motion for the particles
 
 k_max = 10000; % Marching index limit
 time = zeros(k_max,1);
-rho_pp = 1.8 * 10^3; % Primary particles density ~ Black carbon's bulk density
-del_t = (10^-9) * MOV.PROPS(min(pp.d),rho_pp,fl.temp,fl.p); % Marching time step
+[delt_pp, tau_pp, mu_f, lambda_f] = MOV.PROPS(pp.d,fl); 
+% Marching time step, primaries characteristic time, fluid viscosity and...
+% mean free path
 
 fig_pp_anim = figure(2);
-
-% CHANGE: This did not need to be in the loop.
-time = 0:del_t:(k_max * del_t);  % times to be looped over
-
 disp('Simulating:');
-UTILS.TEXTBAR([0, k_max]);  % initialize textbar
-UTILS.TEXTBAR([1, k_max]);  % indicate initial postions are set
-for k = 2 : k_max
-    
-    % CHANGE: Vectorized the particle loop. The program is extremely fast
-    % is it doesn't have to plot. 
-    
+UTILS.TEXTBAR([0, k_max]);  % initializing textbar
+UTILS.TEXTBAR([1, k_max]);  % indicating start of marching
+
+for k = 2 : k_max    
     % TO DO: There are probably too many inputs here. Can this be simplified?
-    tau_pp = MOV.PROPS(pp.d,rho_pp,fl.temp,fl.p);  % get particle properties
-    [pp.r, pp.v] = MOV.MARCH(pp.r,pp.v,pp.d,...
-    	rho_pp,tau_pp,fl.temp,del_t);
+    [pp.r, pp.v] = MOV.MARCH(pp,delt_pp,fl);
     % CHANGE: Assign r and v directly. The multi-step is slower and
     % wastes memory. 
     
@@ -97,7 +89,7 @@ for k = 2 : k_max
     % every step (much slower).
     t_plot = 10;
     if mod(k-1, t_plot)==0
-        VIS.DYNPLOT(dom.size,pp.d,pp.r)
+        VIS.PLOTPP(dom.size,pp,0)
         drawnow;  % draw the plot each time step
     end
     
