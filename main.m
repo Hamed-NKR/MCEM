@@ -1,13 +1,13 @@
-%% Description
+%% General description
 
-% This script:
+% The present script:
 % 1. reads the aggregation input parameters,
 % 2. randomly initializes the monomers' locations and velocities,
 % 3. moves the particles based on brownian motions and drag,
 % 4. imposes periodic conditions on the boundaries,
 % 5. checks for the particles' collisions over time,
 % 6. merge the collided particles as larger clusters,
-% 7. maintians the volume fraction by emlargin the main domain upon
+% 7. maintians the volume fraction by enlarging the main domain upon
 % clusteraions,
 % 8. exports and plots the aggregation data.
 
@@ -67,7 +67,7 @@ VIS.PLOTPP(dom.size,pp,1)
 
 %% Solving equation of motion for the particles
 
-k_max = 10000; % Marching index limit
+k_max = 20; % Marching index limit
 time = zeros(k_max,1);
 
 fig_pp_anim = figure(2);

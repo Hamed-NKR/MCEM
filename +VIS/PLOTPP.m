@@ -7,7 +7,7 @@ function PLOTPP(dom_size,pp,vis_vel)
 % vectors.
 
 hold off;
-clf;
+% clf;
 
 cm1 = [0.2,0.3,1];  % color of circles
 cm2 = [1,0.3,0.2];  % color of velocity vectors
@@ -20,7 +20,7 @@ viscircles([pp_r(:,1),pp_r(:,2)],(pp.d)./2, ...
     'EnhanceVisibility',false,'Color',cm1,'LineWidth',0.5);
 if vis_vel
     hold on;
-    quiver(pp.r(:,1),pp.r(:,2),pp.v(:,1),pp.v(:,2));
+    quiver(pp.r(:,1),pp.r(:,2),pp.v(:,1),pp.v(:,2),'Color',cm2);
     hold off;
 end
 axis equal
@@ -36,7 +36,7 @@ viscircles([pp_r(:,1),pp_r(:,3)],(pp.d)./2, ...
     'EnhanceVisibility',false,'Color',cm1,'LineWidth',0.5);
 if vis_vel
     hold on;
-    quiver(pp.r(:,1),pp.r(:,3),pp.v(:,1),pp.v(:,3));
+    quiver(pp.r(:,1),pp.r(:,3),pp.v(:,1),pp.v(:,3),'Color',cm2);
     hold off;
 end
 axis equal
@@ -52,7 +52,7 @@ viscircles([pp_r(:,2),pp_r(:,3)],(pp.d)./2, ...
     'EnhanceVisibility',false,'Color',cm1,'LineWidth',0.5);
 if vis_vel
     hold on;
-    quiver(pp.r(:,2),pp.r(:,3),pp.v(:,2),pp.v(:,3));
+    quiver(pp.r(:,2),pp.r(:,3),pp.v(:,2),pp.v(:,3),'Color',cm2);
     hold off;
 end
 axis equal
@@ -64,7 +64,7 @@ ylim([0 dom_size(3)])
 
 % 3D subplot
 subplot(2,2,4)
-scatter3(pp_r(:,1),pp_r(:,2),pp_r(:,3),((pp.d)./2)*10^9,...
+scatter3(pp_r(:,1),pp_r(:,2),pp_r(:,3),((pp.d)./2).*2e9,...
     cm1,'filled');
 if vis_vel
     hold on
