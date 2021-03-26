@@ -7,7 +7,8 @@ function PLOTPP(dom_size,pp,vis_vel)
 % vectors.
 
 hold off;
-% clf;
+fig = gcf;
+clf(fig);
 
 cm1 = [0.2,0.3,1];  % color of circles
 cm2 = [1,0.3,0.2];  % color of velocity vectors

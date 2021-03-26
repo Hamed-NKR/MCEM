@@ -63,11 +63,11 @@ pp.v = PP.INIT.VEL(pp.d,fl.temp);
 disp("The computational domain is successfully initialized...")
 
 fig_pp_init = figure(1);
-VIS.PLOTPP(dom.size,pp,1)
+VIS.PLOTPP(dom_size,pp,1)
 
 %% Solving equation of motion for the particles
 
-k_max = 100; % Marching index limit
+k_max = 1000; % Marching index limit
 time = zeros(k_max,1);
 
 fig_pp_anim = figure(2);
@@ -77,11 +77,12 @@ UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 
 for k = 2 : k_max
     
-    [pp.r, pp.v, delt] = MOV.MARCH(pp,fl);
+    [pp.r, pp.v, delt] = MOV.MARCH(pp,fl); % Solving equation of motion
+    pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
-    t_plot = 10;
+    t_plot = 3;
     if mod(k-1,t_plot) == 0
-        VIS.PLOTPP(dom.size,pp,0) % Plotting every 10 time steps 
+        VIS.PLOTPP(dom_size,pp,0) % Plotting every 10 time steps
         drawnow; % Drawing the plot at the desired time steps
     end
     

@@ -14,7 +14,7 @@ rho_par = 1.8e3; % Primaries density ~ Black carbon's bulk density
 [tau_par, diff_par] = MOV.SLIP(par_old.d,fl); 
 
 % Computing marching timestep
-delt_par = ((0.02 .* (par_old.d)).^2) ./ (2 .* diff_par);
+delt_par = ((1e-4 .* (par_old.d)).^2) ./ (2 .* diff_par);
 % Preliminary time steps
 delt_base = min(delt_par); % baseline time step from the smallest particle
 z_par = ceil(delt_par./delt_base); % Integer marching coefficients
@@ -29,8 +29,8 @@ sig_vr = (k_b * (fl.temp) ./ m_par) .* ((1 - exp(- delt_par ./ tau_par)).^2)...
 sig_r2 = (k_b * (fl.temp) ./ m_par) .* ((2 .* delt_par ./ tau_par) - 3 ...
     + 4 .* exp(- delt_par ./ tau_par) - exp(-2 .* delt_par ./ tau_par)) ...
     ./ (tau_par.^2);
-y = randn(size(par_old.d,1), 6); % Gaussian-distributed independent random numbers with...
-% ...zero mean and variance of unity
+y = randn(size(par_old.d,1), 6); % Gaussian-distributed independent...
+% ...random numbers with zero mean and variance of unity
 
 % TO DO: There is a bug here, as there is the sqrt() of a negative number.
 r_par_rand = (sig_vr./sqrt(sig_v2)) .* y(:,1:3) + ...
