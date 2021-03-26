@@ -1,9 +1,10 @@
-function pp_r = LOC(dom_size,n_pp,pp_d)
+function pp_r = LOC(dom_size,pp_d)
 % This function randomly distributes the primary particles throughout...
 % the computational domain.
 
-% Inputs are domain size and primary particle number and size array.
+% Inputs are domain size and primary particle size array (mean+std).
 
+n_pp = size(pp_d,1); % Number of primaries
 pp_r = zeros(n_pp,3); % Initialization of the location array
 ovr = 0; % overlap criterion
 i = 1; % primary particle loop index
