@@ -33,7 +33,7 @@ p_f = params_val(11); % Flow pressure (pa)
 
 %% Initializing the computational domain parameters
 
-% Defining the domain structure
+% Defining the domain structure (for possible later uses)
 dom = struct('size',[]);
 dom.size = dom_size;
 % Input is the domain size array.
@@ -46,9 +46,9 @@ fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 
 % Declaring the primary particles structure
 pp = struct('ind',[1:n_pp]','ind_agg',zeros(n_pp,1),'d',[],...
-    'r',[],'v',[]);
-% Inputs are primary particle index, corresponding aggregate index, and...
-% position and velocity of the primaries.
+    'r',[],'v',[],'nn',[]);
+% Inputs are primary particle index, corresponding aggregate index,...
+% position and velocity of the primaries, and their nearest neighbor list.
 % pp rows correspond to different primaries.
 
 % Assigning the primary particle diameters
@@ -65,12 +65,15 @@ disp("The computational domain is successfully initialized...")
 fig_pp_init = figure(1);
 VIS.PLOTPP(dom_size,pp,1)
 
+fig_pp_nn = figure(2);
+VIS.PLOTNN(dom_size,pp,randperm(n_pp,1))
+
 %% Solving equation of motion for the particles
 
-k_max = 1000; % Marching index limit
+k_max = 300; % Marching index limit
 time = zeros(k_max,1);
 
-fig_pp_anim = figure(2);
+fig_pp_anim = figure(3);
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
 UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
@@ -80,13 +83,14 @@ for k = 2 : k_max
     [pp.r, pp.v, delt] = MOV.MARCH(pp,fl); % Solving equation of motion
     pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
-    t_plot = 3;
+    t_plot = 1;
     if mod(k-1,t_plot) == 0
-        VIS.PLOTPP(dom_size,pp,0) % Plotting every 10 time steps
+        VIS.PLOTPP(dom_size,pp,0) % Plotting every t_plot time steps
         drawnow; % Drawing the plot at the desired time steps
     end
     
-    time(k) = time(k-1) + delt;
+    time(k) = time(k-1) + delt; % Updating time (this needs to be inside...
+    % the loop for later uses)
     
     UTILS.TEXTBAR([k, k_max]);  % Updating textbar
     
