@@ -14,7 +14,7 @@ i = 0; % error generation index
 while ~ isempty(chk)
     pp_d = d_pp(2).*randn(n_pp,1) + d_pp(1);
     chk = find(pp_d <= 0,1); % check all the diameters to be positive
-    if i > 10
+    if i > 1e3
         error("error generating the initial size distribution!\n")
     end
     i = i + 1;

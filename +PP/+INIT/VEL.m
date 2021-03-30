@@ -1,9 +1,10 @@
-function pp_v = VEL(n_pp,pp_d,flm_temp)
+function pp_v = VEL(pp_d,flm_temp)
 % This function gives size dependent initial velocities to the...
 % primary particles along random orientations.
 
-% Inputs are primary particle number and size array, and flame temperature.
+% Inputs are primary particle size array (mean+std), and flame temperature.
 
+n_pp = size(pp_d,1); % Number of primaries
 pp_v = zeros(n_pp,3); % Initialization of the velocity array
 
 rho_bc = 1.8 * 10^3; % Black Carbon's bulk density (kg/m3)

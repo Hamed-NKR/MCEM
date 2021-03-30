@@ -1,21 +1,19 @@
+%% General description
+
+% The present script:
+% 1. reads the aggregation input parameters,
+% 2. randomly initializes the monomers' locations and velocities,
+% 3. moves the particles based on brownian motions and drag,
+% 4. imposes periodic conditions on the boundaries,
+% 5. checks for the particles' collisions over time,
+% 6. merge the collided particles as larger clusters,
+% 7. maintians the volume fraction by enlarging the main domain upon
+% clusteraions,
+% 8. exports and plots the aggregation data.
+
 clc
 clear
 close all
-
-%%%%%%
-
-
-%% Program description
-
-% The present code generates soot fractal aggregates based on...
-% diffusion-limited cluster-cluster aggregation (DLCA) approach.
-
-% The numerical algorithm includes transport and aggloneration of...
-% nascent primary particles using discrete-element modeling (DEM)...
-% in a Langevin dynamics framework.
-
-% Coding by: Hamed Nikookar, PhD candiate in Mechanical Engineering,
-% Aerosol lab, University of British Columbia (UBC)
 
 %% Importing the user-defined parameters
 
@@ -35,54 +33,77 @@ p_f = params_val(11); % Flow pressure (pa)
 
 %% Initializing the computational domain parameters
 
-% Defining the domain structure
+% Defining the domain structure (for possible later uses)
 dom = struct('size',[]);
 dom.size = dom_size;
 % Input is the domain size array.
 
 % Loading the fluid properties
-fl = struct('temp',temp_f,'v',v_f,'p',p_f);
+fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 % fl is the fluid information structure for particle-fluid interactions.
+[fl.mu, fl.lambda] = CPL.KINETIC(fl.temp,fl.p); % fluid viscosity and...
+% ...mean free path
 
 % Declaring the primary particles structure
 pp = struct('ind',[1:n_pp]','ind_agg',zeros(n_pp,1),'d',[],...
-    'r',[],'v',[]);
-% Inputs are primary particle index, corresponding aggregate index, and...
-% position and velocity of the primaries.
+    'r',[],'v',[],'nn',[]);
+% Inputs are primary particle index, corresponding aggregate index,...
+% position and velocity of the primaries, and their nearest neighbor list.
 % pp rows correspond to different primaries.
 
 % Assigning the primary particle diameters
 pp.d = PP.INIT.DIAM(n_pp,d_pp);
 
 % Assigning the primary particle initial locations
-pp.r = PP.INIT.LOC(dom_size,n_pp,pp.d);
+pp.r = PP.INIT.LOC(dom_size,pp.d);
 
 % Assigning the primary particle initial velocities
-pp.v = PP.INIT.VEL(n_pp,pp.d,fl.temp);
+pp.v = PP.INIT.VEL(pp.d,fl.temp);
 
 disp("The computational domain is successfully initialized...")
 
 fig_pp_init = figure(1);
-VIS.STCPLOT(dom.size,pp)
+VIS.PLOTPP(dom_size,pp,1)
+
+fig_pp_nn = figure(2);
+VIS.PLOTNN(dom_size,pp,randperm(n_pp,1))
 
 %% Solving equation of motion for the particles
 
-k_max = 10000; % Marching index limit
+k_max = 50; % Marching index limit
 time = zeros(k_max,1);
-rho_pp = 1.8 * 10^3; % Primary particles density ~ Black carbon's bulk density
-del_t = (10^-9) * MOV.PROPS(min(pp.d),rho_pp,fl.temp,fl.p); % Marching time step
+fig_pp_anim = figure(3);
+t_plt = 1;  % Defining a plotting timeframe criterion
 
-fig_pp_anim = figure(2);
+video_pp = VideoWriter('outputs\Animation_DLCA.avi');  % Initializing video
+video_pp.FrameRate = 5;  % Setting frame rate
+open(video_pp);  % Opening video file
+
+disp('Simulating:');
+UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
+UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 
 for k = 2 : k_max
-    VIS.DYNPLOT(dom.size,n_pp,pp.d,pp.r)
-    pause(0.001)
-    for i = 1 : n_pp
-        time(k) = time(k-1) + del_t;
-        tau_pp = MOV.PROPS(pp.d(i),rho_pp,fl.temp,fl.p);
-        [r_pp_new, v_pp_new] = MOV.MARCH(pp.r(i,:),pp.v(i,:),pp.d(i),...
-            rho_pp,tau_pp,fl.temp,del_t);
-        pp.r(i,:) = r_pp_new;
-        pp.v(i,:) = v_pp_new;
+    
+    [pp.r, pp.v, delt] = MOV.MARCH(pp,fl); % Solving equation of motion
+    pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
+    
+    if mod(k-2,t_plt) == 0
+        VIS.PLOTPP(dom_size,pp,0) % Plotting every t_plt time steps
+        drawnow; % Drawing the plot at the desired time steps
+        pause(0.01); % Slowing down the animation speed
+        frame_now = getframe(fig_pp_anim);
+        writeVideo(video_pp, frame_now);
     end
+    
+    time(k) = time(k-1) + delt; % Updating time (this needs to be inside...
+    % the loop for later uses)
+    
+    UTILS.TEXTBAR([k, k_max]);  % Updating textbar
+    
 end
+
+close(video_pp);
+
+
+
