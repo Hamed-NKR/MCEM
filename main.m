@@ -70,10 +70,15 @@ VIS.PLOTNN(dom_size,pp,randperm(n_pp,1))
 
 %% Solving equation of motion for the particles
 
-k_max = 300; % Marching index limit
+k_max = 50; % Marching index limit
 time = zeros(k_max,1);
-
 fig_pp_anim = figure(3);
+t_plt = 1;  % Defining a plotting timeframe criterion
+
+video_pp = VideoWriter('outputs\Animation_DLCA.avi');  % Initializing video
+video_pp.FrameRate = 5;  % Setting frame rate
+open(video_pp);  % Opening video file
+
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
 UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
@@ -83,10 +88,12 @@ for k = 2 : k_max
     [pp.r, pp.v, delt] = MOV.MARCH(pp,fl); % Solving equation of motion
     pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
-    t_plot = 1;
-    if mod(k-1,t_plot) == 0
-        VIS.PLOTPP(dom_size,pp,0) % Plotting every t_plot time steps
+    if mod(k-2,t_plt) == 0
+        VIS.PLOTPP(dom_size,pp,0) % Plotting every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
+        pause(0.01); % Slowing down the animation speed
+        frame_now = getframe(fig_pp_anim);
+        writeVideo(video_pp, frame_now);
     end
     
     time(k) = time(k-1) + delt; % Updating time (this needs to be inside...
@@ -95,3 +102,8 @@ for k = 2 : k_max
     UTILS.TEXTBAR([k, k_max]);  % Updating textbar
     
 end
+
+close(video_pp);
+
+
+

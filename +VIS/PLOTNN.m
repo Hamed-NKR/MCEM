@@ -74,12 +74,12 @@ ylim([0 dom_size(3)])
 % 3D subplot
 subplot(2,2,4)
 scatter3(par_r(ind_trg,1),par_r(ind_trg,2),par_r(ind_trg,3),...
-    ((par.d(ind_trg))./2).*2e9,cm1,'filled');
+    ((par.d(ind_trg))./2).*2e8,cm1,'filled');
 hold on
 scatter3(par_r(ind_nn,1),par_r(ind_nn,2),par_r(ind_nn,3),...
-    ((par.d(ind_nn))./2).*2e9,cm2,'filled');
+    ((par.d(ind_nn))./2).*2e8,cm2,'filled');
 scatter3(par_r(ind_rest,1),par_r(ind_rest,2),par_r(ind_rest,3),...
-    ((par.d(ind_rest))./2).*2e9,cm3,'filled');
+    ((par.d(ind_rest))./2).*2e8,cm3,'filled');
 hold off
 axis equal
 title('xyz view')

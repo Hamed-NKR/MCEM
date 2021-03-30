@@ -65,7 +65,7 @@ ylim([0 dom_size(3)])
 
 % 3D subplot
 subplot(2,2,4)
-scatter3(pp_r(:,1),pp_r(:,2),pp_r(:,3),((pp.d)./2).*2e9,...
+scatter3(pp_r(:,1),pp_r(:,2),pp_r(:,3),((pp.d)./2).*2e8,...
     cm1,'filled');
 if vis_vel
     hold on
