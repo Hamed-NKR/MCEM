@@ -60,24 +60,28 @@ pp.r = PP.INIT.LOC(dom_size,pp.d);
 % Assigning the primary particle initial velocities
 pp.v = PP.INIT.VEL(pp.d,fl.temp);
 
-disp("The computational domain is successfully initialized...")
+disp("The computational domain was successfully initialized...")
 
 fig_pp_init = figure(1);
-VIS.PLOTPP(dom_size,pp,1)
+VIS.PLOTPP(dom_size,pp,1);
 
 fig_pp_nn = figure(2);
-VIS.PLOTNN(dom_size,pp,randperm(n_pp,1))
+VIS.PLOTNN(dom_size,pp,randperm(n_pp,1),50);
 
 %% Solving equation of motion for the particles
 
-k_max = 50; % Marching index limit
+k_max = 50;  % Marching index limit
 time = zeros(k_max,1);
 fig_pp_anim = figure(3);
 t_plt = 1;  % Defining a plotting timeframe criterion
 
-video_pp = VideoWriter('outputs\Animation_DLCA.avi');  % Initializing video
-video_pp.FrameRate = 5;  % Setting frame rate
-open(video_pp);  % Opening video file
+prompt = 'Do you want the animation to be saved? Y/N: ';
+str = input(prompt,'s');
+if (str == 'Y') || (str == 'y')
+    video_pp = VideoWriter('outputs\Animation_DLCA.avi');  % Initializing video
+    video_pp.FrameRate = 5;  % Setting frame rate
+    open(video_pp);  % Opening video file
+end
 
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
@@ -89,11 +93,13 @@ for k = 2 : k_max
     pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
     if mod(k-2,t_plt) == 0
-        VIS.PLOTPP(dom_size,pp,0) % Plotting every t_plt time steps
+        VIS.PLOTPP(dom_size,pp,0); % Plotting every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
-        pause(0.01); % Slowing down the animation speed
-        frame_now = getframe(fig_pp_anim);
-        writeVideo(video_pp, frame_now);
+        pause(0.1); % Slowing down the animation speed
+        if (str == 'Y') || (str == 'y')
+            frame_now = getframe(fig_pp_anim);  %  Capturing current frame
+            writeVideo(video_pp, frame_now);  %  Saving the video
+        end
     end
     
     time(k) = time(k-1) + delt; % Updating time (this needs to be inside...
@@ -103,7 +109,8 @@ for k = 2 : k_max
     
 end
 
-close(video_pp);
-
+if (str == 'Y') || (str == 'y')
+    close(video_pp);  % Closing the video file
+end
 
 

@@ -4,7 +4,7 @@ function [tau_par, diff_par] = SLIP(par_d, fl)
 
 % Inputs are particle size and fluid structure.
 
-kn = 2 .* fl.lambda ./ par_d; % Knudsen number
+kn = (2 * fl.lambda) ./ par_d; % Knudsen number
 alpha = 1.254;
 beta = 0.4;
 gamma = 1.1;
