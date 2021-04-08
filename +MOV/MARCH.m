@@ -11,7 +11,7 @@ function [r_par_new, v_par_new, delt_base] = MARCH(par_old, fl)
 rho_par = 1.8e3; % Primaries density ~ Black carbon's bulk density
 
 % Primaries characteristic time and dissusivity
-[tau_par, diff_par] = MOV.SLIP(par_old.d,fl); 
+[tau_par, diff_par, ~] = MOV.SLIP(par_old.d,fl); 
 
 % Computing marching timestep
 delt_par = ((0.02 .* (par_old.d)).^2) ./ (2 .* diff_par);

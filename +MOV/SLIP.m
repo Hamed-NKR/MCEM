@@ -1,4 +1,4 @@
-function [tau_par, diff_par] = SLIP(par_d, fl)
+function [tau_par, diff_par, lambda_par] = SLIP(par_d, fl)
 % This function computes the slip-related properties of particles...
 % ...needed for solving their equation of motion.
 
@@ -15,8 +15,12 @@ tau_par = rho_par .* (par_d.^2) .* cc ./ (18 .* fl.mu);
 % Particle response (relaxation) time
 
 k_b = 1.381e-23; % Boltzmann's constant
-f_par = (3 * pi * fl.mu) .* par_d;
+f_par = (3 * pi * fl.mu) .* par_d .* cc;
 diff_par = (k_b * (fl.temp)) ./ f_par; % Particle diffusivity (m2/s)
+
+m_par = rho_par .* pi .* (par_d.^3) ./ 6; % Particle mass (kg)
+lambda_par = sqrt(m_par.*k_b.*(fl.temp)) ./ f_par; % Particle diffusive...
+% ...mean free path
 
 end
 
