@@ -4,9 +4,9 @@ Value			Parameter			Unit			Descriptions
 5e-6			dom_size(2)			[m]			Computational domain width
 5e-6			dom_size(3)			[m]			Computational domain height
 50			n_pp				[-]			Initial number of primaries
-1e-7			d_pp(1)				[m]			Mean size of primaries
-1e-9			d_pp(2)				[m]			Standard deviation of primaries
-3000			temp_f				[k]			Flow temperature 
+2e-7			d_pp(1)				[m]			Mean size of primaries
+5e-8			d_pp(2)				[m]			Standard deviation of primaries
+300			temp_f				[k]			Flow temperature 
 0			v_f(1)				[m/s]			Flow x velcoity 
 0			v_f(2)				[m/s]			Flow y velocity 
 0			v_f(3)				[m/s]			Flow z velocity 
