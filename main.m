@@ -71,7 +71,7 @@ VIS.PLOTNN(dom_size,pp,randperm(n_pp,1),10);
 
 %% Solving equation of motion for the particles
 
-k_max = 200;  % Marching index limit
+k_max = 1000;  % Marching index limit
 time = zeros(k_max,1);
 fig_pp_anim = figure(3);
 t_plt = 1;  % Defining a plotting timeframe criterion
@@ -91,7 +91,7 @@ UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 for k = 2 : k_max
     
     [pp, delt] = MOV.MARCH(pp, fl); % Solving equation of motion
-    %pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
+    pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
     if mod(k-2,t_plt) == 0
         VIS.PLOTPP(dom_size, pp, 0); % Plotting every t_plt time steps

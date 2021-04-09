@@ -6,7 +6,7 @@ function r_par_new = PBC(dom_size,r_par_old)
 
 n_par = size(r_par_old,1); % Getting number of particles
 dom_size = repmat(dom_size',n_par,1);
-stat_par = (r_par_old - dom_size) ./ dom_size; % This status array shows...
+stat_par = r_par_old ./ dom_size; % This status array shows...
 % whether the particles are inside the domain.
 
 % Updating position array in the case of domain escape
