@@ -46,10 +46,11 @@ fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 
 % Declaring the primary particles structure
 pp = struct('ind',[1:n_pp]','ind_agg',zeros(n_pp,1),'d',[],...
-    'r',[],'v',[],'nn',[]);
+    'r',[],'v',[],'delt',[],'tau',[],'diff',[],'lambda',[],'nn',[]);
 % Inputs are primary particle index, corresponding aggregate index,...
-% position and velocity of the primaries, and their nearest neighbor list.
-% pp rows correspond to different primaries.
+% position and velocity of the primaries, their diffusive properties,...
+% ,and nearest neighbor list.
+% Rows of pp elements correspond to different primaries information.
 
 % Assigning the primary particle diameters
 pp.d = PP.INIT.DIAM(n_pp,d_pp);
@@ -66,11 +67,11 @@ fig_pp_init = figure(1);
 VIS.PLOTPP(dom_size,pp,1);
 
 fig_pp_nn = figure(2);
-VIS.PLOTNN(dom_size,pp,randperm(n_pp,1),50);
+VIS.PLOTNN(dom_size,pp,randperm(n_pp,1),10);
 
 %% Solving equation of motion for the particles
 
-k_max = 50;  % Marching index limit
+k_max = 200;  % Marching index limit
 time = zeros(k_max,1);
 fig_pp_anim = figure(3);
 t_plt = 1;  % Defining a plotting timeframe criterion
@@ -89,11 +90,11 @@ UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 
 for k = 2 : k_max
     
-    [pp.r, pp.v, delt] = MOV.MARCH(pp,fl); % Solving equation of motion
-    pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
+    [pp, delt] = MOV.MARCH(pp, fl); % Solving equation of motion
+    %pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
     if mod(k-2,t_plt) == 0
-        VIS.PLOTPP(dom_size,pp,0); % Plotting every t_plt time steps
+        VIS.PLOTPP(dom_size, pp, 0); % Plotting every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
