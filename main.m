@@ -46,10 +46,11 @@ fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 
 % Declaring the primary particles structure
 pp = struct('ind',[1:n_pp]','ind_agg',zeros(n_pp,1),'d',[],...
-    'r',[],'v',[],'nn',[]);
+    'r',[],'v',[],'delt',[],'tau',[],'diff',[],'lambda',[],'nn',[]);
 % Inputs are primary particle index, corresponding aggregate index,...
-% position and velocity of the primaries, and their nearest neighbor list.
-% pp rows correspond to different primaries.
+% position and velocity of the primaries, their diffusive properties,...
+% ,and nearest neighbor list.
+% Rows of pp elements correspond to different primaries information.
 
 % Assigning the primary particle diameters
 pp.d = PP.INIT.DIAM(n_pp,d_pp);
@@ -60,33 +61,46 @@ pp.r = PP.INIT.LOC(dom_size,pp.d);
 % Assigning the primary particle initial velocities
 pp.v = PP.INIT.VEL(pp.d,fl.temp);
 
-disp("The computational domain is successfully initialized...")
+disp("The computational domain was successfully initialized...")
 
 fig_pp_init = figure(1);
-VIS.PLOTPP(dom_size,pp,1)
+VIS.PLOTPP(dom_size,pp,1);
 
 fig_pp_nn = figure(2);
-VIS.PLOTNN(dom_size,pp,randperm(n_pp,1))
+VIS.PLOTNN(dom_size,pp,randperm(n_pp,1),10);
 
 %% Solving equation of motion for the particles
 
-k_max = 300; % Marching index limit
+k_max = 1000;  % Marching index limit
 time = zeros(k_max,1);
-
 fig_pp_anim = figure(3);
+t_plt = 1;  % Defining a plotting timeframe criterion
+
+prompt = 'Do you want the animation to be saved? Y/N: ';
+str = input(prompt,'s');
+if (str == 'Y') || (str == 'y')
+    video_pp = VideoWriter('outputs\Animation_DLCA.avi');  % Initializing video
+    video_pp.FrameRate = 5;  % Setting frame rate
+    open(video_pp);  % Opening video file
+end
+
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
 UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
 
 for k = 2 : k_max
     
-    [pp.r, pp.v, delt] = MOV.MARCH(pp,fl); % Solving equation of motion
+    [pp, delt] = MOV.MARCH(pp, fl); % Solving equation of motion
     pp.r = MOV.PBC(dom_size,pp.r); % Applying periodic boundary conditions
     
-    t_plot = 1;
-    if mod(k-1,t_plot) == 0
-        VIS.PLOTPP(dom_size,pp,0) % Plotting every t_plot time steps
+    if mod(k-2,t_plt) == 0
+        VIS.PLOTPP(dom_size, pp, 0); % Plotting every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
+        pause(0.1); % Slowing down the animation speed
+        if (str == 'Y') || (str == 'y')
+            frame_now = getframe(fig_pp_anim);  %  Capturing current frame
+            writeVideo(video_pp, frame_now);  %  Saving the video
+        end
     end
     
     time(k) = time(k-1) + delt; % Updating time (this needs to be inside...
@@ -95,3 +109,9 @@ for k = 2 : k_max
     UTILS.TEXTBAR([k, k_max]);  % Updating textbar
     
 end
+
+if (str == 'Y') || (str == 'y')
+    close(video_pp);  % Closing the video file
+end
+
+
