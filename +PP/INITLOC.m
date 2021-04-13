@@ -1,4 +1,4 @@
-function pp_r = LOC(dom_size,pp_d)
+function pp_r = INITLOC(dom_size,pp_d)
 % This function randomly distributes the primary particles throughout...
 % the computational domain.
 
@@ -17,7 +17,7 @@ while i <= n_pp
     if i > 1
         k = 1; % Overlap checking loop index
         while k <= i-1
-            ovr = PP.OVR([pp_r(k,:);loc_tmp'],[pp_d(k);pp_d(i)]);
+            ovr = COL.OVR([pp_r(k,:);loc_tmp'],[pp_d(k);pp_d(i)]);
             if ovr == 1
                 % overlap hapenning, the location needs recalculation.
                 j = j+1;

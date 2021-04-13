@@ -1,4 +1,4 @@
-function pp_d = DIAM(n_pp,d_pp)
+function pp_d = INITDIAM(n_pp,d_pp)
 % This function assigns a normal size distribution to the primary particles.
 
 % n_pp is the number of primaries.

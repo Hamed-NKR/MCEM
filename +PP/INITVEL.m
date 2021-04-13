@@ -1,4 +1,4 @@
-function pp_v = VEL(pp_d,flm_temp)
+function pp_v = INITVEL(pp_d,flm_temp)
 % This function gives size dependent initial velocities to the...
 % primary particles along random orientations.
 
