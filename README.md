@@ -12,9 +12,6 @@ Like most other DLCA algorithms, MCEM follows the below steps to generate agglom
 7. Maintianing the volume fraction by enlarging the main computational domain upon clusteraions,
 8. Exporting and plotting the aggregation data.
 
-
-
-
 References:
 
 [1] Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
