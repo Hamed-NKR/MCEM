@@ -8,7 +8,7 @@ Like many other LD-DLCA algorithms, MCEM follows the below steps to generate agg
 3. Moving the particles based on brownian motions and drag,
 4. Imposing periodic conditions on the boundaries,
 5. Checking for particle collisions over time,
-6. Merging the collided particles as larger clusters,
+6. Attaching the collided particles as larger clusters,
 7. Maintianing the volume fraction by enlarging the main computational domain upon clusteraions,
 8. Exporting and plotting the aggregation data.
 
