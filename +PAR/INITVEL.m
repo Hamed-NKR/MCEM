@@ -1,6 +1,6 @@
 function pp_v = INITVEL(pp_d,flm_temp)
-% This function gives size dependent initial velocities to the...
-% primary particles along random orientations.
+% "INITVEL" gives size dependent initial velocities to the primary
+% particles along random orientations.
 
 % Inputs are primary particle size array (mean+std), and flame temperature.
 

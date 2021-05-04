@@ -1,5 +1,5 @@
 function pp_d = INITDIAM(n_pp,d_pp)
-% This function assigns a normal size distribution to the primary particles.
+% "INITDIAM" assigns a normal size distribution to the primary particles.
 
 % n_pp is the number of primaries.
 % d_pp is a 2-member array (2*1) containing mean size and...

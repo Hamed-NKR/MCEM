@@ -1,6 +1,6 @@
 function pp_r = INITLOC(dom_size,pp_d)
-% This function randomly distributes the primary particles throughout...
-% the computational domain.
+% "INITLOC" randomly distributes the primary particles throughout the
+% computational domain.
 
 % Inputs are domain size and primary particle size array (mean+std).
 

@@ -1,14 +1,9 @@
-function [r_pp_new, r_agg_new] = PBC(dom_size, r_pp_old, r_agg_old)
-% This function applies periodic boundary condition to the particle...
-% movements.
+function r_par_new = PBC(dom_size, r_par_old)
+% "PBC" applies periodic boundary condition to the particle movements.
 
-% Inputs are the computational domain size, and primaries and aggregates...
-% ...locations.
+% Inputs are the computational domain size, and particle locations.
 
-n_pp = size(r_pp_old,1); % Number of primaries
-n_agg = size(r_agg_old,1); % Number of aggregates
-n_par = n_pp + n_agg; % Total number of particles
-r_par_old = [r_pp_old; r_agg_old];
+n_par = size(r_par_old,1); % Total number of particles
 dom_size = repmat(dom_size',n_par,1);
 stat_par = r_par_old ./ dom_size; % This status array shows...
 % whether the particles are inside the domain.
@@ -46,8 +41,5 @@ elseif ~ isempty(find(stat_par(:,3) < 0,1)) % checking particle exits from -z
     r_par_new(inds_minus_z,3) = dom_size(inds_minus_z,3) - ...
         mod(abs(r_par_old(inds_minus_z,3)), dom_size(inds_minus_z,3));
 end
-
-r_pp_new = r_par_new(1 : n_pp, :);
-r_agg_new = r_par_new(n_pp + 1 : n_pp + n_agg, :);
 
 end
