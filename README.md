@@ -18,6 +18,7 @@ To accomplish the above steps the following packages come with MCEM:
 "COL" contains different tools to check collisions and cluster the particles,
 and "CPL" assigns flow-particle couplings caused by interactions of soot with the background flaming environment.
 In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program.
+To run the program, two scripts are included in the main directory named as "main_test" and "main_fast". The former one is written to monitor and troubleshoot the outputs while the latter aims to run the code in the lightest form possible to get the results at the lowest computational cost.
 
 References:
 1. Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
