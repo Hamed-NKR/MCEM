@@ -12,8 +12,14 @@ Like many other LD-DLCA algorithms, MCEM follows the below steps to generate agg
 7. Maintianing the volume fraction by enlarging the main computational domain upon clusteraions,
 8. Exporting and plotting the aggregation data.
 
+To accomplish the above steps the following packages come with MCEM:
+a) "PAR": Initializes different properties of particles.
+b) "MOV": Solves the equation of motion for the particles and applies the proper boundary conditions.
+c) "COL": Contains different tools to check collisions and cluster the particles.
+d) "CPL": Assigns flow-particle couplings caused by interactions of soot with the background flaming environment.
+In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program.
+
+
 References:
-
 [1] Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
-
 [2] Olfert, J., & Rogak, S. (2019). Universal relations between soot effective density and primary particle size for common combustion sources. Aerosol Science and Technology, 53(5), 485-492.
