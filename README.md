@@ -13,10 +13,10 @@ Like many other LD-DLCA algorithms, MCEM follows the below steps to generate agg
 8. Exporting and plotting the aggregation data.
 
 To accomplish the above steps the following packages come with MCEM:
-a. "PAR": Initializes different properties of particles.
-b. "MOV": Solves the equation of motion for the particles and applies the proper boundary conditions.
-c. "COL": Contains different tools to check collisions and cluster the particles.
-d. "CPL": Assigns flow-particle couplings caused by interactions of soot with the background flaming environment.
+"PAR": Initializes different properties of particles.
+"MOV": Solves the equation of motion for the particles and applies the proper boundary conditions.
+"COL": Contains different tools to check collisions and cluster the particles.
+"CPL": Assigns flow-particle couplings caused by interactions of soot with the background flaming environment.
 In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program.
 
 References:
