@@ -39,7 +39,7 @@ fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 par = struct('pp',[],'d',[],'r',[],'v',[],...
 'delt',[],'tau',[],'diff',[],'lambda',[],'nnl',[]);
 % Inputs are list of primaries characteristics...
-% ...(index, size and local coordinates), particles' equivalent position...
+% ...(index, size and coordinates), particles' equivalent position...
 % ...and velocity, their diffusive properties, and nearest neighbor list.
 % Element rows correspond to different aggregates info.
 
@@ -51,6 +51,9 @@ par.r = PAR.INITLOC(dom_size,par.d);
 
 % Assigning the primary particle initial velocities
 par.v = PAR.INITVEL(par.d,fl.temp);
+
+% Initializing primary particle field
+par.pp = mat2cell([(1:n_pp)', par.d, par.r],ones(1,n_pp));
 
 disp("The computational domain was successfully initialized...")
 

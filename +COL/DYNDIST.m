@@ -1,6 +1,6 @@
-function dist_norm = DYNDIST(r_par, v_par, d_par)
-% "DYNDIST" computes the minimum distance achievable between two moving
-% spherical particles.
+function dist_norm = DYNDIST(r_par, v_par)
+% "DYNDIST" computes the minimum center-to-center distance achievable
+% between two moving spherical particles.
 
 % Inputs are the particles' location, velocity and size (each having two...
 % ...rows corresponding to the pair particles).
