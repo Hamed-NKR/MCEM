@@ -10,12 +10,11 @@ n_pp = size(pp_d,1); % Number of primaries
 pp_r = rand(n_pp,3) .* (repmat((dom_size)',n_pp,1) - repmat(pp_d,1,3)) +...
     (repmat(pp_d,1,3) ./ 2);
 
-% Generating the "OVR" inputs:
-ind_pps = (1:n_pp)'; % particle indices
+% Making particle pair indices
+ind_pps = (1:n_pp)';
 ind_pps = [repelem(ind_pps,n_pp,1), repmat(ind_pps,n_pp,1)];
-d_pps = [repelem(pp_d,n_pp,1), repmat(pp_d,n_pp,1)]; % size input
-r_pps = [repelem(pp_r,n_pp,1), repmat(pp_r,n_pp,1)]; % location input
-% removing repeating pairs
+
+% identifying repeating pairs
 rmv1 = (1:n_pp)';
 rmv1 = repelem((rmv1-1).*n_pp,1:n_pp);
 rmv2 = repmat((1:n_pp)',[1 n_pp]);
@@ -24,7 +23,11 @@ rmv2 = reshape(rmv2,n_pp^2,1);
 rmv2(rmv2 == 0) = [];
 rmv = rmv1 + rmv2;
 ind_pps(rmv,:) = [];
+
+% Generating the "OVR" inputs:
+d_pps = [repelem(pp_d,n_pp,1), repmat(pp_d,n_pp,1)]; % size input
 d_pps(rmv,:) = [];
+r_pps = [repelem(pp_r,n_pp,1), repmat(pp_r,n_pp,1)]; % location input
 r_pps(rmv,:) = [];
 
 ovrs = COL.OVR(r_pps, d_pps); % Checking initial overlapping...
