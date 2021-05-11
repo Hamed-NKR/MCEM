@@ -48,7 +48,7 @@ while ~ isempty(find(ovrs == 1, 1))
     r_pps(rmv,:) = [];
     ovrs = COL.OVR(r_pps, d_pps); % Rechecking the overlapping
     
-    if ind_err > 10^3
+    if ind_err > 10^2
         error("Error assigning random initial locations!\n")
     end
 end

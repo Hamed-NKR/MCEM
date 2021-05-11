@@ -1,6 +1,6 @@
-% This script is written to test and monitor the performance and outputs of 
-% the program. Some parts, as a result, are not the most efficient in terms
-% of computational cost.
+% This script is written to test and monitor the performance and outputs of
+% the program. The post-processing parts, as a result, are not the most
+% efficient in terms of computational cost.
 
 clc
 clear
@@ -16,11 +16,16 @@ fclose(file_id);
 
 params_val = cell2mat(params(1));
 dom_size = params_val(1:3); % Domain dimensions (m)
-n_pp = params_val(4); % Number of primaries
-d_pp = params_val(5:6); % Mean size and standard deviation of primaries (m)
-temp_f = params_val(7); % Flow temperature (k)
-v_f = params_val(8:10); % Flow velocity vector (m/s)
-p_f = params_val(11); % Flow pressure (pa)
+n_par = params_val(4); % Total number of initial particles (-)
+n_pp = params_val(5:6); % Number distibution parameters of primaries (-)
+d_pp = params_val(7:9); % Size distribution parameters of primaries (m)
+temp_f = params_val(10); % Flow temperature (k)
+v_f = params_val(11:13); % Flow velocity vector (m/s)
+p_f = params_val(14); % Flow pressure (pa)
+% See the description tab in the input file for more info on these
+% parameters.
+
+clear file_id params params_val 
 
 %% Initializing the computational domain parameters
 
@@ -37,23 +42,26 @@ fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 
 % Declaring the particle structure
 par = struct('pp',[],'d',[],'r',[],'v',[],...
-'delt',[],'tau',[],'diff',[],'lambda',[],'nnl',[]);
-% Inputs are list of primaries characteristics...
-% ...(index, size and coordinates), particles' equivalent position...
-% ...and velocity, their diffusive properties, and nearest neighbor list.
+'delt',[],'rho',[],'tau',[],'diff',[],'lambda',[],'nnl',[]);
+% Inputs are list of primaries characteristics (index, size,...
+% ...and coordinates), particles' equivalent position and velocity,...
+% ...their diffusive properties (motion timestep, density,...
+% ...relaxation time, diffusion coefficient, and mean free path),...
+% ...and nearest neighbor list.
 % Element rows correspond to different aggregates info.
 
-% Assigning the primary particle diameters
-par.d = PAR.INITDIAM(n_pp,d_pp);
+% Calculating the primary particle size and number distributions
+[pp_d, pp_n] = PAR.INITDIAM(n_par,n_pp,d_pp);
+
+% Initializing primary particle field (containing their indices, sizes,...
+% ...and positions)
+par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),1)],pp_n);
 
 % Assigning the primary particle initial locations
 par.r = PAR.INITLOC(dom_size,par.d);
 
 % Assigning the primary particle initial velocities
 par.v = PAR.INITVEL(par.d,fl.temp);
-
-% Initializing primary particle field
-par.pp = mat2cell([(1:n_pp)', par.d, par.r],ones(1,n_pp));
 
 disp("The computational domain was successfully initialized...")
 
