@@ -1,6 +1,5 @@
 function ind_nn = NNS(par_r,par_d,ind_trg,coef_trg)
-% This function searches for and identifies the nearest neighbors of a
-% particle.
+% "NNS" searches for and identifies the nearest neighbors of a particle.
 
 % The inputs are the desired particle index and location and sizes of...
 % ...the particle population.

@@ -1,6 +1,6 @@
 function [mu_f, lambda_f] = KINETIC(fl_temp,fl_p)
-% This function Calculates the fluid slip-related properties based on...
-% ...the kinetic theory of gases
+% "KINETIC" calculates the fluid slip-related properties based on the
+% kinetic theory of gases
 
 % Inputs are the fluid temperature and pressure.
 

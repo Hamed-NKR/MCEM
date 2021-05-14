@@ -1,5 +1,5 @@
 function PLOTNN(dom_size,par,ind_trg,coef_trg)
-% This function plots the nearest neighbors of a desired particles.
+% "PLOTNN" plots the nearest neighbors of a desired particles.
 
 % Inputs are computational domain size, particle population structure,...
 % ...and target particle index.
