@@ -35,7 +35,7 @@ classdef Agg
         
         function h = RENDER(obj)
             pp0 = obj.pp;  % shorten subsequent references to pp
-            n_pp = length(pp0);
+            n_pp = length(pp0.dp);
             
             disp('Rendering:');
             UTILS.TEXTBAR([0, n_pp]);
@@ -51,11 +51,11 @@ classdef Agg
                     Z .* pp0.dp(ii) + pp0.r(ii,3));
                 lightangle(-45,30)
                 h.FaceLighting = 'gouraud';
-                h.AmbientStrength = 0.3;
-                h.DiffuseStrength = 0.8;
-                h.SpecularStrength = 0.4;
-                h.SpecularExponent = 25;
-                h.BackFaceLighting = 'unlit';
+                h.AmbientStrength = 0.8;
+                h.DiffuseStrength = 0.2;
+                h.SpecularStrength = 0.05;
+                h.SpecularExponent = 2;
+                h.BackFaceLighting = 'lit';
                 
                 UTILS.TEXTBAR([ii, n_pp]);
             end
