@@ -35,7 +35,7 @@ classdef Agg
         
         function h = RENDER(obj)
             pp0 = obj.pp;  % shorten subsequent references to pp
-            n_pp = length(obj.pp.dp);
+            n_pp = length(pp0);
             
             disp('Rendering:');
             UTILS.TEXTBAR([0, n_pp]);
@@ -101,6 +101,15 @@ classdef Agg
                 max(sum(sqrt((pp.r - com) .^ 2), 2));
             
             dmax = dmax + pp.dp(imax) ./ 2;  % add the primary part. diameter
+            
+        end
+        
+        
+        %== CHECK_OVERLAP ===========================================s=====%
+        function f_overlap = CHECK_OVERLAP(pp)
+        % Output is a logical indicating if a particle is overlapping another.
+            
+            % Loop through particles to check overlap.
             
         end
     end
