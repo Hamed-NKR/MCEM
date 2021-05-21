@@ -1,25 +1,34 @@
-function PLOTPAR(dom_size,par,vis_vel)
+function PLOTPAR(dom_size , par, vis)
 % "PLOTPAR" plots the instantaneous location of primary particles.
 
-% dom_size is the computational domain dimensions array.
-% pp is the primaries structure.
-% vis_vel is a logical variable indicating the visibility of velocity...
-% vectors.
+% Inputs:
+    % dom_size: Computational domain dimensions
+    % par: The information structure of particles population
+    % vis: The visibility status of various particle properties...
+        % ...(equivalent aggregate size, velocity vectors, nearest...
+        % ...neighbors)
 
 hold off;
 fig = gcf;
 clf(fig);
 
-cm1 = [0.2,0.3,1];  % color of circles
-cm2 = [1,0.3,0.2];  % color of velocity vectors
+cm1 = [0.2,0.3,1];  % Color of primaries
+cm2 = [0.2,0.8,1];  % Color of equivalent aggregate
+cm3 = [1,0.3,0.2];  % Color of velocity vectors
+
+pp = cell2mat(par.pp);
 
 % XY subplot
 subplot(2,2,1)
-viscircles([par.r(:,1),par.r(:,2)],(par.d)./2, ...
-    'EnhanceVisibility',false,'Color',cm1,'LineWidth',0.5);
-if vis_vel
+viscircles([pp(:,3), pp(:,4)], pp(:,2)./2, 'EnhanceVisibility', false,...
+    'Color', cm1, 'LineWidth', 0.5); % Plotting primaries
+viscircles([par.r(:,1), par.r(:,2)], (par.d)./2, ...
+    'EnhanceVisibility', false, 'Color', cm2, 'LineWidth', 2,...
+    'LineStyle', '--'); % Plotting equivalent spheres of the aggregates
+if vis
     hold on;
-    quiver(par.r(:,1),par.r(:,2),par.v(:,1),par.v(:,2),'Color',cm2);
+    quiver(par.r(:,1), par.r(:,2), par.v(:,1), par.v(:,2), 'Color', cm3);
+    % Plotting velocity vectors
     hold off;
 end
 axis equal
@@ -31,11 +40,14 @@ ylim([0 dom_size(2)])
 
 % XZ subplot
 subplot(2,2,2)
-viscircles([par.r(:,1),par.r(:,3)],(par.d)./2, ...
-    'EnhanceVisibility',false,'Color',cm1,'LineWidth',0.5);
-if vis_vel
+viscircles([pp(:,3), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
+    'Color', cm1, 'LineWidth' ,0.5);
+viscircles([par.r(:,1), par.r(:,3)], (par.d)./2,...
+    'EnhanceVisibility', false, 'Color', cm2, 'LineWidth', 2,...
+    'LineStyle', '--');
+if vis
     hold on;
-    quiver(par.r(:,1),par.r(:,3),par.v(:,1),par.v(:,3),'Color',cm2);
+    quiver(par.r(:,1), par.r(:,3), par.v(:,1), par.v(:,3), 'Color', cm3);
     hold off;
 end
 axis equal
@@ -47,11 +59,14 @@ ylim([0 dom_size(3)])
 
 % YZ subplot
 subplot(2,2,3)
-viscircles([par.r(:,2),par.r(:,3)],(par.d)./2, ...
-    'EnhanceVisibility',false,'Color',cm1,'LineWidth',0.5);
-if vis_vel
+viscircles([pp(:,4), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
+    'Color', cm1, 'LineWidth' ,0.5);
+viscircles([par.r(:,2), par.r(:,3)], (par.d)./2,...
+    'EnhanceVisibility', false, 'Color', cm2, 'LineWidth', 2,...
+    'LineStyle', '--');
+if vis
     hold on;
-    quiver(par.r(:,2),par.r(:,3),par.v(:,2),par.v(:,3),'Color',cm2);
+    quiver(par.r(:,2), par.r(:,3), par.v(:,2), par.v(:,3), 'Color', cm3);
     hold off;
 end
 axis equal
@@ -63,12 +78,14 @@ ylim([0 dom_size(3)])
 
 % 3D subplot
 subplot(2,2,4)
-h3 = scatter3(par.r(:,1),par.r(:,2),par.r(:,3),((par.d)./2).*2e8,...
+scatter3(pp(:,3), pp(:,4), pp(:,5), ((pp(:,2))./2).*2e9,...
     cm1,'filled');
-if vis_vel
-    hold on
-    quiver3(par.r(:,1),par.r(:,2),par.r(:,3),par.v(:,1),par.v(:,2),par.v(:,3),...
-        'Color',cm2)
+hold on
+scatter3(par.r(:,1), par.r(:,2), par.r(:,3), ((par.d)./2).*2e9,...
+    cm2);
+if vis
+    quiver3(par.r(:,1), par.r(:,2), par.r(:,3), par.v(:,1), par.v(:,2),...
+        par.v(:,3), 'Color', cm3)
     hold off;
 end
 axis equal

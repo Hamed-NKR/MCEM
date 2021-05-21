@@ -1,10 +1,23 @@
-% This script is written to test and monitor the performance and outputs of
-% the program. The post-processing parts, as a result, are not the most
-% efficient in terms of computational cost.
+% This script is written to test and monitor the performance and outputs...
+    % ...of the program. The post-processing parts, as a result, are not...
+    % ...the most efficient in terms of computational cost.
 
 clc
 clear
 close all
+
+%% Defining the constant physical properties
+
+Name = {'rho_bc'; 'M_air'; 'kb'; 'Na'; 'Ru'};
+Value = [1.8e3; 28.97e-3; 1.381e-23; 6.022e23; 8.314];
+Unit = {'kg/m3'; 'kg/mol'; 'j/k'; 'mol^-1'; 'j/mol.k'};
+Description = {'Black Carbon bulk density'; 'Air molar mass';...
+    'Boltzmann constant'; 'Avogadro constant'; 'Universal gas constant'};
+
+props = table(Name, Value, Unit, Description); % Creating the table...
+    % ...of properties
+
+clear Name Value Unit Description
 
 %% Importing the user-defined parameters
 
@@ -22,8 +35,9 @@ d_pp = params_val(7:9); % Size distribution parameters of primaries (m)
 temp_f = params_val(10); % Flow temperature (k)
 v_f = params_val(11:13); % Flow velocity vector (m/s)
 p_f = params_val(14); % Flow pressure (pa)
-% See the description tab in the input file for more info on these
-% parameters.
+
+% NOTE: See the description tab in the input file for more info on these...
+    % ...parameters.
 
 clear file_id params params_val 
 
@@ -37,39 +51,42 @@ dom.size = dom_size;
 % Loading the fluid properties
 fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
 % fl is the fluid information structure for particle-fluid interactions.
-[fl.mu, fl.lambda] = CPL.KINETIC(fl.temp,fl.p); % fluid viscosity and...
-% ...mean free path
+[fl.mu, fl.lambda] = CPL.KINETIC(fl,props); % fluid viscosity and...
+    % ...mean free path
 
 % Declaring the particle structure
-par = struct('pp',[],'d',[],'r',[],'v',[],...
+par = struct('pp',[],'n',[],'d',[],'r',[],'v',[],...
 'delt',[],'rho',[],'tau',[],'diff',[],'lambda',[],'nnl',[]);
 % Inputs are list of primaries characteristics (index, size,...
-% ...and coordinates), particles' equivalent position and velocity,...
-% ...their diffusive properties (motion timestep, density,...
-% ...relaxation time, diffusion coefficient, and mean free path),...
-% ...and nearest neighbor list.
-% Element rows correspond to different aggregates info.
+    % ...and coordinates), number of primary within particles,...
+    % ...particles' equivalent position and velocity,...
+    % ...their diffusive properties (motion timestep, density,...
+    % ...relaxation time, diffusion coefficient, and mean free path),...
+    % ...and nearest neighbor list.
+% NOTE: Element rows correspond to different aggregates info.
 
 % Calculating the primary particle size and number distributions
-[pp_d, pp_n] = PAR.INITDIAM(n_par,n_pp,d_pp);
+[pp_d, par.n] = PAR.INITDIAM(n_par,n_pp,d_pp);
 
-% Initializing primary particle field (containing their indices, sizes,...
-% ...and positions)
-par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),1)],pp_n);
+% Initializing the primary particle field; Assigning the indices and sizes
+par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], par.n);
 
-% Assigning the primary particle initial locations
-par.r = PAR.INITLOC(dom_size,par.d);
+% Generating the initial aggregates (if applicable)
+[par.pp, par.d] = PAR.INITMORPH(par.pp, par.n);
 
-% Assigning the primary particle initial velocities
-par.v = PAR.INITVEL(par.d,fl.temp);
+% Assigning the particle initial locations
+par = PAR.INITLOC(dom_size, par);
 
-disp("The computational domain was successfully initialized...")
+% Assigning the particle initial velocities
+par.v = PAR.INITVEL(par.pp, par.n, fl.temp, props);
+
+disp("The computational domain is successfully initialized...")
 
 fig_init = figure(1);
-UTILS.PLOTPAR(dom_size,par,1);
+UTILS.PLOTPAR(dom_size, par, 1);
 
 fig_nn = figure(2);
-UTILS.PLOTNN(dom_size,par,randperm(n_pp,1),10);
+UTILS.PLOTNN(dom_size, par, randperm(n_pp,1), 10);
 
 %% Solving equation of motion for the particles
 
@@ -95,7 +112,8 @@ for k = 2 : k_max
     
     [par, delt] = MOV.MARCH(par, fl);  % Solving equation of motion
     par.r = MOV.PBC(dom_size, par.r);  % Applying periodic...
-    % ...boundary conditions
+        % ...boundary conditions
+    
 %     par = COL.GROW(par);  % Checking for collisions and updating particle
 %     % structures upon new clusterations
     
@@ -112,11 +130,10 @@ for k = 2 : k_max
     time(k) = time(k-1) + delt; % Updating time
     
     UTILS.TEXTBAR([k, k_max]);  % Updating textbar
-    
+ 
 end
 
 if (str == 'Y') || (str == 'y')
     close(video_par);  % Closing the video file
 end
-
 
