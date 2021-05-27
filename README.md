@@ -2,7 +2,7 @@
 
 The present code aims to generate fractal soot aggregates from clustering of primary particle populations. The aggregation phenomenon studied here is in the diffusion-limited cluster-cluster aggregation (DLCA) regime. The numerical algorithm used consists of solving transport equation for the particles in a Langevin Dynamics (LD) framewrok [1] and simulating their growth upon collision with each other. The primary particles considered are nascent soot in typical flame conditions having a polydisperse size distribution. The long-term goal for this project is to model the aggregation in a new way which assumes a hierarchical clustering suggested by External Mixing Hypothesis [2]. This will results in aggeragtes which are externally polydisperse (in terms of primary particle size) while having an internally monodisperse morphology.
 
-Like many other LD-DLCA algorithms, MCEM follows the below steps to generate agglomerated soot:
+LD-DLCA algorithms such as MCEM typically follow the below steps to generate agglomerated soot [3]:
 1. Reading the aggregation input parameters,
 2. Random initialization of the monomers' locations and velocities,
 3. Moving the particles based on brownian motions and drag,
@@ -14,12 +14,13 @@ Like many other LD-DLCA algorithms, MCEM follows the below steps to generate agg
 
 To accomplish the above steps the following packages come with MCEM:
 "PAR" initializes different properties of particles,
-"MOV" solves the equation of motion for the particles and applies the proper boundary conditions,
+"TRANSP" computes important transport properties of fluid and particles, solves the particle equation of motions and applies the proper boundary conditions,
 "COL" contains different tools to check collisions and cluster the particles,
-and "CPL" assigns flow-particle couplings caused by interactions of soot with the background flaming environment.
+and "UTILS" implements different tools to visualize and post-process the results.
 In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program.
 To run the program, two scripts are included in the main directory named as "main_test" and "main_fast". The former one is written to monitor and troubleshoot the outputs while the latter aims to run the code in the lightest form possible to get the results at the lowest computational cost.
 
 References:
 1. Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
 2. Olfert, J., & Rogak, S. (2019). Universal relations between soot effective density and primary particle size for common combustion sources. Aerosol Science and Technology, 53(5), 485-492.
+3. Heine, M. C., & Pratsinis, S. E. (2007). Brownian coagulation at high concentration. Langmuir, 23(19), 9882-9890.
