@@ -25,7 +25,7 @@ while ~ isempty(chk)
     pp_d = d_pp(2).*randn(n_par,1) + d_pp(1); % Global size distribution
     chk = find(pp_d <= 0,1); % check all the diameters to be positive
     if i > 1e2
-        error("error generating the initial size distribution! (negative vales: 1st level)\n")
+        error('error generating the initial size distribution! (negative vales: 1st level)\n')
     end
     i = i + 1;
     pp_n = round(n_pp(2).*randn(n_par,1) + n_pp(1)); % Internal primary...
@@ -50,7 +50,7 @@ while ~ isempty(chk)
     pp_d = repelem(pp_d,pp_n) + d_pp(3) .* dist2;
     chk = find(pp_d <= 0,1);
     if i > 1e2
-        error("error generating the initial size distribution! (negative vales: 2nd level)\n")
+        error('error generating the initial size distribution! (negative vales: 2nd level)\n')
     end
     i = i + 1;    
 end

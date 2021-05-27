@@ -55,6 +55,7 @@ for i = 1 : n_par
                 d_ovr = [repmat(par_pp{i}(jj1,2), j-1, 1), ...
                     par_pp{i}(sel_pp(1 : j-1),2)];
                 chk = COL.OVR(r_ovr, d_ovr);
+                
             end
             
             % Post-deposition intrinsic rotation
@@ -72,8 +73,11 @@ for i = 1 : n_par
             rot = yaw * pitch * roll; % The net rotation matrix
             % Obtaining the post rotation coordinates of primaries
             par_pp{i}(:,3:5) = (rot * (par_pp{i}(:,3:5))')';
+            
         end
+        
     end
+    
 end
 
 [~, par_d] = COL.EQUIV(par_pp, par_n); % Assigning radius of gyration as...
