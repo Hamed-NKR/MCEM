@@ -1,5 +1,5 @@
 
-% TEXTBAR  Print out a text-based progress bar.
+% TEXTBAR  Prints out a text-based progress bar.
 % 
 %  DESCRIPTION:
 %   UTILS.TEXTBAR() or textbar(0) initializes a textbar without

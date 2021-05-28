@@ -1,10 +1,9 @@
-function r_par_new = PBC(dom_size,r_par_old)
-% This function applies periodic boundary condition to the particle...
-% movements.
+function r_par_new = PBC(dom_size, r_par_old)
+% "PBC" applies periodic boundary condition to the particle movements.
 
-% Inputs are the computational domain size and particle locations
+% Inputs are the computational domain size, and particle locations.
 
-n_par = size(r_par_old,1); % Getting number of particles
+n_par = size(r_par_old,1); % Total number of particles
 dom_size = repmat(dom_size',n_par,1);
 stat_par = r_par_old ./ dom_size; % This status array shows...
 % whether the particles are inside the domain.

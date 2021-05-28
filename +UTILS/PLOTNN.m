@@ -1,16 +1,21 @@
-function PLOTNN(dom_size,par,ind_trg,coef_trg)
-% This function plots the nearest neighbors of a desired particles.
+function PLOTNN(dom_size, par, ind_trg, coef_trg)
+% "PLOTNN" plots the nearest neighbors of a desired particles.
 
-% Inputs are computational domain size, particle population structure,...
-% ...and target particle index.
+% Inputs:
+    % dom_size: The computational domain size
+    % par: The information structure of particles population
+    % ind_trg: The index of target particle (the one neighbors of which...
+        % ...need to be identified)
+    % coef_trg: The enlargement coefficient for the size of a spherical...
+        % ...barrier used to identify the neighbors
 
 hold off;
 fig = gcf;
 clf(fig);
 
-cm1 = [0.2,1,0.3];  % Color of target particle
-cm2 = [1,0.3,0.2];  % color of nearest neighbors
-cm3 = [0.3,0.2,1];  % Color of far particles
+cm1 = [0.2,1,0.3];  % Color of the target particle
+cm2 = [1,0.3,0.2];  % color of the nearest neighbors
+cm3 = [0.3,0.2,1];  % Color of the non-neighbor particles
 
 n_par = size(par.r,1); % Getting number of the particles 
 
