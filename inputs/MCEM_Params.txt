@@ -3,7 +3,7 @@ Name            Value           Unit            Description
 dom_size(1)	5e-6		[m]		Computational domain length
 dom_size(2)	5e-6		[m]		Computational domain width
 dom_size(3)	5e-6		[m]		Computational domain height
-n_par		5		[-]		Total number of initial particles
+n_par		6		[-]		Total number of initial particles
 n_pp(1)		10		[-]		Mean number of primaries within the particles
 n_pp(2)		3		[-]		Standard deviation of primary numbers within the particles
 d_pp(1)		2e-7		[m]		Global mean size of primaries
