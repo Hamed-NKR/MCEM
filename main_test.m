@@ -1,122 +1,194 @@
-% This script is written to test and monitor the performance and outputs of
-% the program. The post-processing parts, as a result, are not the most
-% efficient in terms of computational cost.
+% "main_test" is a script to examine and monitor the performance and...
+    % ...outputs of "MCEM" program.
 
 clc
 clear
+clf('reset')
 close all
 
-%% Importing the user-defined parameters
+%% Part 1: Defining the constant physical parameters of the problem
+
+% Creating the table of constant parameters
+Name = {'rho_bc'; 'M_air'; 'kb'; 'Na'; 'Ru'};
+Value = [1.8e3; 28.97e-3; 1.381e-23; 6.022e23; 8.314];
+Unit = {'kg/m3'; 'kg/mol'; 'j/k'; 'mol^-1'; 'j/mol.k'};
+Description = {'Black Carbon bulk density'; 'Air molar mass';...
+    'Boltzmann constant'; 'Avogadro constant'; 'Universal gas constant'};
+params_const = table(Name, Value, Unit, Description);
+
+clear Name Value Unit Description % Cleaning the worksapce
+
+%% Part 2: Importing the user-defined parameters of domain, particle and flow
 
 % Extracting data from the input file
 file_id = fopen('inputs\MCEM_Params.txt','r');
-params = textscan(file_id,'%f%s%s%s','Headerlines',2,...
+import_data = textscan(file_id,'%s%f%s%s','Headerlines',2,...
     'Delimiter','\t','MultipleDelimsAsOne',1);
 fclose(file_id);
 
-params_val = cell2mat(params(1));
-dom_size = params_val(1:3); % Domain dimensions (m)
-n_par = params_val(4); % Total number of initial particles (-)
-n_pp = params_val(5:6); % Number distibution parameters of primaries (-)
-d_pp = params_val(7:9); % Size distribution parameters of primaries (m)
-temp_f = params_val(10); % Flow temperature (k)
-v_f = params_val(11:13); % Flow velocity vector (m/s)
-p_f = params_val(14); % Flow pressure (pa)
-% See the description tab in the input file for more info on these
-% parameters.
+% Creating the table of user-defined parameters
+Name = import_data{1,1};
+Value = import_data{1,2};
+Unit = import_data{1,3};
+Description = import_data{1,4};
+params_ud = table(Name, Value, Unit, Description);
+% NOTE: See the "Description" column for more info on these parameters.
 
-clear file_id params params_val 
+clear file_id import_data ans Name Value Unit Description % Cleaning the...
+    % ...worksapce
 
-%% Initializing the computational domain parameters
+%% Part 3: Initializing the fluid and particle transport variables
 
-% Defining the domain structure (for possible later uses)
-dom = struct('size',[]);
-dom.size = dom_size;
-% Input is the domain size array.
+% Declaring the fluid structure and loading the corresponding imported...
+    % ...properties
+fl = struct('temp', params_ud.Value(10), 'v', params_ud.Value(11:3),...
+    'p', params_ud.Value(14), 'mu', [],'lambda', []);
+% "fl" is a structure containing the main physical properties of the...
+    % ...background fluid. It is used to consider and study the...
+    % ...particle-fluid interactions.
+% Fields:
+    % temp: Fluid temperature
+    % v: ~ velocity
+    % p: ~ pressure
+    % mu: ~ viscosity
+    % lambda: ~ mean free path
 
-% Loading the fluid properties
-fl = struct('temp',temp_f,'v',v_f,'p',p_f,'mu',[],'lambda',[]);
-% fl is the fluid information structure for particle-fluid interactions.
-[fl.mu, fl.lambda] = CPL.KINETIC(fl.temp,fl.p); % fluid viscosity and...
-% ...mean free path
+[fl.mu, fl.lambda] = TRANSP.FLPROPS(fl,params_const); % Calculating the...
+    % ...fluid viscosity and mean free path
 
 % Declaring the particle structure
-par = struct('pp',[],'d',[],'r',[],'v',[],...
-'delt',[],'rho',[],'tau',[],'diff',[],'lambda',[],'nnl',[]);
-% Inputs are list of primaries characteristics (index, size,...
-% ...and coordinates), particles' equivalent position and velocity,...
-% ...their diffusive properties (motion timestep, density,...
-% ...relaxation time, diffusion coefficient, and mean free path),...
-% ...and nearest neighbor list.
-% Element rows correspond to different aggregates info.
+par = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
+    'rho', [], 'delt', [], 'tau', [], 'f', [], 'diff', [],...
+    'lambda', [], 'kn', [], 'nnl', []);
+% "par" is a structure conating the main physical properties of...
+    % ...independent particles (whether being single monomers or...
+    % ...aggregates) as well as the properties of their constituent...
+    % ...primary particles (if applicable).
+% Fields:
+    % pp: Primary particle characteristics (an N*5 matrix containing...
+        % ...their index, size, and location)
+    % n: Number of primaries within the particles
+    % d: Independent particles equivalent diameter
+    % r: ~ spatial location
+    % v: ~ velocity
+    % m: ~ mass
+    % rho: ~ effective density
+    % delt: ~ motion time-step
+    % tau: ~ relaxation time
+    % f: ~ friction factor
+    % diff: ~ diffusivity
+    % lambda: ~ diffusive mean free path
+    % kn: Knudsen number (both kinetic and diffusive)
+    % nnl: ~ nearest neighbor list
+% NOTE: The rows of each field correspond to characteristics of each...
+    % ...independent particle.
 
 % Calculating the primary particle size and number distributions
-[pp_d, pp_n] = PAR.INITDIAM(n_par,n_pp,d_pp);
+[pp_d, par.n] = PAR.INIT_DIAM(params_ud.Value(4), params_ud.Value(5:6),...
+    params_ud.Value(7:9));
 
-% Initializing primary particle field (containing their indices, sizes,...
-% ...and positions)
-par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),1)],pp_n);
+% Initializing the primary particle field; Assigning the indices and sizes
+par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], par.n);
 
-% Assigning the primary particle initial locations
-par.r = PAR.INITLOC(dom_size,par.d);
+% Generating the initial aggregates (if applicable)
+par.pp = PAR.INIT_MORPH(par.pp);
 
-% Assigning the primary particle initial velocities
-par.v = PAR.INITVEL(par.d,fl.temp);
+% Finding the equivalent particle sizes
+par.d = PAR.AGG_SIZING(par.pp, par.n);
 
-disp("The computational domain was successfully initialized...")
+% Assigning the particle initial locations
+par = PAR.INIT_LOC(params_ud.Value(1:3), par);
 
-fig_init = figure(1);
-UTILS.PLOTPAR(dom_size,par,1);
+% Finding the initial mobility propeties of particles
+par = PAR.AGG_MOBIL(par, fl, params_const);
 
-fig_nn = figure(2);
-UTILS.PLOTNN(dom_size,par,randperm(n_pp,1),10);
+% Assigning the particle initial velocities
+par.v = PAR.INIT_VEL(par.pp, par.n, fl.temp, params_const);
 
-%% Solving equation of motion for the particles
+% Finding the initial nearest neighbors
+ind_trg = (1 : params_ud.Value(4))'; % Indicices of target particles
+coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
+    % ...coefficients
+par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
-k_max = 50;  % Marching index limit
+disp("The computational domain is successfully initialized...")
+
+% Visualizing the initial particle locations and velocities, and nearest...
+    % ...neighbor lists
+% figure
+% ind_trg_test = (randperm(params_ud.Value(4),...
+%     min([params_ud.Value(4), 5])))'; % A random portion of target...
+%         % ...indices for nearest neighbor testing
+% [fig_parinit, fig_nntest] = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
+%     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
+%     'target_coefficient', coef_trg(ind_trg_test));
+% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
+
+%% Part 4: Simulating the particle aggregations
+
+k_max = 100; % Marching index limit
 time = zeros(k_max,1);
-fig_anim = figure(3);
-t_plt = 1;  % Defining a plotting timeframe criterion
+t_plt = 1; % Defining a plotting timeframe criterion
+t_nns = 10; % The timeframe for nearest neighbor search
 
-prompt = 'Do you want the animation to be saved? Y/N: ';
-str = input(prompt,'s');
+% prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
+% str = input(prompt,'s'); % Animation saving variable (yes/no)
+str = 'y';
 if (str == 'Y') || (str == 'y')
     video_par = VideoWriter('outputs\Animation_DLCA.avi'); 
-    % Initializing the video file
-    video_par.FrameRate = 5;  % Setting frame rate
-    open(video_par);  % Opening video file
+        % Initializing the video file
+    video_par.FrameRate = 5; % Setting frame rate
+    video_par.Quality = 100; % Setting quality
+    open(video_par); % Opening video file
 end
 
+% Initializing the animation
+figure
+fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par);
+
 disp('Simulating:');
-UTILS.TEXTBAR([0, k_max]);  % Initializing textbar
-UTILS.TEXTBAR([1, k_max]);  % Indicating start of marching
+UTILS.TEXTBAR([0, k_max]); % Initializing textbar
+UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 for k = 2 : k_max
     
-    [par, delt] = MOV.MARCH(par, fl);  % Solving equation of motion
-    par.r = MOV.PBC(dom_size, par.r);  % Applying periodic...
-    % ...boundary conditions
-%     par = COL.GROW(par);  % Checking for collisions and updating particle
-%     % structures upon new clusterations
+    [par, delt] = TRANSP.MARCH(par, fl, params_const); % Solving...
+        % ...equation of motions
     
-    if mod(k-2,t_plt) == 0
-        UTILS.PLOTPAR(dom_size, par, 0);  % Plotting every t_plt time steps
-        drawnow;  % Drawing the plot at the desired time steps
-        pause(0.1);  % Slowing down the animation speed
+    par = TRANSP.PBC(params_ud.Value(1:3), par); % Applying periodic...
+        % ...boundary conditions
+    
+%     par = COL.GROW(par); % Checking for collisions and updating...
+%       % ...particle structures upon new clusterations
+
+%     par = PAR.AGG_MOBIL(par, fl, params_const); % Updating the mobility...
+%         % ...propeties
+    
+%     if mod(k-2, t_nns + 1) == 0
+%         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Updating the...
+%             % ...nearest neighbors
+%     end
+
+    if mod(k-2, t_plt + 1) == 0
+        fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par); % Plotting...
+            % ...every t_plt time steps
+        drawnow; % Drawing the plot at the desired time steps
+        pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim);  %  Capturing current frame
-            writeVideo(video_par, frame_now);  %  Saving the video
+            frame_now = getframe(fig_anim, [0, 0, 1000, 1000]);
+                % Capturing current frame
+            writeVideo(video_par, frame_now); % Saving the video
         end
     end
     
     time(k) = time(k-1) + delt; % Updating time
     
-    UTILS.TEXTBAR([k, k_max]);  % Updating textbar
+    UTILS.TEXTBAR([k, k_max]); % Updating textbar
     
 end
 
 if (str == 'Y') || (str == 'y')
-    close(video_par);  % Closing the video file
+    close(video_par); % Closing the video file
 end
-
-
