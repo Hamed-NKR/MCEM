@@ -111,6 +111,10 @@ coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
+
+par = UTILS.PAR2AGG(par);  % convert to aggregates
+
+
 disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
