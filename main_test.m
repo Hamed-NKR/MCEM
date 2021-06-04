@@ -111,6 +111,10 @@ coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
+
+par = UTILS.PAR2AGG(par);  % convert to aggregates
+
+
 disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
@@ -177,7 +181,7 @@ for k = 2 : k_max
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim, [0, 0, 1000, 1000]);
+            frame_now = getframe(fig_anim, [0, 0, 1000, 892.1]);
                 % Capturing current frame
             writeVideo(video_par, frame_now); % Saving the video
         end
