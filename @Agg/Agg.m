@@ -3,37 +3,70 @@
 %  
 %  05-2021
 
-classdef Agg
+classdef AGG
     
     properties
         pp = struct()   % primary particle information
+        n = [];         % number of primary particles
+        
         dmax = []       % maximum extent of diameter
-        com = []        % center of mass
+        r = []          % center of mass
+        v = []          % aggregate velocity
+        
+        m = []          % ~ mass
+        rho = []        % ~ effective density
+        delt = []       % ~ motion time-step
+        tau = []        % ~ relaxation time
+        f = []          % ~ friction factor
+        diff = []       % ~ diffusivity
+        lambda = []     % ~ diffusive mean free path
+        kn = []         % Knudsen number (both kinetic and diffusive)
+        nnl = []        % ~ nearest neighbor list
     end
     
     methods
         %== AGG ==========================================================%
-        function obj = Agg(pp)
+        function obj = AGG(pp)
          % Function to initialize the aggregate object.
             
-            obj.pp = pp;
+            if nargin == 0; return; end
             
-            obj.com = obj.GET_COM(pp);
-            obj.dmax = obj.GET_MAX(pp, obj.com);
+            % Assign aggregate velocity.
+            if ~exist('v', 'var'); v = []; end
+            if isempty(v); v = [0, 0, 0]; end  % no velocity be default
+            obj.v = v;
+            
+            % Assign primary particle information.
+            obj.pp = pp;
+            obj.n = size(pp.r, 1);
+            
+            obj.r = obj.COM(pp);
+            obj.dmax = obj.TERRITORY(pp, obj.r);
             
         end
         
         
         %== TRANSLATE ====================================================%
-        function obj = TRANSLATE(obj, dr)
-            obj.pp.r = obj.pp.r + dr;
+        function objs = TRANSLATE(objs, dr)
             
-            obj.com = obj.GET_COM(obj.pp);
-            % DMAX does not change.
+            for ii=1:length(objs)
+                objs(ii).pp.r = objs(ii).pp.r + dr(ii, :);
+                
+                objs(ii).r = objs.COM(objs(ii).pp);
+            end
+            
+            % TERRITORY (max. outer diameter) does not change.
         end
         
         
-        function h = RENDER(obj)
+        %== RENDER =======================================================%
+        function h = RENDER(obj, idx)
+            
+            % Select only idx (first if not given) aggregate.
+            if ~exist('idx', 'var'); idx = []; end
+            if isempty(idx); idx = 1; end
+            obj = obj(idx);
+            
             pp0 = obj.pp;  % shorten subsequent references to pp
             n_pp = length(pp0.dp);
             
@@ -46,9 +79,9 @@ classdef Agg
             % Plot spheres.
             [X,Y,Z] = sphere(60);
             for ii=1:n_pp
-                h = surf(X .* pp0.dp(ii) + pp0.r(ii,1), ...
-                    Y .* pp0.dp(ii) + pp0.r(ii,2), ...
-                    Z .* pp0.dp(ii) + pp0.r(ii,3));
+                h = surf(X .* pp0.dp(ii) ./ 2 + pp0.r(ii,1), ...
+                    Y .* pp0.dp(ii) ./ 2 + pp0.r(ii,2), ...
+                    Z .* pp0.dp(ii) ./ 2 + pp0.r(ii,3));
                 lightangle(-45,30)
                 h.FaceLighting = 'gouraud';
                 h.AmbientStrength = 0.8;
@@ -82,8 +115,8 @@ classdef Agg
     
     methods(Static)
         
-        %== GET_COM ======================================================%
-        function com = GET_COM(pp)
+        %== COM ======================================================%
+        function com = COM(pp)
         % Computed the center of mass of the aggregate.
             
             m = pp.dp .^ 3;
@@ -94,24 +127,49 @@ classdef Agg
         
         
         %== GET_MAX ======================================================%
-        function dmax = GET_MAX(pp, com)
+        function dmax = TERRITORY(pp, com)
         % Get the maximum extent of the aggregate.
             
-            % Most distant primary particle.
+            % Most distant primary ppticle.
             [dmax, imax] = ...
                 max(sum(sqrt((pp.r - com) .^ 2), 2));
             
-            dmax = dmax + pp.dp(imax) ./ 2;  % add the primary part. diameter
+            dmax = dmax + pp.dp(imax) ./ 2;  % add the primary ppt. diameter
             
         end
         
         
         %== CHECK_OVERLAP ===========================================s=====%
-        function f_overlap = CHECK_OVERLAP(pp)
-        % Output is a logical indicating if a particle is overlapping another.
+        function f_overlap = OVR(pp)
+        % Output is a logical indicating if a ppticle is overlapping another.
             
-            % Loop through particles to check overlap.
+            % Loop through ppticles to check overlap.
             
+        end
+        
+        
+        %== COMPILEPP ====================================================%
+        %   Compile primary particle information across multiple
+        %   aggregates.
+        function pp = COMPILEPP(objs)
+            
+            pp = [];
+            for ii=1:length(objs)
+            	pp = [pp; ...
+                      [objs(ii).pp.id, ...
+                       objs(ii).pp.dp, ...
+                       objs(ii).pp.r]];
+            end
+        end
+        
+        %== COMPILE ======================================================%
+        %   Compile another property over multiple aggregates.
+        function prop = COMPILE(objs, propname)
+            
+            prop = [];
+            for ii=1:length(objs)
+            	prop = [prop; objs(ii).(propname)];
+            end
         end
     end
 end
