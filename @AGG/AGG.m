@@ -60,12 +60,16 @@ classdef AGG
         
         
         %== RENDER =======================================================%
-        function h = RENDER(obj, idx)
+        function h = RENDER(obj, idx, cm)
             
             % Select only idx (first if not given) aggregate.
             if ~exist('idx', 'var'); idx = []; end
             if isempty(idx); idx = 1; end
             obj = obj(idx);
+            
+            % Set default colormap as "summer".
+            if ~exist('cm', 'var'); cm = []; end
+            if isempty(cm); cm = summer; end
             
             pp0 = obj.pp;  % shorten subsequent references to pp
             n_pp = length(pp0.dp);
@@ -74,7 +78,7 @@ classdef AGG
             UTILS.TEXTBAR([0, n_pp]);
             
             clf; axis equal; hold on;
-            colormap(summer);
+            colormap(cm);
             
             % Plot spheres.
             [X,Y,Z] = sphere(60);
@@ -107,6 +111,10 @@ classdef AGG
             
             figure(gcf);
             hold off;
+            
+            if nargout==0
+                clear h; 
+            end
         end
         
     end
