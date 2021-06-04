@@ -67,6 +67,7 @@ classdef Agg
             shading interp;
             view([-37, 20]);
             h = gca;
+            axis('off');
             
             disp('DONE.');
             disp(' ');
