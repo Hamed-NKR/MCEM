@@ -1,6 +1,7 @@
-function [ind_nn, ind_rest] = NNS(par, ind_trg, coef_trg)
+function [ind_nn, varargout] = NNS(par, ind_trg, coef_trg)
 % "NNS" identifies the nearest neighbors of a particle based on a...
     % ...user-defined neighboring criterion.
+% ----------------------------------------------------------------------- %
 
 % Inputs:
     % par: The information structure of particles population
@@ -9,9 +10,17 @@ function [ind_nn, ind_rest] = NNS(par, ind_trg, coef_trg)
     % coef_trg: The enlargement coefficient for the size of a spherical...
         % ...barrier used to identify the neighbors (a single value or...
         % ...an n_par*1 array where n_par: number of the particles)
+% ----------------------------------------------------------------------- %
+
 % Outputs:
     % ind_nn: The index of nearest neighbors
-    % ind_rest: The index of non-neighbor particles
+    % varargout{1}: The index of non-neighbor particles
+% ----------------------------------------------------------------------- %
+
+if nargout > 2
+    error('Error: Invalid number of output arguments!') % Checking for...
+        % ...redundant output arguments
+end
 
 n_par = size(par.n,1); % Total number of the (independent) particles
 n_trg = size(ind_trg,1); % Number of target particles
@@ -40,12 +49,19 @@ ind_stat = [ind_chk, ind_stat, ind_temp];
 % Converting to storable format
 ind_stat = mat2cell(ind_stat, n_par .* ones(1,n_trg));
 ind_nn = cell(n_trg, 1); % Initializing nearest neighbor list
-ind_rest = cell(n_trg, 1); % Initializing non-neighbors list
+if nargout > 1
+    ind_rest = cell(n_trg, 1); % Initializing non-neighbors list
+end
 for i = 1 : n_trg
     ind_nn{i} = ind_stat{i}(ind_stat{i}(:,2) == 1); % Assigning the...
         % ...nearest neighbor indices
-    ind_rest{i} = ind_stat{i}(ind_stat{i}(:,3) == 1);
-        % Assigning the non-neighbor indices
+    if nargout > 1
+        ind_rest{i} = ind_stat{i}(ind_stat{i}(:,3) == 1); % Assigning...
+            % ...the non-neighbor indices
+    end
+end
+if nargout > 1
+    varargout{1} = ind_rest;
 end
 
 end

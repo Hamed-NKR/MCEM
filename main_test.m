@@ -3,6 +3,7 @@
 
 clc
 clear
+clf('reset')
 close all
 
 %% Part 1: Defining the constant physical parameters of the problem
@@ -57,7 +58,8 @@ fl = struct('temp', params_ud.Value(10), 'v', params_ud.Value(11:3),...
 
 % Declaring the particle structure
 par = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
-'rho', [], 'delt', [], 'tau', [], 'diff', [], 'lambda', [], 'nnl', []);
+    'rho', [], 'delt', [], 'tau', [], 'f', [], 'diff', [],...
+    'lambda', [], 'kn', [], 'nnl', []);
 % "par" is a structure conating the main physical properties of...
     % ...independent particles (whether being single monomers or...
     % ...aggregates) as well as the properties of their constituent...
@@ -73,53 +75,78 @@ par = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
     % rho: ~ effective density
     % delt: ~ motion time-step
     % tau: ~ relaxation time
+    % f: ~ friction factor
     % diff: ~ diffusivity
     % lambda: ~ diffusive mean free path
+    % kn: Knudsen number (both kinetic and diffusive)
     % nnl: ~ nearest neighbor list
 % NOTE: The rows of each field correspond to characteristics of each...
     % ...independent particle.
 
 % Calculating the primary particle size and number distributions
-[pp_d, par.n] = PAR.INITDIAM(params_ud.Value(4), params_ud.Value(5:6),...
+[pp_d, par.n] = PAR.INIT_DIAM(params_ud.Value(4), params_ud.Value(5:6),...
     params_ud.Value(7:9));
 
 % Initializing the primary particle field; Assigning the indices and sizes
 par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], par.n);
 
 % Generating the initial aggregates (if applicable)
-[par.pp, par.d] = PAR.INITMORPH(par.pp, par.n);
+par.pp = PAR.INIT_MORPH(par.pp);
+
+% Finding the equivalent particle sizes
+par.d = PAR.AGG_SIZING(par.pp, par.n);
 
 % Assigning the particle initial locations
-par = PAR.INITLOC(params_ud.Value(1:3), par);
+par = PAR.INIT_LOC(params_ud.Value(1:3), par);
+
+% Finding the initial mobility propeties of particles
+par = PAR.AGG_MOBIL(par, fl, params_const);
 
 % Assigning the particle initial velocities
-par.v = PAR.INITVEL(par.pp, par.n, fl.temp, params_const);
+par.v = PAR.INIT_VEL(par.pp, par.n, fl.temp, params_const);
+
+% Finding the initial nearest neighbors
+ind_trg = (1 : params_ud.Value(4))'; % Indicices of target particles
+coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
+    % ...coefficients
+par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
 disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
-[fig_parinit, fig_nntest] = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
-     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on', ...
-     'nearest_neighbor', 'on', 'target_index',...
-      (randperm(params_ud.Value(4),5))', 'target_coefficient',...
-      randi(10,5,1));
+% figure
+% ind_trg_test = (randperm(params_ud.Value(4),...
+%     min([params_ud.Value(4), 5])))'; % A random portion of target...
+%         % ...indices for nearest neighbor testing
+% [fig_parinit, fig_nntest] = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
+%     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
+%     'target_coefficient', coef_trg(ind_trg_test));
+% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
 
 %% Part 4: Simulating the particle aggregations
 
-k_max = 50; % Marching index limit
+k_max = 100; % Marching index limit
 time = zeros(k_max,1);
-fig_anim = figure(3);
 t_plt = 1; % Defining a plotting timeframe criterion
+t_nns = 10; % The timeframe for nearest neighbor search
 
-prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
-str = input(prompt,'s');
+% prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
+% str = input(prompt,'s'); % Animation saving variable (yes/no)
+str = 'y';
 if (str == 'Y') || (str == 'y')
     video_par = VideoWriter('outputs\Animation_DLCA.avi'); 
         % Initializing the video file
     video_par.FrameRate = 5; % Setting frame rate
+    video_par.Quality = 100; % Setting quality
     open(video_par); % Opening video file
 end
+
+% Initializing the animation
+figure
+fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par);
 
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]); % Initializing textbar
@@ -127,20 +154,31 @@ UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 for k = 2 : k_max
     
-    [par, delt] = TRANSP.MARCH(par, fl); % Solving equation of motions
-    par.r = TRANSP.PBC(params_ud.Value(1:3), par.r); % Applying periodic...
+    [par, delt] = TRANSP.MARCH(par, fl, params_const); % Solving...
+        % ...equation of motions
+    
+    par = TRANSP.PBC(params_ud.Value(1:3), par); % Applying periodic...
         % ...boundary conditions
     
 %     par = COL.GROW(par); % Checking for collisions and updating...
 %       % ...particle structures upon new clusterations
+
+%     par = PAR.AGG_MOBIL(par, fl, params_const); % Updating the mobility...
+%         % ...propeties
     
-    if mod(k-2,t_plt) == 0
-        UTILS.PLOTPAR(params_ud.Value(1:3), par, 0); % Plotting every...
-            % ...t_plt time steps
+%     if mod(k-2, t_nns + 1) == 0
+%         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Updating the...
+%             % ...nearest neighbors
+%     end
+
+    if mod(k-2, t_plt + 1) == 0
+        fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par); % Plotting...
+            % ...every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim); % Capturing current frame
+            frame_now = getframe(fig_anim, [0, 0, 1000, 1000]);
+                % Capturing current frame
             writeVideo(video_par, frame_now); % Saving the video
         end
     end
@@ -148,10 +186,9 @@ for k = 2 : k_max
     time(k) = time(k-1) + delt; % Updating time
     
     UTILS.TEXTBAR([k, k_max]); % Updating textbar
- 
+    
 end
 
 if (str == 'Y') || (str == 'y')
     close(video_par); % Closing the video file
 end
-

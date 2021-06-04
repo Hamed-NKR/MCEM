@@ -1,5 +1,6 @@
 function [fig_main, varargout] = PLOTPAR(dom_size, par, varargin)
 % "PLOTPAR" plots the instantaneous location of primary particles.
+% ----------------------------------------------------------------------- %
 
 % Inputs:
     % dom_size: Computational domain dimensions
@@ -17,22 +18,29 @@ function [fig_main, varargout] = PLOTPAR(dom_size, par, varargin)
             % ..."COL.NNS" for details)
         % Note.1: Visibility inputs MUST match the above-mentioned format.
         % Note.2: While 'nearest_neighbor' is 'on'
+% ----------------------------------------------------------------------- %
+
 % Outputs
     % fig_main: Figure handle for spatial distribution of particles, and...
         % ...possibly their equivalent size and velocity
     % varargout: Figure handle for the nearest neighbor plots
-        
-        
-hold off;
-fig_old = gcf;
-clf(fig_old)
+% ----------------------------------------------------------------------- %        
 
-fig_main = figure(1); % Initializing the main figure handle
+% Initializing the main figure handle
+hold off
+fig_main = gcf;
 
-% Initialing the colors of different plot elements
-cm1 = [0.2,0.3,1]; % Color of primaries
-cm2 = [0.2,0.8,1]; % Color of spherical aggregate equivalents
-cm3 = [1,0.8,0.2]; % Color of velocity vectors
+% Clearing previous data (for animations)
+all_axes_in_figure = findall(fig_main, 'type', 'axes');
+n_ax = numel(all_axes_in_figure);
+for i = 1 : n_ax
+    cla(all_axes_in_figure(i))
+end
+
+% Initializing visibility variables
+vis_equiv = 0; % Equivalent size visibility status
+vis_vel = 0; % Velocity visibility status
+vis_nn = 0; % Nearest neighbor visibility status
 
 if nargout > 2
     error('Error: Invalid number of output arguments!') % Checking for...
@@ -109,7 +117,7 @@ if nargin > 2
                         ii2 = 2 * find(ismember(varargin_spec,...
                             'target_coefficient'));
                         coef_trg = varargin{ii2};
-                        varargout{1} = figure(2); % Initializing the...
+                        varargout{1} = figure;  % Initializing the...
                             % ...nearest neighbors figure handle
                     end
                     
@@ -130,10 +138,21 @@ end
 %%%
 
 pp = cell2mat(par.pp);
-figure(1);
+
+figure(fig_main)
+
+% Setting figure position and background
+fig_main.Position = [0, 0, 1000, 1000];
+set(fig_main, 'color', 'white');
+
+% Initialing the colors of different plot elements
+cm1 = [0.2,0.3,1]; % Color of primaries
+cm2 = [0.2,0.8,1]; % Color of spherical aggregate equivalents
+cm3 = [1,0.8,0.2]; % Color of velocity vectors
 
 % XY subplot
 subplot(2,2,1)
+% Plotting the primary particles
 viscircles([pp(:,3), pp(:,4)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth', 0.5); % Plotting primaries
 hold on
@@ -147,6 +166,7 @@ end
 if vis_vel
     quiver(par.r(:,1), par.r(:,2), par.v(:,1), par.v(:,2), 'Color', cm3);
 end
+% Setting different plot graphics
 hold off;
 axis equal
 title('xy view')
@@ -222,8 +242,8 @@ zlim([0 dom_size(3)])
 
 % Plotting the nearest neighbors
 if vis_nn
-    figure(2);
-    UTILS.PLOTNN(dom_size, par, ind_trg, coef_trg);
+    figure(varargout{1})
+    varargout{1} = UTILS.PLOTNN(dom_size, par, ind_trg, coef_trg);
 end
 
 end
