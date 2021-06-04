@@ -28,7 +28,7 @@ function [fig_main, varargout] = PLOTPAR(dom_size, par, varargin)
 
 % Compile primary particles across multiple aggregates.
 if isa(par, 'AGG')
-    pp = AGG.COMPILE(par);
+    pp = AGG.COMPILEPP(par);
 else
     pp = cell2mat(par.pp);
 end
