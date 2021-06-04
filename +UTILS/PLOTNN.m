@@ -1,5 +1,6 @@
-function PLOTNN(dom_size, par, ind_trg, coef_trg)
+function fig_nn = PLOTNN(dom_size, par, ind_trg, coef_trg)
 % "PLOTNN" highlights the nearest neighbors of a desired particles.
+% ----------------------------------------------------------------------- %
 
 % Inputs:
     % dom_size: The computational domain size
@@ -8,24 +9,41 @@ function PLOTNN(dom_size, par, ind_trg, coef_trg)
         % ...need to be identified)
     % coef_trg: The enlargement coefficient for the size of a spherical...
         % ...barrier used to identify the neighbors
+% ----------------------------------------------------------------------- %
 
-hold off;
+% Initializing the nearest neighbor figure handle
+hold off
+fig_nn = gcf;
 
+% Clearing previous data (for animations)
+all_axes_in_figure = findall(fig_nn, 'type', 'axes');
+n_ax = numel(all_axes_in_figure);
+for i = 1 : n_ax
+    cla(all_axes_in_figure(i))
+end
+
+figure(fig_nn)
+
+% Setting figure position and background
+fig_nn.Position = [0, 0, 2000, 1000];
+set(fig_nn, 'color', 'white');
+
+% Initialing the colors of different plot elements
 cm1 = [0.2,1,0.3];  % Color of the target particle
 cm2 = [1,0.3,0.2];  % color of the nearest neighbors
 cm3 = [0.3,0.2,1];  % Color of the non-neighbor particles
 
 n_trg = numel(ind_trg); % Number of target particles for neighbor checking
 tiledlayout(n_trg,4); % Initializing the figure layout
-[ind_nn, ind_rest] = COL.NNS(par, ind_trg, coef_trg); % Getting the neighbor...
-    % ...and non-neighbor indices
+[ind_nn, ind_rest] = COL.NNS(par, ind_trg, coef_trg); % Getting the...
+    % ...neighbor and non-neighbor indices
 
 % Looping over the target particles
 for i = 1 : n_trg
     
     pp_trg = cell2mat(par.pp(ind_trg(i))); % Target particles pp info
     pp_nn = cell2mat(par.pp(ind_nn{i})); % Nearest neighbor's pp info
-    % Avoiding plotting errors due to array emptiness
+    % Avoiding errors while plotting due to array emptiness
     if isempty(pp_nn)
         pp_nn = NaN(1,6);
     end
@@ -36,17 +54,22 @@ for i = 1 : n_trg
     
     % XY tile
     nexttile
+    % Plotting the target particle
     p1_xy = viscircles([pp_trg(:,3), pp_trg(:,4)], pp_trg(:,2) ./ 2,...
         'EnhanceVisibility', false, 'Color', cm1, 'LineWidth', 0.5);
     hold on
+    % Neigboring limit
     p2_xy = viscircles([par.r(ind_trg(i),1),par.r(ind_trg(i),2)],...
         coef_trg(i) .* par.d(ind_trg(i)) ./ 2,...
         'EnhanceVisibility', false, 'Color', 'k','LineStyle','--',...
         'LineWidth',0.5);
+    % Nearest neighbors
     p3_xy = viscircles([pp_nn(:,3), pp_nn(:,4)], pp_nn(:,2) ./ 2,...
         'EnhanceVisibility',false,'Color',cm2,'LineWidth',0.5);
+    % Non-neighbors
     p4_xy = viscircles([pp_rest(:,3), pp_rest(:,4)], pp_rest(:,2) ./ 2,...
         'EnhanceVisibility',false,'Color',cm3,'LineWidth',0.5);
+    % Setting different plot graphics
     hold off
     axis equal
     title('xy view')
