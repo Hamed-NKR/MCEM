@@ -1,13 +1,13 @@
+% "AGG" is a class containing the aggregate properties and functions.
 
-% AGG  A class containing the aggregate properties and functions.
-%  
-%  05-2021
+%  by: Tim Sipkens, 05-2021
+% ----------------------------------------------------------------------- %
 
 classdef AGG
     
     properties
         pp = struct()   % primary particle information
-        n = [];         % number of primary particles
+        n = []          % number of primary particles
         
         dmax = []       % maximum extent of diameter
         r = []          % center of mass

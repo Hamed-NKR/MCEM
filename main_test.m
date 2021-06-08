@@ -141,7 +141,10 @@ t_nns = 10; % The timeframe for nearest neighbor search
 % str = input(prompt,'s'); % Animation saving variable (yes/no)
 str = 'y';
 if (str == 'Y') || (str == 'y')
-    video_par = VideoWriter('outputs\Animation_DLCA.avi'); 
+    % Checking the existence of animation directory
+%    if ~ exist('outputs', 'dir'); mkdir outputs; end
+    mkdir outputs
+    video_par = VideoWriter('outputs\DLCA_anim.avi'); 
         % Initializing the video file
     video_par.FrameRate = 5; % Setting frame rate
     video_par.Quality = 100; % Setting quality
