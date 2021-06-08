@@ -55,8 +55,8 @@ dr0 = (m ./ f) .* (par_v_new + v) .*...
 if isa(par, 'AGG')
     for ii=1:length(par)  % update velocity
         par(ii).v = par_v_new(ii, :);
-        par = par.TRANSLATE(dr0 ./ z_par);
     end
+    par = par.TRANSLATE(dr0 ./ z_par);
 else
     % Updating the primary particle locations
     pp = cell2mat(par.pp);

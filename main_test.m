@@ -184,7 +184,7 @@ for k = 2 : k_max
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim, [0, 0, 1000, 892.1]);
+            frame_now = getframe(fig_anim, fig_anim.Position);
                 % Capturing current frame
             writeVideo(video_par, frame_now); % Saving the video
         end
