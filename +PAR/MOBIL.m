@@ -1,4 +1,4 @@
-function agg = AGG_MOBIL(agg, fl, params_const)
+function agg = MOBIL(agg, fl, params_const)
 % "AGG_MOBIL" calculates the transport properties of aggregates.
 % ----------------------------------------------------------------------- %
 
@@ -21,7 +21,7 @@ cc = 1 + (agg.kn(:,1)) .* (alpha + beta .* exp(-gamma ./ (agg.kn(:,1))));
     % Cunningham correction factor
 
 rho_bc = params_const.Value(1); % Black Carbon bulk density (kg/m3)
-agg.rho = rho_bc; % Effective density
+agg.rho = rho_bc .* ones(n_agg,1); % Effective density
 agg.tau = rho_bc .* ((agg.d).^2) .* cc ./ (18 .* fl.mu); % Response...
     % ...(relaxation) time
 
@@ -29,8 +29,9 @@ kb = params_const.Value(3); % Boltzmann's constant (j/k)
 agg.f = (3 * pi * fl.mu) .* (agg.d) ./ cc; % Friction factor
 agg.diff = (kb * (fl.temp)) ./ (agg.f) ; % Particle diffusivity (m2/s)
 
+agg.m = ones(n_agg,1); % Initializing aggregate mass array
 for i = 1 : n_agg
-    agg.m = (params_const.Value(1) * pi / 6) * sum((agg.pp{i}(:,2)).^3);
+    agg.m(i) = (params_const.Value(1) * pi / 6) * sum((agg.pp{i}(:,2)).^3);
         % Aggregate mass (kg)
 end
 

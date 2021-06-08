@@ -57,15 +57,16 @@ if isa(par, 'AGG')
         par(ii).v = par_v_new(ii, :);
     end
     par = par.TRANSLATE(dr0 ./ z_par);
+
 else
     % Updating the primary particle locations
     pp = cell2mat(par.pp);
-    pp(:,3:5) = pp(:,3:5) + repelem(dr0, [par.n], 1);
+    pp(:,3:5) = pp(:,3:5) + repelem(dr0 ./ z_par, par.n, 1);
+    par.pp = mat2cell(pp, par.n);
     
     par.v = par_v_new;
-    par.r = par.r + dr0 ./ z_par; % Interpolating the...
-        % ...displacement for the baseline timestep
-    par.pp = mat2cell(pp, par.n);
+    par.r = par.r + dr0 ./ z_par; % Interpolating the displacement for...
+        % ...the baseline timestep
 end
 
 end

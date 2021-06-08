@@ -1,4 +1,4 @@
-function d_agg = AGG_SIZING(pp, n_pp)
+function d_agg = SIZING(pp, n_pp)
 % "AGG_SIZING" computes various equivalent sizes proposed for fractal...
     % ...aggregates.
 % ----------------------------------------------------------------------- %

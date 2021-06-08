@@ -94,13 +94,13 @@ par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], par.n);
 par.pp = PAR.INIT_MORPH(par.pp);
 
 % Finding the equivalent particle sizes
-par.d = PAR.AGG_SIZING(par.pp, par.n);
+par.d = PAR.SIZING(par.pp, par.n);
 
 % Assigning the particle initial locations
 par = PAR.INIT_LOC(params_ud.Value(1:3), par);
 
 % Finding the initial mobility propeties of particles
-par = PAR.AGG_MOBIL(par, fl, params_const);
+par = PAR.MOBIL(par, fl, params_const);
 
 % Assigning the particle initial velocities
 par.v = PAR.INIT_VEL(par.pp, par.n, fl.temp, params_const);
@@ -111,9 +111,7 @@ coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
-
-par = UTILS.PAR2AGG(par);  % convert to aggregates
-
+% par = UTILS.PAR2AGG(par);  % convert to aggregates
 
 disp("The computational domain is successfully initialized...")
 
@@ -141,9 +139,11 @@ t_nns = 10; % The timeframe for nearest neighbor search
 % str = input(prompt,'s'); % Animation saving variable (yes/no)
 str = 'y';
 if (str == 'Y') || (str == 'y')
-    % Checking the existence of animation directory
-%    if ~ exist('outputs', 'dir'); mkdir outputs; end
-    mkdir outputs
+%    % Checking the existence of animation directory
+%     if exist('outputs', 'dir') ~= 7
+%         mkdir('outputs');
+%     end
+    mkdir('outputs');
     video_par = VideoWriter('outputs\DLCA_anim.avi'); 
         % Initializing the video file
     video_par.FrameRate = 5; % Setting frame rate
@@ -173,12 +173,12 @@ for k = 2 : k_max
 %     par = PAR.AGG_MOBIL(par, fl, params_const); % Updating the mobility...
 %         % ...propeties
     
-%     if mod(k-2, t_nns + 1) == 0
+%     if mod(k-2, t_nns) == 0
 %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Updating the...
 %             % ...nearest neighbors
 %     end
 
-    if mod(k-2, t_plt + 1) == 0
+    if mod(k-2, t_plt) == 0
         fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par); % Plotting...
             % ...every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps

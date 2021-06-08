@@ -56,18 +56,19 @@ elseif ~ isempty(find(stat_par(:,3) < 0,1)) % checking particle exits...
         mod(abs(r(inds_minus_z,3)), dom_size(inds_minus_z,3));
 end
 
+dr = par_r_new - r;
+
 if isa(par, 'AGG')
-    dr = par_r_new - r;
     par = par.TRANSLATE(dr);
-else
+
+else    
     % Updating the primary particle locations
     pp = cell2mat(par.pp);
-    pp(:,3:5) = pp(:,3:5) + repelem((par_r_new - r), par.n, 1);
-    pp = mat2cell(pp, par.n);
+    pp(:,3:5) = pp(:,3:5) + repelem(dr, par.n, 1);
+    par.pp = mat2cell(pp, par.n);
 
-    % Updating the particle structure positions
+    % Updating the particle center of mass
     par.r = par_r_new;
-    par.pp = pp;
 end
 
 end

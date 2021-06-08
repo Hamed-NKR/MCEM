@@ -21,8 +21,8 @@ for ii=1:nagg
     agg(ii).v = par.v(ii, :);
     
     % TO DO: Mass is not correct.
-    agg(ii).m = par.m;                  % ~ mass
-    agg(ii).rho = par.rho;              % ~ effective density
+    agg(ii).m = par.m(ii);                  % ~ mass
+    agg(ii).rho = par.rho(ii);              % ~ effective density
     agg(ii).delt = par.delt(ii);        % ~ motion time-step
     agg(ii).tau = par.tau(ii);          % ~ relaxation time
     agg(ii).f = par.f(ii);              % ~ friction factor
