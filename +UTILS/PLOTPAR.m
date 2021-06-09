@@ -26,16 +26,16 @@ function [fig_main, varargout] = PLOTPAR(dom_size, par, varargin)
     % varargout: Figure handle for the nearest neighbor plots
 % ----------------------------------------------------------------------- %        
 
+% Compile primary particles across multiple aggregates.
+if isa(par, 'AGG')
+    pp = AGG.COMPILEPP(par);
+else
+    pp = cell2mat(par.pp);
+end
+
 % Initializing the main figure handle
 hold off
 fig_main = gcf;
-
-% Clearing previous data (for animations)
-all_axes_in_figure = findall(fig_main, 'type', 'axes');
-n_ax = numel(all_axes_in_figure);
-for i = 1 : n_ax
-    cla(all_axes_in_figure(i))
-end
 
 % Initializing visibility variables
 vis_equiv = 0; % Equivalent size visibility status
@@ -137,12 +137,14 @@ if nargin > 2
 end
 %%%
 
-pp = cell2mat(par.pp);
+
 
 figure(fig_main)
 
 % Setting figure position and background
-fig_main.Position = [0, 0, 1000, 1000];
+if ~all(fig_main.Position == [0, 0, 1000, 892.1])
+    fig_main.Position = [0, 0, 1000, 892.1];
+end
 set(fig_main, 'color', 'white');
 
 % Initialing the colors of different plot elements
@@ -152,6 +154,8 @@ cm3 = [1,0.8,0.2]; % Color of velocity vectors
 
 % XY subplot
 subplot(2,2,1)
+ca = gca;
+delete(ca.Children);
 % Plotting the primary particles
 viscircles([pp(:,3), pp(:,4)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth', 0.5); % Plotting primaries
@@ -177,6 +181,8 @@ ylim([0 dom_size(2)])
 
 % XZ subplot
 subplot(2,2,2)
+ca = gca;
+delete(ca.Children);
 viscircles([pp(:,3), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
 hold on
@@ -198,6 +204,8 @@ ylim([0 dom_size(3)])
 
 % YZ subplot
 subplot(2,2,3)
+ca = gca;
+delete(ca.Children);
 hold on
 viscircles([pp(:,4), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
@@ -219,6 +227,8 @@ ylim([0 dom_size(3)])
 
 % 3D subplot
 subplot(2,2,4)
+ca = gca;
+delete(ca.Children);
 scatter3(pp(:,3), pp(:,4), pp(:,5), ((pp(:,2))./2).*2e9,...
     cm1,'filled');
 hold on
