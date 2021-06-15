@@ -107,17 +107,30 @@ par.v = PAR.INIT_VEL(par.pp, par.n, fl.temp, params_const);
 
 % Finding the initial nearest neighbors
 ind_trg = (1 : params_ud.Value(4))'; % Indicices of target particles
-coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
+coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 par.nnl = COL.NNS(par, ind_trg, coef_trg);
+
+% par.pp{2} = COL.CONNECT(par.pp{1},par.pp{2});
 
 % par = UTILS.PAR2AGG(par);  % convert to aggregates
 
 disp("The computational domain is successfully initialized...")
 
+% figure
+% for i = 1 : params_ud.Value(4)
+%     par.RENDER(i);
+%     hold on
+% end
+
+% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
+
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
 % figure
+% fig_parinit2 = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
 % ind_trg_test = (randperm(params_ud.Value(4),...
 %     min([params_ud.Value(4), 5])))'; % A random portion of target...
 %         % ...indices for nearest neighbor testing
@@ -125,8 +138,6 @@ disp("The computational domain is successfully initialized...")
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
 %     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
 %     'target_coefficient', coef_trg(ind_trg_test));
-% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
 
 %% Part 4: Simulating the particle aggregations
 
@@ -184,7 +195,7 @@ for k = 2 : k_max
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim, fig_anim.Position);
+            frame_now = getframe(fig_anim);
                 % Capturing current frame
             writeVideo(video_par, frame_now); % Saving the video
         end

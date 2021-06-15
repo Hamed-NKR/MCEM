@@ -26,7 +26,7 @@ for i = 1 : n_par
             
             chk = 1; % Overlap checking criterion   
             
-            while chk
+            while ~ isempty(find(chk == 1, 1))
                 
                 jj1 = sel_pp(j); % New primary particle index
                 jj0 = sel_pp(randperm(j-1,1)); % Finding a random index...
