@@ -111,25 +111,14 @@ coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
-% par.pp{2} = COL.CONNECT(par.pp{1},par.pp{2});
-
-% par = UTILS.PAR2AGG(par);  % convert to aggregates
+% par = UTILS.PAR2AGG(par);  % Converting to aggregate objects
 
 disp("The computational domain is successfully initialized...")
-
-% figure
-% for i = 1 : params_ud.Value(4)
-%     par.RENDER(i);
-%     hold on
-% end
-
-% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
 
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
 % figure
-% fig_parinit2 = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
 % ind_trg_test = (randperm(params_ud.Value(4),...
 %     min([params_ud.Value(4), 5])))'; % A random portion of target...
@@ -138,6 +127,19 @@ disp("The computational domain is successfully initialized...")
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
 %     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
 %     'target_coefficient', coef_trg(ind_trg_test));
+
+figure(1)
+UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+    'equivalent_volumetric_size', 'on', 'velocity_vector', 'on')
+
+par.pp{2} = COL.CONNECT_RAND(par.pp{1},par.pp{2});
+% [par.pp{1}, par.pp{2}] = COL.CONNECT_REAL(par.pp{1}, par.v(1,:),...
+%     par.pp{2}, par.v(2,:));
+[par, i_list] = COL.UNITE(par, [1,2]);
+
+figure(2)
+UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+    'equivalent_volumetric_size', 'on', 'velocity_vector', 'on')
 
 %% Part 4: Simulating the particle aggregations
 
@@ -181,7 +183,7 @@ for k = 2 : k_max
 %     par = COL.GROW(par); % Checking for collisions and updating...
 %       % ...particle structures upon new clusterations
 
-%     par = PAR.AGG_MOBIL(par, fl, params_const); % Updating the mobility...
+%     par = PAR.MOBIL(par, fl, params_const); % Updating the mobility...
 %         % ...propeties
     
 %     if mod(k-2, t_nns) == 0

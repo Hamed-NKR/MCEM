@@ -30,4 +30,3 @@ r_prj = r_pps(:,4:6) + d_tang .* vnorm_rel; % Location of projected points
 normdist = sqrt(sum((r_prj - r_pps(:,1:3)).^2, 2)); % Projection distance
 
 end
-

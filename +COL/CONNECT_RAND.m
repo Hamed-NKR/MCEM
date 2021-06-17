@@ -5,7 +5,8 @@ function pp2 = CONNECT_RAND(pp1, pp2)
 
 % Inputs/Outputs:
     % pp1: Primary particle info array for aggregate 1
-    % pp2: ~ for aggregate 2
+    % pp2: ~ for aggregate 2 (This is the one that moves with respect to...
+        % ...the other)
 % ----------------------------------------------------------------------- %
 
 n_pp1 = size(pp1, 1); % Number of primary particles within aggregate 1
