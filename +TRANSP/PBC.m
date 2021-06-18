@@ -56,19 +56,14 @@ elseif ~ isempty(find(stat_par(:,3) < 0,1)) % checking particle exits...
         mod(abs(r(inds_minus_z,3)), dom_size(inds_minus_z,3));
 end
 
-dr = par_r_new - r;
+dr = par_r_new - r; % Translation vectors
 
-if isa(par, 'AGG')
+if isa(par, 'AGG') % Updating aggregate class objects
     par = par.TRANSLATE(dr);
 
-else    
-    % Updating the primary particle locations
-    pp = cell2mat(par.pp);
-    pp(:,3:5) = pp(:,3:5) + repelem(dr, par.n, 1);
-    par.pp = mat2cell(pp, par.n);
+else % Updating the particle structure
+    [par.pp, par.r] = PAR.TRANSLATE(par.pp, par.r, par.n, dr);
 
-    % Updating the particle center of mass
-    par.r = par_r_new;
 end
 
 end

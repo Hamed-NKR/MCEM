@@ -72,9 +72,7 @@ end
 % Updating the primary particle locations based on their new random...
     % ...center positions
 pp_rc = COL.EQUIV(par.pp, par.n); % Initial particle centers
-par_pp = cell2mat(par.pp);
-par_pp(:,3:5) = par_pp(:,3:5) - repelem(pp_rc, par.n, 1) +...
-    repelem(par.r, par.n, 1);
-par.pp = mat2cell(par_pp, par.n);
+dr0 = par.r - pp_rc; % Translation vectors
+par.pp = PAR.TRANSLATE(par.pp, par.r, par.n, dr0);
 
 end

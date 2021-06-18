@@ -1,4 +1,4 @@
-function par_pp = INIT_MORPH(par_pp)
+function [par_pp, par_d] = INIT_MORPH(par_pp)
 % "INIT_MORPH" assigns initial (random) morpholgy of the primaries...
     % ...within individual aggregates.
 
@@ -12,17 +12,18 @@ function par_pp = INIT_MORPH(par_pp)
 % ----------------------------------------------------------------------- %
 
 n_par = size(par_pp,1); % Total number of aggregates
+n_pp = zeros(n_par, 1); % Number of primaries within the particles
 
 for i = 1 : n_par
     
-    n_pp = size(par_pp{i},1); % Number of primaries within the particles
+    n_pp(i) = size(par_pp{i},1);
     
-    if n_pp > 1
+    if n_pp(i) > 1
         
-        sel_pp = randperm(n_pp); % Random primary particle...
+        sel_pp = randperm(n_pp(i)); % Random primary particle...
             % ...selection array
         
-        for j = 2 : n_pp
+        for j = 2 : n_pp(i)
             
             chk = 1; % Overlap checking criterion   
             
@@ -79,5 +80,9 @@ for i = 1 : n_par
     end
     
 end
+
+par_d = zeros(n_par,1); % Initializing the size array
+[~, par_d(:,1)] = COL.EQUIV(par_pp, n_pp); % Assigning the equivalent...
+    % ...volumetric sizes
 
 end

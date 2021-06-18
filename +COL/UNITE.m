@@ -37,7 +37,7 @@ i_temp = unique(i_list(:,2), 'stable'); % Extracting remaining old indices
 i_temp = [(1 : numel(i_temp))', i_temp]; % Adding new indices
 % Asigning new indices to the aggregate populations
 for i = 1 : n_par0
-    i_list(i,3) = i_temp(find(i_temp(:,1) == i_list(i,2), 1), 2);
+    i_list(i,3) = i_temp(find(i_temp(:,2) == i_list(i,2), 1), 1);
 end
 i_list(:,2) = [];
 
