@@ -147,7 +147,7 @@ disp("The computational domain is successfully initialized...")
 
 %% Part 4: Simulating the particle aggregations
 
-k_max = 100; % Marching index limit
+k_max = 50; % Marching index limit
 time = zeros(k_max,1);
 t_plt = 1; % Defining a plotting timeframe criterion
 t_nns = 10; % The timeframe for nearest neighbor search
@@ -163,7 +163,7 @@ if (str == 'Y') || (str == 'y')
     mkdir('outputs');
     video_par = VideoWriter('outputs\DLCA_anim.avi'); 
         % Initializing the video file
-    video_par.FrameRate = 5; % Setting frame rate
+    video_par.FrameRate = 1; % Setting frame rate
     video_par.Quality = 100; % Setting quality
     open(video_par); % Opening video file
 end
