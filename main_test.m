@@ -91,32 +91,36 @@ par = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
 par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], par.n);
 
 % Generating the initial aggregates (if applicable)
-par.pp = PAR.INIT_MORPH(par.pp);
-
-% Finding the equivalent particle sizes
-par.d = PAR.SIZING(par.pp, par.n);
+[par.pp, par.d] = PAR.INIT_MORPH(par.pp);
 
 % Assigning the particle initial locations
 par = PAR.INIT_LOC(params_ud.Value(1:3), par);
 
+% % Finding the equivalent particle sizes
+% par.d = TRANSP.SIZING(par.pp, par.n);
+
 % Finding the initial mobility propeties of particles
-par = PAR.MOBIL(par, fl, params_const);
+par = TRANSP.MOBIL(par, fl, params_const);
 
 % Assigning the particle initial velocities
 par.v = PAR.INIT_VEL(par.pp, par.n, fl.temp, params_const);
 
 % Finding the initial nearest neighbors
 ind_trg = (1 : params_ud.Value(4))'; % Indicices of target particles
-coef_trg = 10 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
+coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 par.nnl = COL.NNS(par, ind_trg, coef_trg);
 
-% par = UTILS.PAR2AGG(par);  % convert to aggregates
+% par = UTILS.PAR2AGG(par);  % Converting to aggregate objects
 
 disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
+% figure
+% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
+
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...
 %     min([params_ud.Value(4), 5])))'; % A random portion of target...
@@ -125,8 +129,21 @@ disp("The computational domain is successfully initialized...")
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
 %     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
 %     'target_coefficient', coef_trg(ind_trg_test));
-% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+
+% dtheta = 2 .* pi .* rand(2, 3);
+% par.pp = PAR.ROTATE(par.pp, par.r, par.n, dtheta);
+% par.v = PAR.ROTATE_SIMPLE(par.v, par.r, dtheta);
+% figure(3)
+% UTILS.PLOTPAR(params_ud.Value(1:3), par,...
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
+
+% par.pp{2} = COL.CONNECT_RAND(par.pp{1},par.pp{2});
+% % [par.pp{1}, par.pp{2}] = COL.CONNECT_REAL(par.pp{1}, par.v(1,:),...
+% %     par.pp{2}, par.v(2,:));
+% [par, i_list] = COL.UNITE(par, [1,2]);
+% figure(4)
+% UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on')
 
 %% Part 4: Simulating the particle aggregations
 
@@ -167,11 +184,13 @@ for k = 2 : k_max
     par = TRANSP.PBC(params_ud.Value(1:3), par); % Applying periodic...
         % ...boundary conditions
     
-%     par = COL.GROW(par); % Checking for collisions and updating...
-%       % ...particle structures upon new clusterations
-
-%     par = PAR.AGG_MOBIL(par, fl, params_const); % Updating the mobility...
-%         % ...propeties
+    par = COL.GROW(par); % Checking for collisions and updating...
+      % ...particle structures upon new clusterations
+    
+%     par.d = TRANSP.SIZING(par.pp, par.n); % Updating the equivalent sizes
+    
+    par = TRANSP.MOBIL(par, fl, params_const); % Updating the mobility...
+        % ...propeties
     
 %     if mod(k-2, t_nns) == 0
 %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Updating the...
@@ -184,7 +203,7 @@ for k = 2 : k_max
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim, fig_anim.Position);
+            frame_now = getframe(fig_anim, [0, 0, 1000, 892.1]);
                 % Capturing current frame
             writeVideo(video_par, frame_now); % Saving the video
         end

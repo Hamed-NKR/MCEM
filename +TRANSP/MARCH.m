@@ -37,36 +37,31 @@ delt = delt_base .* z_par; % This is to avoid numerical instabilities.
 
 % Solving the equation of motion
 var_march = exp(f .* delt ./ m);
-% Velocity march
+% Finding the velocity march
 rv_dot_rv = (3 .* kb .* fl.temp ./ m) .* (1 - (var_march.^(-2)));
 par_v_new = v .* (var_march.^(-1)) + sqrt(rv_dot_rv ./ 3) .*...
     [randn(n_par, 1), randn(n_par, 1), randn(n_par, 1)];
-% position march
+% Finding the position march
 rr_dot_rr = (6 .* m .* kb .* fl.temp ./ (f.^2)) .*...
     (f .* delt ./ m - 2 .* ((1 - (var_march.^(-1))) ./...
     (1 + (var_march.^(-1)))));
-dr0 = (m ./ f) .* (par_v_new + v) .*...
+dr = (m ./ f) .* (par_v_new + v) .*...
     ((1 - (var_march.^(-1))) ./ (1 + (var_march.^(-1)))) +...
     sqrt(rr_dot_rr ./ 3) .* [randn(n_par, 1), randn(n_par, 1),...
-    randn(n_par, 1)];  % change in position
+    randn(n_par, 1)];  % Translation vectors
 
-
-% Updating the particle structure
-if isa(par, 'AGG')
-    for ii=1:length(par)  % update velocity
+if isa(par, 'AGG') % Updating aggregate class objects
+    for ii=1:length(par)
         par(ii).v = par_v_new(ii, :);
     end
-    par = par.TRANSLATE(dr0 ./ z_par);
+    par = par.TRANSLATE(dr ./ z_par);
 
-else
-    % Updating the primary particle locations
-    pp = cell2mat(par.pp);
-    pp(:,3:5) = pp(:,3:5) + repelem(dr0 ./ z_par, par.n, 1);
-    par.pp = mat2cell(pp, par.n);
-    
-    par.v = par_v_new;
-    par.r = par.r + dr0 ./ z_par; % Interpolating the displacement for...
-        % ...the baseline timestep
+else % Updating the particle structure
+    % ~ the primary particle and aggregate locations
+    [par.pp, par.r] = PAR.TRANSLATE(par.pp, par.r, par.n, dr ./ z_par);
+        % The displacements are interpoldated for the baseline timestep
+    par.v = par_v_new; % ~ the velocities
+
 end
 
 end
