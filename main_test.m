@@ -57,7 +57,7 @@ fl = struct('temp', params_ud.Value(10), 'v', params_ud.Value(11:3),...
     % ...fluid viscosity and mean free path
 
 % Declaring the particle structure
-par = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
+pars = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
     'rho', [], 'delt', [], 'tau', [], 'f', [], 'diff', [],...
     'lambda', [], 'kn', [], 'nnl', []);
 % "par" is a structure conating the main physical properties of...
@@ -84,66 +84,54 @@ par = struct('pp', [], 'n', [], 'd', [], 'r', [], 'v', [], 'm', [],...
     % ...independent particle.
 
 % Calculating the primary particle size and number distributions
-[pp_d, par.n] = PAR.INIT_DIAM(params_ud.Value(4), params_ud.Value(5:6),...
+[pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(4), params_ud.Value(5:6),...
     params_ud.Value(7:9));
 
 % Initializing the primary particle field; Assigning the indices and sizes
-par.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], par.n);
+pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n);
 
 % Generating the initial aggregates (if applicable)
-[par.pp, par.d] = PAR.INIT_MORPH(par.pp);
+[pars.pp, pars.d] = PAR.INIT_MORPH(pars.pp);
 
 % Assigning the particle initial locations
-par = PAR.INIT_LOC(params_ud.Value(1:3), par);
+pars = PAR.INIT_LOC(params_ud.Value(1:3), pars);
 
 % % Finding the equivalent particle sizes
 % par.d = TRANSP.SIZING(par.pp, par.n);
 
 % Finding the initial mobility propeties of particles
-par = TRANSP.MOBIL(par, fl, params_const);
+pars = TRANSP.MOBIL(pars, fl, params_const);
 
 % Assigning the particle initial velocities
-par.v = PAR.INIT_VEL(par.pp, par.n, fl.temp, params_const);
+pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const);
 
 % Finding the initial nearest neighbors
 ind_trg = (1 : params_ud.Value(4))'; % Indicices of target particles
 coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
-par.nnl = COL.NNS(par, ind_trg, coef_trg);
+pars.nnl = COL.NNS(pars, ind_trg, coef_trg);
 
-% par = UTILS.PAR2AGG(par);  % Converting to aggregate objects
+% pars = PAR.PAR2AGG(pars);  % Converting to aggregate objects
 
 disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
 % figure
-% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), pars,...
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
 
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...
 %     min([params_ud.Value(4), 5])))'; % A random portion of target...
 %         % ...indices for nearest neighbor testing
-% [fig_parinit, fig_nntest] = UTILS.PLOTPAR(params_ud.Value(1:3), par,...
+% [fig_parinit, fig_nntest] = UTILS.PLOTPAR(params_ud.Value(1:3), pars,...
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
 %     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
 %     'target_coefficient', coef_trg(ind_trg_test));
 
-% dtheta = 2 .* pi .* rand(2, 3);
-% par.pp = PAR.ROTATE(par.pp, par.r, par.n, dtheta);
-% par.v = PAR.ROTATE_SIMPLE(par.v, par.r, dtheta);
-% figure(3)
-% UTILS.PLOTPAR(params_ud.Value(1:3), par,...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
-
-% par.pp{2} = COL.CONNECT_RAND(par.pp{1},par.pp{2});
-% % [par.pp{1}, par.pp{2}] = COL.CONNECT_REAL(par.pp{1}, par.v(1,:),...
-% %     par.pp{2}, par.v(2,:));
-% [par, i_list] = COL.UNITE(par, [1,2]);
-% figure(4)
-% UTILS.PLOTPAR(params_ud.Value(1:3), par,...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on')
+% figure
+% fig_3d = UTILS.RENDER(params_ud.Value(1:3), pars.pp, pars.n);
 
 %% Part 4: Simulating the particle aggregations
 
@@ -163,14 +151,14 @@ if (str == 'Y') || (str == 'y')
     mkdir('outputs');
     video_par = VideoWriter('outputs\DLCA_anim.avi'); 
         % Initializing the video file
-    video_par.FrameRate = 1; % Setting frame rate
+    video_par.FrameRate = 3; % Setting frame rate
     video_par.Quality = 100; % Setting quality
     open(video_par); % Opening video file
 end
 
 % Initializing the animation
 figure
-fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par);
+fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), pars);
 
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]); % Initializing textbar
@@ -178,18 +166,18 @@ UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 for k = 2 : k_max
     
-    [par, delt] = TRANSP.MARCH(par, fl, params_const); % Solving...
+    [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
         % ...equation of motions
     
-    par = TRANSP.PBC(params_ud.Value(1:3), par); % Applying periodic...
+    pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying periodic...
         % ...boundary conditions
     
-    par = COL.GROW(par); % Checking for collisions and updating...
+    pars = COL.GROW(pars); % Checking for collisions and updating...
       % ...particle structures upon new clusterations
     
 %     par.d = TRANSP.SIZING(par.pp, par.n); % Updating the equivalent sizes
     
-    par = TRANSP.MOBIL(par, fl, params_const); % Updating the mobility...
+    pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the mobility...
         % ...propeties
     
 %     if mod(k-2, t_nns) == 0
@@ -198,7 +186,7 @@ for k = 2 : k_max
 %     end
 
     if mod(k-2, t_plt) == 0
-        fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), par); % Plotting...
+        fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), pars); % Plotting...
             % ...every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed

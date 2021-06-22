@@ -43,11 +43,20 @@ if ~ isempty(find(ovrs == 1, 1))
     
     for i = 1 : n_chk
         if ind_chk(i,1) ~= ind_chk(i,2)
-            par.pp{ind_chk(i,2)} = COL.CONNECT_RAND(par.pp{ind_chk(i,1)}...
-                , par.pp{ind_chk(i,2)}); % Sticking the two colliding...
-                    % ...particles
+            
+            % Sticking the two colliding particles
+            [par.pp{ind_chk(i,2)}, par.pp{ind_chk(i,2)}] =...
+                COL.CONNECT_SIMPLE(par.pp{ind_chk(i,1)},...
+                par.pp{ind_chk(i,2)}); 
+%             [par.pp{ind_chk(i,2)}, par.pp{ind_chk(i,2)}] =...
+%                 COL.CONNECT_REL(par.pp{ind_chk(i,1)}, par.v(ind_chk(i,1)),...
+%                 par.pp{ind_chk(i,2)}, par.v(ind_chk(i,2))); 
+%             par.pp{ind_chk(i,2)} = COL.CONNECT_RAND(par.pp{ind_chk(i,1)}...
+%                 , par.pp{ind_chk(i,2)}); 
+
+            % Merging the particles info
             [par, ind_new] = COL.UNITE(par, [ind_chk(i,1), ind_chk(i,2)]);
-                % Merging the particles info
+            
             % Updating the general overlap checking indices after each...
                 % ...unification
             for j = 1 : n_chk
@@ -56,7 +65,9 @@ if ~ isempty(find(ovrs == 1, 1))
                 ind_chk(j,2) = ind_new(find(ind_new(:,1) ==...
                     ind_chk(j,2), 1), 2);
             end
+            
         end
+        
     end
     
 end

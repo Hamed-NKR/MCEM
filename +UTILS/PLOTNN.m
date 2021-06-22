@@ -22,7 +22,7 @@ for i = 1 : n_ax
     cla(all_axes_in_figure(i))
 end
 
-figure(fig_nn)
+figure(fig_nn);
 
 % Setting figure position and background
 fig_nn.Position = [0, 0, 2000, 1000];
@@ -151,8 +151,12 @@ for i = 1 : n_trg
     xlim([0 dom_size(1)])
     ylim([0 dom_size(2)])
     zlim([0 dom_size(3)])
-
 end
+
+if nargout == 0
+    clear fig_nn;
+end
+
 
 end
 

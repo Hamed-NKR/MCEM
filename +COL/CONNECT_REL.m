@@ -1,5 +1,5 @@
-function [pp1, pp2, colstat] = CONNECT_REAL(pp1, v_par1, pp2, v_par2)
-% "CONNECT_REAL" sticks two approaching aggregates to each other based...
+function [pp1, pp2, colstat] = CONNECT_REL(pp1, v_par1, pp2, v_par2)
+% "CONNECT_REL" sticks two approaching aggregates to each other based...
     % ...on their real physical status including their relative...
     % ...locations and velocities.
 % ----------------------------------------------------------------------- %
@@ -7,7 +7,7 @@ function [pp1, pp2, colstat] = CONNECT_REAL(pp1, v_par1, pp2, v_par2)
 % Inputs/Outputs:
     % pp"i": Primary particle info cell array for aggregate "i"
     % v_par"i": Center of mass velocity of aggregate "i"
-    % stat: Returns the collision status of aggregate pairs 
+    % colstat: Returns the collision status of aggregate pairs 
 % ----------------------------------------------------------------------- %
 
 n_pp1 = size(pp1, 1); % Number of primary particles within aggregate 1
@@ -19,20 +19,21 @@ v_par1_temp = repmat(v_par1, n_pp1 * n_pp2, 1);
 pp2_temp = repmat(pp2, n_pp1, 1);
 v_par2_temp = repmat(v_par2, n_pp1 * n_pp2, 1);
 
-% Calculating the minimal distances and assocaited timesteps
-del_r = COL.DYNDIST([pp1_temp(:,3:5), pp2_temp(:,3:5)],...
-    [v_par1_temp, v_par2_temp]);
-ind_cnt = find(del_r == min(del_r), 1); % Finding pairs with the...
-    % ...lowest minimal distance
+% Calculating the minimum primary-primary distances
+dist_pp = COL.DYNDIST([pp1_temp(:,3:5), pp2_temp(:,3:5)],...
+    [v_par1_temp, v_par2_temp]) - (pp1_temp(:,2) + pp2_temp(:,2)) ./ 2;
+ind_cnt = find(dist_pp == min(dist_pp), 1); % Finding the pair with...
+    % ...the lowest minimum distance in the population
 
-% Checking if there is a chance for the aggregates to collide sometime...
-    % ...in the futre
-if min(del_r) > (pp1_temp(ind_cnt,2) + pp2_temp(ind_cnt,2)) / 2
-    colstat = 0; % Aggregates do not have a chance to collide
+% Checking if there is a chance for the aggregates to collide
+if min(dist_pp) > 0
+    colstat = 0; % Aggregates will not collide
+
 else
-    colstat = 1; % Aggregates migh be able to collide
+    colstat = 1; % Aggregates are able to collide
+    
+    % Adding the index numbers of the nearest pair
     ind_cnt = [ind_cnt, pp1_temp(ind_cnt,1), pp2_temp(ind_cnt,1)];
-        % Adding the index numbers of the nearest pair
     ind_cnt = [ind_cnt, find(pp1(:,1) == ind_cnt(2)),...
         find(pp2(:,1) == ind_cnt(3))];
     
@@ -41,7 +42,7 @@ else
         pp2(ind_cnt(5), 2)]); % The displacement needed for the nearest...
             % ...primaries to point-touch
     
-    % Updating primary particle locations
+    % Updating the aggregate locations
     pp1(:, 3:5) = pp1(:, 3:5) + repmat(dr_cnt(1, 1:3), n_pp1, 1);
     pp2(:, 3:5) = pp2(:, 3:5) + repmat(dr_cnt(1, 4:6), n_pp2, 1);
 end

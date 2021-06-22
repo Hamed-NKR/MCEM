@@ -139,7 +139,7 @@ end
 
 
 
-figure(fig_main)
+figure(fig_main);
 
 % Setting figure position and background
 if ~all(fig_main.Position == [0, 0, 1000, 892.1])
@@ -254,6 +254,12 @@ zlim([0 dom_size(3)])
 if vis_nn
     figure(varargout{1})
     varargout{1} = UTILS.PLOTNN(dom_size, par, ind_trg, coef_trg);
+end
+
+if nargout == 0
+    clear fig_main;
+elseif nargout == 1
+    clear varargout;
 end
 
 end
