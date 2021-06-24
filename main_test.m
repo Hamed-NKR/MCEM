@@ -118,18 +118,18 @@ disp("The computational domain is successfully initialized...")
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
 % figure
-% fig_parinit = UTILS.PLOTPAR(params_ud.Value(1:3), pars,...
+% fig_init = UTILS.PLOTPARS(params_ud.Value(1:3), pars,...
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
-
+% 
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...
 %     min([params_ud.Value(4), 5])))'; % A random portion of target...
 %         % ...indices for nearest neighbor testing
-% [fig_parinit, fig_nntest] = UTILS.PLOTPAR(params_ud.Value(1:3), pars,...
+% [fig_init, fig_nntest] = UTILS.PLOTPARS(params_ud.Value(1:3), pars,...
 %     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
 %     'nearest_neighbor', 'on', 'target_index', ind_trg_test,...
 %     'target_coefficient', coef_trg(ind_trg_test));
-
+% 
 % figure
 % fig_3d = UTILS.RENDER(params_ud.Value(1:3), pars.pp, pars.n);
 
@@ -158,7 +158,7 @@ end
 
 % Initializing the animation
 figure
-fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), pars);
+fig_anim = UTILS.PLOTPARS(params_ud.Value(1:3), pars);
 
 disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]); % Initializing textbar
@@ -186,7 +186,7 @@ for k = 2 : k_max
 %     end
 
     if mod(k-2, t_plt) == 0
-        fig_anim = UTILS.PLOTPAR(params_ud.Value(1:3), pars); % Plotting...
+        fig_anim = UTILS.PLOTPARS(params_ud.Value(1:3), pars); % Plotting...
             % ...every t_plt time steps
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
@@ -200,7 +200,6 @@ for k = 2 : k_max
     time(k) = time(k-1) + delt; % Updating time
     
     UTILS.TEXTBAR([k, k_max]); % Updating textbar
-    
 end
 
 if (str == 'Y') || (str == 'y')

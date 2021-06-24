@@ -14,16 +14,17 @@ function h = RENDER(dom_size, pps, n_pps, cm)
 % Output:
     % fig: The output figure handle
 % ----------------------------------------------------------------------- %
-        
+
 % Setting default colormap as "summer"
 if ~exist('cm', 'var'); cm = []; end
 if isempty(cm); cm = summer; end
 
-n_par = numel(pps); % Number of independent particles        
+n_par = numel(pps); % Number of independent particles
+n_tot = sum(n_pps); % Total number of primaries
 
-% Displaying progress
+% Displaying overal progress
 disp('Rendering:');
-UTILS.TEXTBAR([0, n_par]);
+UTILS.TEXTBAR([0, n_tot]);
 
 % Initializing the figure handle
 hold off
@@ -38,26 +39,25 @@ colormap(cm); % Setting colormap
 % Plotting aggregates
 [X,Y,Z] = sphere(60);
 for i = 1 : n_par
-    
+        
     for j = 1 : n_pps(i)
     
         h = surf(X .* pps{i}(j,2) ./ 2 + pps{i}(j,3), ...
             Y .* pps{i}(j,2) ./ 2 + pps{i}(j,4), ...
             Z .* pps{i}(j,2) ./ 2 + pps{i}(j,5));
-
-        lightangle(-45,30)
-        h.FaceLighting = 'gouraud';
-        h.AmbientStrength = 0.8;
-        h.DiffuseStrength = 0.2;
-        h.SpecularStrength = 0.05;
-        h.SpecularExponent = 2;
-        h.BackFaceLighting = 'lit';
         
         hold on
+        UTILS.TEXTBAR([sum(n_pps(1 : i-1)) + j, n_tot]);
     end
-    
-    UTILS.TEXTBAR([i, n_par]);
 end
+
+lightangle(-45,30)
+h.FaceLighting = 'gouraud';
+h.AmbientStrength = 0.8;
+h.DiffuseStrength = 0.2;
+h.SpecularStrength = 0.05;
+h.SpecularExponent = 2;
+h.BackFaceLighting = 'lit';
 
 disp(' ');
         

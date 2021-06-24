@@ -1,4 +1,4 @@
-function [fig_main, varargout] = PLOTPAR(dom_size, par, varargin)
+function [fig_main, varargout] = PLOTPARS(dom_size, par, varargin)
 % "PLOTPAR" plots the instantaneous location of primary particles.
 % ----------------------------------------------------------------------- %
 
@@ -257,7 +257,7 @@ if vis_nn
 end
 
 if nargout == 0
-    clear fig_main;
+    clear fig_main varargout;
 elseif nargout == 1
     clear varargout;
 end
