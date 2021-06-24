@@ -60,20 +60,11 @@ for i = 1 : n_par
             end
             
             % Post-deposition intrinsic rotation
-            angs = 2 * pi * rand(3,1); % A set of 3 Euler angles...
+            angs = 2 * pi * rand(3,1); % A set of 3 random Euler angles...
                 % ...(yaw, pitch, and roll)
-            yaw = [cos(angs(1)), -sin(angs(1)), 0;...
-                sin(angs(1)), cos(angs(1)), 0; 0, 0, 1];
-                % transformation matrix for yaw rotation
-            pitch = [cos(angs(2)), 0, sin(angs(2));...
-                 0, 1, 0; -sin(angs(2)), 0, cos(angs(2))];
-                % transformation matrix for pitch rotation
-            roll = [1, 0, 0; 0, cos(angs(3)), -sin(angs(3));...
-                0, sin(angs(3)), cos(angs(3))];
-                % transformation matrix for roll rotation
-            rot = yaw * pitch * roll; % The net rotation matrix
-            % Obtaining the post rotation coordinates of primaries
-            par_pp{i}(:,3:5) = (rot * (par_pp{i}(:,3:5))')';
+            par_r = COL.EQUIV(par_pp(i), n_pp(i)); % Obtaining center of...
+                % ...mass
+            par_pp(i) = PAR.ROTATE(par_pp(i), par_r, n_pp(i), angs);
             
         end
         

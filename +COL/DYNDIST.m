@@ -25,7 +25,7 @@ r_rel = r_pps(:,4:6) - r_pps(:,1:3);  % Relative displacements ~
 vnorm_rel = v_rel ./ sqrt(sum(v_rel.^2, 2)); % Normalized relative velocity
 d_tang = dot(-r_rel, vnorm_rel, 2); % Tangential distance to the...
     % ...projected point
-normtime = abs(d_tang) / sqrt(sum(v_rel.^2, 2)); % Projection time
+normtime = abs(d_tang) ./ sqrt(sum(v_rel.^2, 2)); % Projection time
 r_prj = r_pps(:,4:6) + d_tang .* vnorm_rel; % Location of projected points
 normdist = sqrt(sum((r_prj - r_pps(:,1:3)).^2, 2)); % Projection distance
 

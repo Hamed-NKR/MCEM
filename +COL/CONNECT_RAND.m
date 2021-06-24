@@ -14,36 +14,25 @@ n_pp2 = size(pp2, 1); % ~ aggregate 2
 pp1_temp = repelem(pp1, n_pp2, 1);
 pp2_temp = repmat(pp2, n_pp1, 1);
 
-dist_pp = sqrt(sum((pp1_temp(:,3:5) - pp2_temp(:,3:5)).^2, 2));
-    % List of distances of primary particle centers
+dist_pp = sqrt(sum((pp1_temp(:,3:5) - pp2_temp(:,3:5)).^2, 2)) -...
+    (pp1_temp(:,2) + pp2_temp(:,2)) ./ 2; % Minimum distances of primary...
+        % ...particles
 ind_cnt = find(dist_pp == min(dist_pp), 1); % Finding pairs with minimum...
-    % ...distance
-ind_cnt = [ind_cnt, pp1_temp(ind_cnt,1), pp2_temp(ind_cnt,1)]; % Adding...
-    % ...the index numbers of the nearest pair
+    % ...distance in the population
+% Adding the index numbers of the nearest pair
+ind_cnt = [ind_cnt, pp1_temp(ind_cnt,1), pp2_temp(ind_cnt,1)];
 ind_cnt = [ind_cnt, find(pp1(:,1) == ind_cnt(2)),...
     find(pp2(:,1) == ind_cnt(3))];
 
 chk = 1; % Overlap checking criterion   
 while ~ isempty(find(chk == 1, 1))
     
-    pp2_com = COL.EQUIV({pp2}, n_pp2); % Aggregate 2's center of mass
-    pp2_com = repmat(pp2_com, n_pp2, 1);
-    
     % Pre-deposition intrinsic rotation of aggregate
+    pp2_com = COL.EQUIV({pp2}, n_pp2); % Aggregate 2's center of mass
     angs = 2 * pi * rand(3,1); % A set of 3 Euler angles (yaw, pitch,...
         % ...and roll)
-    yaw = [cos(angs(1)), -sin(angs(1)), 0;...
-        sin(angs(1)), cos(angs(1)), 0; 0, 0, 1];
-        % transformation matrix for yaw rotation
-    pitch = [cos(angs(2)), 0, sin(angs(2));...
-         0, 1, 0; -sin(angs(2)), 0, cos(angs(2))];
-        % transformation matrix for pitch rotation
-    roll = [1, 0, 0; 0, cos(angs(3)), -sin(angs(3));...
-        0, sin(angs(3)), cos(angs(3))];
-        % transformation matrix for roll rotation
-    rot = yaw * pitch * roll; % The net rotation matrix
-    % Obtaining the post rotation coordinates of primaries
-    pp2(:,3:5) = (rot * (pp2(:,3:5) - pp2_com)')' + pp2_com;
+    pp2 = cell2mat(PAR.ROTATE({pp2}, pp2_com, n_pp2, angs)); % Obtaining...
+        % ...the post rotation coordinates of primaries
     
     phi = 2 * pi * rand; % A random azimuthal orientation for deposition...
         % ...of aggregate 2 on 1
