@@ -15,6 +15,24 @@ function fig_nn = PLOTNN(dom_size, par, ind_trg, coef_trg)
 hold off
 fig_nn = gcf;
 
+% Compiling primary particles across multiple aggregates
+if isa(par, 'AGG')
+    pp = AGG.COMPILEPP(par);
+else
+    pp = cell2mat(par.pp);
+end
+
+% Concatinating the aggregates global info
+if vis_equiv
+    d = cat(1, par.d);
+    r = cat(1, par.r);
+end
+
+if vis_vel
+    if ~exist('r', 'var'); r = cat(1, par.r); end
+    v = cat(1, par.v);
+end
+
 % Clearing previous data (for animations)
 all_axes_in_figure = findall(fig_nn, 'type', 'axes');
 n_ax = numel(all_axes_in_figure);

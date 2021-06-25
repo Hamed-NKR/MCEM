@@ -111,16 +111,16 @@ coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 pars.nnl = COL.NNS(pars, ind_trg, coef_trg);
 
-% pars = PAR.PAR2AGG(pars);  % Converting to aggregate objects
+pars = PAR.PAR2AGG(pars);  % Converting to aggregate objects
 
 disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
-% figure
-% fig_init = UTILS.PLOTPARS(params_ud.Value(1:3), pars,...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
-% 
+figure
+fig_init = UTILS.PLOTPARS(params_ud.Value(1:3), pars,...
+    'equivalent_volumetric_size', 'on', 'velocity_vector', 'on');
+
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...
 %     min([params_ud.Value(4), 5])))'; % A random portion of target...
@@ -135,7 +135,7 @@ disp("The computational domain is successfully initialized...")
 
 %% Part 4: Simulating the particle aggregations
 
-k_max = 50; % Marching index limit
+k_max = 2000; % Marching index limit
 time = zeros(k_max,1);
 t_plt = 1; % Defining a plotting timeframe criterion
 t_nns = 10; % The timeframe for nearest neighbor search
@@ -191,9 +191,9 @@ for k = 2 : k_max
         drawnow; % Drawing the plot at the desired time steps
         pause(0.1); % Slowing down the animation speed
         if (str == 'Y') || (str == 'y')
-            frame_now = getframe(fig_anim, [0, 0, 1000, 892.1]);
+            framenow = getframe(fig_anim, [0, 0, 1000, 892.1]);
                 % Capturing current frame
-            writeVideo(video_par, frame_now); % Saving the video
+            writeVideo(video_par, framenow); % Saving the video
         end
     end
     

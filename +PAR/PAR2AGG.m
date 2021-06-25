@@ -1,9 +1,9 @@
-
-% PAR2AGG Convert from a PAR structure to an array of AGG objects.
-%  
-%  AUTHOR: Timothy Sipkens, 2021-06-04
-
 function agg = PAR2AGG(par)
+% "PAR2AGG" Convert from a PAR structure to an array of AGG objects.
+%
+%  Original author: Timothy Sipkens, 06-2021
+% ----------------------------------------------------------------------- %
+
 
 nagg = length(par.pp);  % number of aggregates
 
@@ -18,6 +18,7 @@ for ii=1:nagg
     
     agg(ii, :) = AGG(pp);
     
+    agg(ii).d = par.d(ii, :);
     agg(ii).v = par.v(ii, :);
     
     % TO DO: Mass is not correct.

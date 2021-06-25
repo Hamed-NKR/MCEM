@@ -26,13 +26,6 @@ function [fig_main, varargout] = PLOTPARS(dom_size, par, varargin)
     % varargout: Figure handle for the nearest neighbor plots
 % ----------------------------------------------------------------------- %        
 
-% Compile primary particles across multiple aggregates.
-if isa(par, 'AGG')
-    pp = AGG.COMPILEPP(par);
-else
-    pp = cell2mat(par.pp);
-end
-
 % Initializing the main figure handle
 hold off
 fig_main = gcf;
@@ -137,8 +130,6 @@ if nargin > 2
 end
 %%%
 
-
-
 figure(fig_main);
 
 % Setting figure position and background
@@ -152,6 +143,24 @@ cm1 = [0.2,0.3,1]; % Color of primaries
 cm2 = [0.2,0.8,1]; % Color of spherical aggregate equivalents
 cm3 = [1,0.8,0.2]; % Color of velocity vectors
 
+% Compiling primary particles across multiple aggregates
+if isa(par, 'AGG')
+    pp = AGG.COMPILEPP(par);
+else
+    pp = cell2mat(par.pp);
+end
+
+% Concatinating the aggregates global info
+if vis_equiv
+    d = cat(1, par.d);
+    r = cat(1, par.r);
+end
+
+if vis_vel
+    if ~exist('r', 'var'); r = cat(1, par.r); end
+    v = cat(1, par.v);
+end
+
 % XY subplot
 subplot(2,2,1)
 ca = gca;
@@ -162,13 +171,12 @@ viscircles([pp(:,3), pp(:,4)], pp(:,2)./2, 'EnhanceVisibility', false,...
 hold on
 % Plotting equivalent spheres representing the aggregates
 if vis_equiv
-    viscircles([par.r(:,1), par.r(:,2)], (par.d)./2, ...
-        'EnhanceVisibility', false, 'Color', cm2, 'LineWidth', 2,...
-        'LineStyle', '--');
+    viscircles([r(:,1), r(:,2)], d(:,1)./2, 'EnhanceVisibility', false,...
+        'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 % Plotting velocity vectors
 if vis_vel
-    quiver(par.r(:,1), par.r(:,2), par.v(:,1), par.v(:,2), 'Color', cm3);
+    quiver(r(:,1), r(:,2), v(:,1), v(:,2), 'Color', cm3);
 end
 % Setting different plot graphics
 hold off;
@@ -187,12 +195,11 @@ viscircles([pp(:,3), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
 hold on
 if vis_equiv
-    viscircles([par.r(:,1), par.r(:,3)], (par.d)./2,...
-        'EnhanceVisibility', false, 'Color', cm2, 'LineWidth', 2,...
-        'LineStyle', '--');
+    viscircles([r(:,1), r(:,3)], d(:,1)./2, 'EnhanceVisibility', false,...
+        'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 if vis_vel
-    quiver(par.r(:,1), par.r(:,3), par.v(:,1), par.v(:,3), 'Color', cm3);
+    quiver(r(:,1), r(:,3), v(:,1), v(:,3), 'Color', cm3);
 end
 hold off
 axis equal
@@ -210,12 +217,11 @@ hold on
 viscircles([pp(:,4), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
 if vis_equiv
-    viscircles([par.r(:,2), par.r(:,3)], (par.d)./2,...
-        'EnhanceVisibility', false, 'Color', cm2, 'LineWidth', 2,...
-        'LineStyle', '--');
+    viscircles([r(:,2), r(:,3)], d(:,1)./2, 'EnhanceVisibility', false,...
+        'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 if vis_vel
-    quiver(par.r(:,2), par.r(:,3), par.v(:,2), par.v(:,3), 'Color', cm3);
+    quiver(r(:,2), r(:,3), v(:,2), v(:,3), 'Color', cm3);
 end
 hold off
 axis equal
@@ -229,16 +235,13 @@ ylim([0 dom_size(3)])
 subplot(2,2,4)
 ca = gca;
 delete(ca.Children);
-scatter3(pp(:,3), pp(:,4), pp(:,5), ((pp(:,2))./2).*2e9,...
-    cm1,'filled');
+scatter3(pp(:,3), pp(:,4), pp(:,5), ((pp(:,2))./2).*2e9, cm1,'filled');
 hold on
 if vis_equiv
-    scatter3(par.r(:,1), par.r(:,2), par.r(:,3), ((par.d)./2).*2e9,...
-        cm2);
+    scatter3(r(:,1), r(:,2), r(:,3), (d(:,1)./2).*2e9, cm2);
 end
 if vis_vel
-    quiver3(par.r(:,1), par.r(:,2), par.r(:,3), par.v(:,1), par.v(:,2),...
-        par.v(:,3), 'Color', cm3);
+    quiver3(r(:,1), r(:,2), r(:,3), v(:,1), v(:,2), v(:,3), 'Color', cm3);
 end
 hold off
 axis equal
@@ -252,7 +255,7 @@ zlim([0 dom_size(3)])
 
 % Plotting the nearest neighbors
 if vis_nn
-    figure(varargout{1})
+    figure(varargout{1});
     varargout{1} = UTILS.PLOTNN(dom_size, par, ind_trg, coef_trg);
 end
 

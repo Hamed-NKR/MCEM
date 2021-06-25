@@ -1,21 +1,21 @@
 function [par, delt_base] = MARCH(par, fl, params_const)
 % "MARCH" solves the equation of motion of particles and finds their new...
-    % ...location and velocity alomg with their marching time scale.
-
+%   ...location and velocity alomg with their marching time scale.
+%   
 % Note: For more detail on the equations used here, see a tutorial on...
-    % ...on Langevin Dynamics modeling of aerosols by Suresh &...
-    % ...Gopalakrishnan (2021).
+%   ...on Langevin Dynamics modeling of aerosols by Suresh &...
+%   ...Gopalakrishnan (2021).
 % ----------------------------------------------------------------------- %
 
 % Input/Outputs:
-    % par: Particle information structure
-    % fl: Fluid info structure
-    % params_const: Problem's table of constant physical properties
-    % delt_base: The universal marching times-step for the poulation of...
-        % ...particles
+%   par: Particle information structure
+%   fl: Fluid info structure
+%   params_const: Problem's table of constant physical properties
+%   delt_base: The universal marching times-step for the poulation of...
+%   ...particles
 % ----------------------------------------------------------------------- %
 
-% Compile primary particles across multiple aggregates.
+% Compiling primary particles across multiple aggregates
 if isa(par, 'AGG')
     n_par = size(par, 1);
 else
@@ -24,7 +24,7 @@ end
 
 kb = params_const.Value(3); % Boltzmann's constant (j/k)
 
-% Copy properties locally.
+% Copying properties locally.
 m = cat(1, par.m);
 v = cat(1, par.v);
 f = cat(1, par.f);

@@ -1,17 +1,17 @@
-% "AGG" is a class containing the aggregate properties and functions.
-
-%  by: Tim Sipkens, 05-2021
-% ----------------------------------------------------------------------- %
-
 classdef AGG
+% "AGG" is a class containing the aggregate properties and functions.
+%
+%  Original author: Tim Sipkens, 05-2021
+% ----------------------------------------------------------------------- %
     
     properties
         pp = struct()   % primary particle information
         n = []          % number of primary particles
         
+        d = []          % aggregate equivalent size
+        r = []          % ~ center of mass
+        v = []          % ~ velocity
         dmax = []       % maximum extent of diameter
-        r = []          % center of mass
-        v = []          % aggregate velocity
         
         m = []          % ~ mass
         rho = []        % ~ effective density
@@ -35,6 +35,10 @@ classdef AGG
             if ~exist('v', 'var'); v = []; end
             if isempty(v); v = [0, 0, 0]; end  % no velocity be default
             obj.v = v;
+            
+            if ~exist('d', 'var'); d = []; end
+            if isempty(d); d = 0; end
+            obj.d = d;
             
             % Assign primary particle information.
             obj.pp = pp;
