@@ -1,10 +1,10 @@
 function par = GROW(par)
 % "GROW" monitors collision of particles and updates the particle...
-    % ...structure based on the post-aggregation data.
+%     ...structure based on the post-aggregation data.
 % ----------------------------------------------------------------------- %
-
+% 
 % Input/Output:
-    % par: Particle structure
+%     par: Particle structure
 % ----------------------------------------------------------------------- %
 
 n_par = size(par.n,1);  % Total number of particles

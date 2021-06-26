@@ -3,7 +3,14 @@ function agg = PAR2AGG(par)
 %
 %  Original author: Timothy Sipkens, 06-2021
 % ----------------------------------------------------------------------- %
-
+% 
+% Input:
+%     par: Particle information structure
+% ----------------------------------------------------------------------- %
+% 
+% Outputs:
+%     agg: Aggregate class objects
+% ----------------------------------------------------------------------- %
 
 nagg = length(par.pp);  % number of aggregates
 

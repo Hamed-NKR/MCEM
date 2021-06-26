@@ -1,29 +1,29 @@
 function [fig_main, varargout] = PLOTPARS(dom_size, par, varargin)
 % "PLOTPAR" plots the instantaneous location of primary particles.
 % ----------------------------------------------------------------------- %
-
+%
 % Inputs:
-    % dom_size: Computational domain dimensions
-    % par: The information structure of particles population
-    % varargin: An optional varying argument that contains the...
-        % ...visibility status of various particle properties:
-        % 'equivalent_volumetric_size': 'on'/'off' (or: 'ON/OFF', 'On/Off')
-        % 'velocity_vector': 'on'/'off' (or: ~)
-        % 'nearest_neighbor': 'on'/'off' (or: ~)
-        % 'target_index'(in the case of 'nearest_neighbor' being 'on'):...
-            % ...The indices of target particles, an N*1 array of...
-            % ...integers (see "COL.NNS" for more info)
-        % 'target_coefficient'(again for 'nearest_neighbor' set to...
-            % ...'on'): The neighboring limit coefficient (look up...
-            % ..."COL.NNS" for details)
-        % Note.1: Visibility inputs MUST match the above-mentioned format.
-        % Note.2: While 'nearest_neighbor' is 'on'
+%     dom_size: Computational domain dimensions
+%     par: The information structure of particles population
+%     varargin: An optional varying argument that contains the...
+%         ...visibility status of various particle properties:
+%         'equivalent_volumetric_size': 'on'/'off' (or: 'ON/OFF', 'On/Off')
+%         'velocity_vector': 'on'/'off' (or: ~)
+%         'nearest_neighbor': 'on'/'off' (or: ~)
+%         'target_index'(in the case of 'nearest_neighbor' being 'on'):...
+%             ...The indices of target particles, an N*1 array of...
+%             ...integers (see "COL.NNS" for more info)
+%         'target_coefficient'(again for 'nearest_neighbor' set to...
+%             ...'on'): The neighboring limit coefficient (look up...
+%             ..."COL.NNS" for details)
+%         Note.1: Visibility inputs MUST match the above-mentioned format.
+%         Note.2: While 'nearest_neighbor' is 'on'
 % ----------------------------------------------------------------------- %
-
+%
 % Outputs
-    % fig_main: Figure handle for spatial distribution of particles, and...
-        % ...possibly their equivalent size and velocity
-    % varargout: Figure handle for the nearest neighbor plots
+%     fig_main: Figure handle for spatial distribution of particles, and...
+%         ...possibly their equivalent size and velocity
+%     varargout: Figure handle for the nearest neighbor plots
 % ----------------------------------------------------------------------- %        
 
 % Initializing the main figure handle

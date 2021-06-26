@@ -1,17 +1,17 @@
 function par_v = INIT_VEL(pp, n_pp ,fl_temp, params_const)
 % "INIT_VEL" gives size dependent initial velocities to the primary...
-    % ...particles along random orientations.
+%     ...particles along random orientations.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % par_pp: Primary particle infomration cell array
-    % par_n: Number distribution of primaries
-    % fl_temp: Flame temperature
-    % params_const: Problem's table of constant physical properties
+%     par_pp: Primary particle infomration cell array
+%     par_n: Number distribution of primaries
+%     fl_temp: Flame temperature
+%     params_const: Problem's table of constant physical properties
 % ----------------------------------------------------------------------- %
-
+% 
 % Output:
-    % par_v: Primary particle velocities
+%     par_v: Primary particle velocities
 % ----------------------------------------------------------------------- %
 
 rho_bc = params_const.Value(1); % Black Carbon's bulk density (kg/m3)

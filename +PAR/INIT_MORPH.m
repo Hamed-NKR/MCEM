@@ -1,14 +1,14 @@
 function [par_pp, par_d] = INIT_MORPH(par_pp)
 % "INIT_MORPH" assigns initial (random) morpholgy of the primaries...
-    % ...within individual aggregates.
-
+%     ...within individual aggregates.
+% 
 % NOTE: Only suggested for initialization of aggregates with...
-    % ...a few number of primaries.
+%     ...a few number of primaries.
 % ----------------------------------------------------------------------- %
-
+% 
 % Input/Output:
 % par_pp: An array of primary particle information (containing their...
-    % ...indices, sizes, and locations)
+%     ...indices, sizes, and locations)
 % ----------------------------------------------------------------------- %
 
 n_par = size(par_pp,1); % Total number of aggregates

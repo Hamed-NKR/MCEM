@@ -1,16 +1,16 @@
 function [mu_f, lambda_f] = FLPROPS(fl, params_const)
 % "KINETIC" calculates the fluid slip-related properties based on the...
-    % ...kinetic theory of gases.
+%     ...kinetic theory of gases.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % fl: Fluid information structure
-    % params_const: Problem's table of constant physical properties
+%     fl: Fluid information structure
+%     params_const: Problem's table of constant physical properties
 % ----------------------------------------------------------------------- %
-
+% 
 % Outputs:
-    % mu_f: Fluid viscosity
-    % lambda_f: Fluid mean free path
+%     mu_f: Fluid viscosity
+%     lambda_f: Fluid mean free path
 % ----------------------------------------------------------------------- %
 
 M_air = params_const.Value(2); % Air molar mass (kg/mol)

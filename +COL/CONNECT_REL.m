@@ -1,13 +1,13 @@
 function [pp1, pp2, colstat] = CONNECT_REL(pp1, v_par1, pp2, v_par2)
 % "CONNECT_REL" sticks two approaching aggregates to each other based...
-    % ...on their real physical status including their relative...
-    % ...locations and velocities.
+%     ...on their real physical status including their relative...
+%     ...locations and velocities.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/Outputs:
-    % pp"i": Primary particle info cell array for aggregate "i"
-    % v_par"i": Center of mass velocity of aggregate "i"
-    % colstat: Returns the collision status of aggregate pairs 
+%     pp"i": Primary particle info cell array for aggregate "i"
+%     v_par"i": Center of mass velocity of aggregate "i"
+%     colstat: Returns the collision status of aggregate pairs 
 % ----------------------------------------------------------------------- %
 
 n_pp1 = size(pp1, 1); % Number of primary particles within aggregate 1

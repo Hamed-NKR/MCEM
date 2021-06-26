@@ -1,15 +1,15 @@
 function par = INIT_LOC(dom_size, par)
 % "INIT_LOC" randomly distributes the particles throughout the...
-    % ...computational domain.
+%     ...computational domain.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % dom_size: Computational domain size
-    % par: Particle information structure
+%     dom_size: Computational domain size
+%     par: Particle information structure
 % ----------------------------------------------------------------------- %
-
+% 
 % Output:
-    % par_r: Particle center of mass array
+%     par_r: Particle center of mass array
 % ----------------------------------------------------------------------- %
 
 % Initialization of the location array

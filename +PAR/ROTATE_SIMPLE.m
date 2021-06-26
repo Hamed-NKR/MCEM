@@ -1,11 +1,11 @@
 function vec = ROTATE_SIMPLE(vec, r_c, dtheta)
 % "ROTATE_SIMPLE" rotates a vector around an arbitrary center.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/Outputs:
-    % vec: The vector considered to rotate
-    % r_c: Center of rotation
-    % dtheta: Rotation vector (1/ yaw, 2/ pitch, 3/ roll), an N*3 vector
+%     vec: The vector considered to rotate
+%     r_c: Center of rotation
+%     dtheta: Rotation vector (1/ yaw, 2/ pitch, 3/ roll), an N*3 vector
 % ----------------------------------------------------------------------- %
 
 n_vec = size(vec, 1); % Number of vectors to be rotated

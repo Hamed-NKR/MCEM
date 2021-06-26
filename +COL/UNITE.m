@@ -1,12 +1,12 @@
 function [par, i_list] = UNITE(par, i_col)
 % "UNITE" unifies the properties of a set of colliding aggregate pairs
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/Outputs:
-    % par: Particle characteristics structure
-    % i_col: An N*2 particle index set for colliding pairs
-    % i_list: A list of independent particle indices before (column 1)...
-        % ...and after (column 2) merging
+%     par: Particle characteristics structure
+%     i_col: An N*2 particle index set for colliding pairs
+%     i_list: A list of independent particle indices before (column 1)...
+%         ...and after (column 2) merging
 % ----------------------------------------------------------------------- %
 
 n_par0 = size(par.n, 1); % Initial total number of independent particles

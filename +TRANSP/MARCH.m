@@ -6,7 +6,7 @@ function [par, delt_base] = MARCH(par, fl, params_const)
 %   ...on Langevin Dynamics modeling of aerosols by Suresh &...
 %   ...Gopalakrishnan (2021).
 % ----------------------------------------------------------------------- %
-
+% 
 % Input/Outputs:
 %   par: Particle information structure
 %   fl: Fluid info structure
@@ -15,16 +15,16 @@ function [par, delt_base] = MARCH(par, fl, params_const)
 %   ...particles
 % ----------------------------------------------------------------------- %
 
-% Compiling primary particles across multiple aggregates
+% Total number of (independent) particles
 if isa(par, 'AGG')
     n_par = size(par, 1);
 else
-    n_par = size(par.n, 1); % Total number of particles
+    n_par = size(par.n, 1);
 end
 
 kb = params_const.Value(3); % Boltzmann's constant (j/k)
 
-% Copying properties locally.
+% Compiling/copying properties locally
 m = cat(1, par.m);
 v = cat(1, par.v);
 f = cat(1, par.f);
@@ -51,8 +51,8 @@ dr = (m ./ f) .* (par_v_new + v) .*...
     randn(n_par, 1)];  % Translation vectors
 
 if isa(par, 'AGG') % Updating aggregate class objects
-    for ii=1:length(par)
-        par(ii).v = par_v_new(ii, :);
+    for i = 1 : n_par
+        par(i).v = par_v_new(i, :);
     end
     par = par.TRANSLATE(dr ./ z_par);
 

@@ -164,7 +164,7 @@ classdef AGG
         function pp = COMPILEPP(objs)
             
             pp = [];
-            for ii=1:length(objs)
+            for ii=1 : size(objs,1)
             	pp = [pp; ...
                       [objs(ii).pp.id, ...
                        objs(ii).pp.dp, ...
@@ -177,7 +177,7 @@ classdef AGG
         function prop = COMPILE(objs, propname)
             
             prop = [];
-            for ii=1:length(objs)
+            for ii=1 : size(objs,1)
             	prop = [prop; objs(ii).(propname)];
             end
         end

@@ -1,18 +1,18 @@
 function h = RENDER(dom_size, pps, n_pps, cm)
 % "RENDER" depicts the posture of an aggregate population in space.
-
+% 
 % NOTE: Originally developed by Tim Sipkens, 2021.
 % ----------------------------------------------------------------------- %
-
+% 
 % Input:
-    % dom_size: Computational domain dimensions
-    % pps: A cell array of primary particles info
-    % n_pps: Number distribution of primaries
-    % cm: Plot colormap
+%     dom_size: Computational domain dimensions
+%     pps: A cell array of primary particles info
+%     n_pps: Number distribution of primaries
+%     cm: Plot colormap
 % ----------------------------------------------------------------------- %
-
+% 
 % Output:
-    % fig: The output figure handle
+%     fig: The output figure handle
 % ----------------------------------------------------------------------- %
 
 % Setting default colormap as "summer"

@@ -1,16 +1,16 @@
 function [r_cm, varargout] = EQUIV(pp, n_pp)
 % "EQUIV" computes the center of mass and equivalent volumetric size of...
-    % ...an ensemble of spherical particles.
+%     ...an ensemble of spherical particles.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % pp: Primary particle information cell array
-    % n_pp: Number distribution of primaries
+%     pp: Primary particle information cell array
+%     n_pp: Number distribution of primaries
 % ----------------------------------------------------------------------- %
-
+% 
 % Outputs:
-    % r_cm: Aggregate center of mass position
-    % varargout{1}: Aggregate equivalent volumetric diameter
+%     r_cm: Aggregate center of mass position
+%     varargout{1}: Aggregate equivalent volumetric diameter
 % ----------------------------------------------------------------------- %
 
 if nargout > 2

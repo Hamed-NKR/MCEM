@@ -1,21 +1,21 @@
 function [pp_d, pp_n] = INIT_DIAM(n_par, n_pp, d_pp)
 % "INIT_DIAM" assigns a normal distribution to the global primary...
-    % ...particle sizes and another normal size distribution to the...
-    % ...primaries within the aggregates.
+%     ...particle sizes and another normal size distribution to the...
+%     ...primaries within the aggregates.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % n_par: The total number of (independent) particles.
-    % n_pp: The number and standard deviation of primaries within each...
-        % ...particle (a 2*1 vector).
-    % d_pp: The global mean size and standard deviation of primaries...
-        % ...as well as the size standard deviation within the aggregates.
+%     n_par: The total number of (independent) particles.
+%     n_pp: The number and standard deviation of primaries within each...
+%         ...particle (a 2*1 vector).
+%     d_pp: The global mean size and standard deviation of primaries...
+%         ...as well as the size standard deviation within the aggregates.
 % ----------------------------------------------------------------------- %
-
+% 
 % Outputs:
-    % pp_d: Primary particle sizes
-    % pp_n: Primary particle number distribution (numbers within each...
-        % ...particle) 
+%     pp_d: Primary particle sizes
+%     pp_n: Primary particle number distribution (numbers within each...
+%         ...particle) 
 % ----------------------------------------------------------------------- %
 
 pp_d = zeros(n_par,1); % declaring the diameter array

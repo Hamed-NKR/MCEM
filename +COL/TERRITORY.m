@@ -1,17 +1,17 @@
 function dmax_par = TERRITORY(r_par, pp, n_pp)
 % "TERRITORY" identifies the aggregates domain boundary as their...
-    % ...furthest internal distance with repect to its center of mass.
+%     ...furthest internal distance with repect to its center of mass.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % r_par: Center of mass location of independent particles
-    % pp: Primary particle information cell array
-    % n_pp: Number distribution of primaries
+%     r_par: Center of mass location of independent particles
+%     pp: Primary particle information cell array
+%     n_pp: Number distribution of primaries
 % ----------------------------------------------------------------------- %
-
+% 
 % Output:
-    % dmax_par: Maximum diameter of independent particles with respect...
-        % ...to their center of mass
+%     dmax_par: Maximum diameter of independent particles with respect...
+%         ...to their center of mass
 % ----------------------------------------------------------------------- %
 
 r_par = repelem(r_par, n_pp, 1);

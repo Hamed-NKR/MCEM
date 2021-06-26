@@ -1,13 +1,13 @@
 function par_pp = ROTATE(par_pp, par_r, par_n, dtheta)
 % "ROTATE" rotates the primary particle locations of an aggregate...
-    % ...with respect to their center of mass.
+%     ...with respect to their center of mass.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/Outputs:
-    % par_pp: Primary particles info cell array
-    % par_r: Center of mass of (independent) particles
-    % par_n: Number of primaries within each aggregate
-    % dtheta: Rotation vector (1/ yaw, 2/ pitch, 3/ roll), an N*3 vector
+%     par_pp: Primary particles info cell array
+%     par_r: Center of mass of (independent) particles
+%     par_n: Number of primaries within each aggregate
+%     dtheta: Rotation vector (1/ yaw, 2/ pitch, 3/ roll), an N*3 vector
 % ----------------------------------------------------------------------- %
 
 n_par = size(par_n, 1); % Total number of aggregates

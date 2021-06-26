@@ -1,12 +1,12 @@
 function par = MOBIL(par, fl, params_const)
 % "MOBIL" calculates the transport properties of aggregates.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/output:
-    % par: Aggregates information structure containting their...
-        % ...geometrical and diffusive properties
-    % fl: Fluid info structure
-    % params_const: Problem's table of constant physical properties    
+%     par: Aggregates information structure containting their...
+%         ...geometrical and diffusive properties
+%     fl: Fluid info structure
+%     params_const: Problem's table of constant physical properties    
 % ----------------------------------------------------------------------- %
 
 n_par = size(par.n,1); % Total number of aggregates
