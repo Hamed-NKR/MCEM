@@ -1,10 +1,10 @@
-function [ind_nn, varargout] = NNS(par, ind_trg, coef_trg)
+function [ind_nn, varargout] = NNS(pars, ind_trg, coef_trg)
 % "NNS" identifies the nearest neighbors of a particle based on a...
 %     ...user-defined neighboring criterion.
 % ----------------------------------------------------------------------- %
 % 
 % Inputs:
-%     par: The information structure of particles population
+%     pars: The particle information structure/class
 %     ind_trg: The index of target particle; i.e., the one neighbors of...
 %         ...which need to be identified (an N*1 array)
 %     coef_trg: The enlargement coefficient for the size of a spherical...
@@ -22,22 +22,22 @@ if nargout > 2
         % ...redundant output arguments
 end
 
-if isa(par, 'AGG')
-    n_par = size(par, 1); % Total number of (independent) particles
+if isa(pars, 'AGG')
+    n_par = length(pars); % Total number of (independent) particles
     dmax = zeros(n_par);
     for i = 1 : n_par
-        dmax(i) = par.TERRITORY(par(i).pp, par(i).r); % Maximum size...
-            % ...of the particles with respect to their center of mass
+        dmax(i) = pars.TERRITORY(pars(i).pp); % Maximum size of the...
+            % ...particles with respect to their center of mass
     end
     
 else
-    n_par = size(par.n, 1);
-    dmax = COL.TERRITORY(par.r, par.pp, par.n);
+    n_par = size(pars.n, 1);
+    dmax = PAR.TERRITORY(pars.pp, pars.n);
     
 end
 
 % Compiling/copying properties locally
-r = cat(1, par.r);
+r = cat(1, pars.r);
 
 n_trg = size(ind_trg,1); % Number of target particles
 

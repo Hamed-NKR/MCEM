@@ -1,6 +1,6 @@
-function [pp1, pp2] = CONNECT_SIMPLE(pp1, pp2)
-% "CONNECT_SIMPLE" joins two approaching aggregates toward the minimum...
-%     ...distance between their primaries.
+function [pp1, pp2] = CONNECT(pp1, pp2)
+% "CONNECT" joins two approaching aggregates toward the minimum distance...
+%     ...between their primaries.
 % ----------------------------------------------------------------------- %
 % 
 % Inputs/Outputs:

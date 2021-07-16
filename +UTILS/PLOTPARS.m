@@ -1,41 +1,34 @@
-function [fig_main, varargout] = PLOTPARS(dom_size, par, varargin)
+function h_pars = PLOTPARS(pars, dom_size, varargin)
 % "PLOTPAR" plots the instantaneous location of primary particles.
 % ----------------------------------------------------------------------- %
 %
 % Inputs:
 %     dom_size: Computational domain dimensions
-%     par: The information structure of particles population
+%     pars: The particle information structure/class
 %     varargin: An optional varying argument that contains the...
 %         ...visibility status of various particle properties:
-%         'equivalent_volumetric_size': 'on'/'off' (or: 'ON/OFF', 'On/Off')
-%         'velocity_vector': 'on'/'off' (or: ~)
-%         'nearest_neighbor': 'on'/'off' (or: ~)
-%         'target_index'(in the case of 'nearest_neighbor' being 'on'):...
-%             ...The indices of target particles, an N*1 array of...
-%             ...integers (see "COL.NNS" for more info)
-%         'target_coefficient'(again for 'nearest_neighbor' set to...
-%             ...'on'): The neighboring limit coefficient (look up...
-%             ..."COL.NNS" for details)
-%         Note.1: Visibility inputs MUST match the above-mentioned format.
-%         Note.2: While 'nearest_neighbor' is 'on'
+%         (a) 'equivalent_volumetric_size': 'on'/'off' (or: 'ON/OFF',...
+%           ...'On/Off')
+%         (b) 'velocity_vector': 'on'/'off' (or: ~)
+%
+% Note: Visibility inputs MUST match the above-mentioned format.
 % ----------------------------------------------------------------------- %
 %
 % Outputs
-%     fig_main: Figure handle for spatial distribution of particles, and...
+%     h_main: Figure handle for spatial distribution of particles, and...
 %         ...possibly their equivalent size and velocity
-%     varargout: Figure handle for the nearest neighbor plots
 % ----------------------------------------------------------------------- %        
 
 % Initializing the main figure handle
 hold off
-fig_main = gcf;
+h_pars = gcf;
 
 % Initializing visibility variables
 vis_equiv = 0; % Equivalent size visibility status
-vis_vel = 0; % Velocity visibility status
-vis_nn = 0; % Nearest neighbor visibility status
+vis_vel = 0; % Velocity ~
+vis_rend = 0; % Render ~
 
-if nargout > 2
+if nargout > 1
     error('Error: Invalid number of output arguments!') % Checking for...
         % ...redundant output arguments
 end
@@ -54,7 +47,7 @@ if nargin > 2
     end
     
     % Checking for redundant, insufficient, or repeating input arguments
-    if (mod(nargin,2) ~= 0) || (nargin > 12)
+    if (mod(nargin,2) ~= 0) || (nargin > 8)
         error('Error: Invalid number of input arguments!')
 
     elseif numel(unique(varargin_spec)) ~= nargin_spec
@@ -90,28 +83,17 @@ if nargin > 2
                             2*i)
                     end
                     
-                % Checking the status of nearest neighbors visibility    
-                case 'nearest_neighbor'
-                    vis_nn = strcmp(varargin{2*i},'on') ||...
+                % Checking the rendering status
+                case 'render'
+                    vis_rend = strcmp(varargin{2*i},'on') ||...
                         strcmp(varargin{2*i},'ON') ||...
                         strcmp(varargin{2*i},'On');
-                    if ~ (vis_nn || strcmp(varargin{2*i},'off') ||...
+                    % Checking for invalid status variables
+                    if ~ (vis_rend || strcmp(varargin{2*i},'off') ||...
                         strcmp(varargin{2*i},'OFF') ||...
                         strcmp(varargin{2*i},'Off'))
                         error('Error: Invalid input argument number %d \n',...
                             2*i)
-                    elseif (~ vis_nn) && (nargout > 1)
-                        error('Error: Invalid number of output arguments!')
-                    % Initializing the nearest neighbor figure
-                    elseif vis_nn
-                        ii1 = 2 * find(ismember(varargin_spec,...
-                            'target_index'));
-                        ind_trg = varargin{ii1};
-                        ii2 = 2 * find(ismember(varargin_spec,...
-                            'target_coefficient'));
-                        coef_trg = varargin{ii2};
-                        varargout{1} = figure;  % Initializing the...
-                            % ...nearest neighbors figure handle
                     end
                     
                 otherwise
@@ -130,13 +112,13 @@ if nargin > 2
 end
 %%%
 
-figure(fig_main);
+figure(h_pars);
 
 % Setting figure position and background
-if ~all(fig_main.Position == [0, 0, 1000, 892.1])
-    fig_main.Position = [0, 0, 1000, 892.1];
+if ~all(h_pars.Position == [0, 0, 1000, 892.1])
+    h_pars.Position = [0, 0, 1000, 892.1];
 end
-set(fig_main, 'color', 'white');
+set(h_pars, 'color', 'white');
 
 % Initialing the colors of different plot elements
 cm1 = [0.2,0.3,1]; % Color of primaries
@@ -144,21 +126,21 @@ cm2 = [0.2,0.8,1]; % Color of spherical aggregate equivalents
 cm3 = [1,0.8,0.2]; % Color of velocity vectors
 
 % Compiling primary particles across multiple aggregates
-if isa(par, 'AGG')
-    pp = AGG.COMPILEPP(par);
+if isa(pars, 'AGG')
+    pp = AGG.COMPILEPP(pars);
 else
-    pp = cell2mat(par.pp);
+    pp = cell2mat(pars.pp);
 end
 
 % Concatinating the aggregates global info
 if vis_equiv
-    d = cat(1, par.d);
-    r = cat(1, par.r);
+    dv = cat(1, pars.dmax);
+    r = cat(1, pars.r);
 end
 
 if vis_vel
-    if ~exist('r', 'var'); r = cat(1, par.r); end
-    v = cat(1, par.v);
+    if ~exist('r', 'var'); r = cat(1, pars.r); end
+    v = cat(1, pars.v);
 end
 
 % XY subplot
@@ -171,7 +153,7 @@ viscircles([pp(:,3), pp(:,4)], pp(:,2)./2, 'EnhanceVisibility', false,...
 hold on
 % Plotting equivalent spheres representing the aggregates
 if vis_equiv
-    viscircles([r(:,1), r(:,2)], d(:,1)./2, 'EnhanceVisibility', false,...
+    viscircles([r(:,1), r(:,2)], dv ./ 2, 'EnhanceVisibility', false,...
         'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 % Plotting velocity vectors
@@ -195,7 +177,7 @@ viscircles([pp(:,3), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
 hold on
 if vis_equiv
-    viscircles([r(:,1), r(:,3)], d(:,1)./2, 'EnhanceVisibility', false,...
+    viscircles([r(:,1), r(:,3)], dv ./ 2, 'EnhanceVisibility', false,...
         'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 if vis_vel
@@ -217,7 +199,7 @@ hold on
 viscircles([pp(:,4), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
 if vis_equiv
-    viscircles([r(:,2), r(:,3)], d(:,1)./2, 'EnhanceVisibility', false,...
+    viscircles([r(:,2), r(:,3)], dv ./ 2, 'EnhanceVisibility', false,...
         'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 if vis_vel
@@ -235,16 +217,26 @@ ylim([0 dom_size(3)])
 subplot(2,2,4)
 ca = gca;
 delete(ca.Children);
-scatter3(pp(:,3), pp(:,4), pp(:,5), ((pp(:,2))./2).*2e9, cm1,'filled');
+if vis_rend
+    UTILS.RENDER(pars, dom_size);
+else
+    scatter3(pp(:,3), pp(:,4), pp(:,5), ((pp(:,2)) ./ 2) .* 2e9, cm1,...
+        'filled');
+end
 hold on
 if vis_equiv
-    scatter3(r(:,1), r(:,2), r(:,3), (d(:,1)./2).*2e9, cm2);
+    if vis_rend
+        UTILS.PLOTPP(r(:,1), r(:,2), r(:,3), dv, cm2, 0.3);
+    else
+        scatter3(r(:,1), r(:,2), r(:,3), (dv ./ 2) .* 2e9, cm2);
+    end
 end
 if vis_vel
     quiver3(r(:,1), r(:,2), r(:,3), v(:,1), v(:,2), v(:,3), 'Color', cm3);
 end
 hold off
 axis equal
+grid off
 title('xyz view')
 xlabel('x (m)')
 ylabel('y (m)')
@@ -253,16 +245,8 @@ xlim([0 dom_size(1)])
 ylim([0 dom_size(2)])
 zlim([0 dom_size(3)])
 
-% Plotting the nearest neighbors
-if vis_nn
-    figure(varargout{1});
-    varargout{1} = UTILS.PLOTNN(dom_size, par, ind_trg, coef_trg);
-end
-
 if nargout == 0
-    clear fig_main varargout;
-elseif nargout == 1
-    clear varargout;
+    clear h_pars;  % Deleting figure handle if not requested as an output
 end
 
 end

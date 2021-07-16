@@ -1,14 +1,14 @@
-function par = GROW(par)
+ function pars = GROW(pars)
 % "GROW" monitors collision of particles and updates the particle...
 %     ...structure based on the post-aggregation data.
 % ----------------------------------------------------------------------- %
 % 
 % Input/Output:
-%     par: Particle structure
+%     pars: Particle structure
 % ----------------------------------------------------------------------- %
 
-n_par = size(par.n,1);  % Total number of particles
-dmax = COL.TERRITORY(par.r, par.pp, par.n); % Maximum distance within...
+n_par = size(pars.n, 1);  % Total number of particles
+dmax = PAR.TERRITORY(pars.pp, pars.n); % Maximum distance within...
     % ...the aggregates from their center of mass
 % Making particle pair indices
 ind_pars = (1 : n_par)';
@@ -28,7 +28,7 @@ ind_pars(rmv,:) = [];
 d_pars = [repelem(dmax, n_par, 1), repmat(dmax, n_par, 1)];
     % size input
 d_pars(rmv,:) = [];
-r_pars = [repelem(par.r, n_par, 1), repmat(par.r, n_par, 1)];
+r_pars = [repelem(pars.r, n_par, 1), repmat(pars.r, n_par, 1)];
     % location input
 r_pars(rmv,:) = [];
 
@@ -45,15 +45,8 @@ if ~ isempty(find(ovrs == 1, 1))
         if ind_chk(i,1) ~= ind_chk(i,2)
 
             % Sticking the two colliding particles
-            [par.pp{ind_chk(i,1)}, par.pp{ind_chk(i,2)}] =...
-                COL.CONNECT_SIMPLE(par.pp{ind_chk(i,1)},...
-                par.pp{ind_chk(i,2)}); 
-%             [par.pp{ind_chk(i,1)}, par.pp{ind_chk(i,2)}, colstat] =...
-%                 COL.CONNECT_REL(par.pp{ind_chk(i,1)},...
-%                 par.v(ind_chk(i,1),:), par.pp{ind_chk(i,2)},...
-%                 par.v(ind_chk(i,2),:)); 
-%             par.pp{ind_chk(i,2)} = COL.CONNECT_RAND(par.pp{ind_chk(i,1)}...
-%                 , par.pp{ind_chk(i,2)}); 
+            [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}] =...
+                COL.CONNECT(pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}); 
             
             % Defining collision status variable(1 --> collided. 0 -->...
                 % ...uncollided)
@@ -62,7 +55,7 @@ if ~ isempty(find(ovrs == 1, 1))
             if colstat
                 
                 % Merging the particles info
-                [par, ind_new] = COL.UNITE(par, [ind_chk(i,1),...
+                [pars, ind_new] = COL.UNITE(pars, [ind_chk(i,1),...
                     ind_chk(i,2)]);
 
                 % Updating the general overlap checking indices after each...

@@ -1,21 +1,21 @@
-function par = PBC(dom_size, par)
+function pars = PBC(dom_size, pars)
 % "PBC" applies periodic boundary condition to the particle movements.
 % ----------------------------------------------------------------------- %
 % 
 % Inputs/Outputs:
 %     dom_size: Computational domain size
-%     par: Particle information structure
+%     pars: The particle information structure/class
 % ----------------------------------------------------------------------- %
 
 % Total number of (independent) particles
-if isa(par, 'AGG')
-    n_par = size(par, 1);
+if isa(pars, 'AGG')
+    n_par = length(pars);
 else
-    n_par = size(par.n, 1);
+    n_par = size(pars.n, 1);
 end
 
 % Compiling/copying properties locally
-r = cat(1, par.r);
+r = cat(1, pars.r);
 
 dom_size = repmat(dom_size', n_par, 1);
 stat_par = r ./ dom_size; % This status array shows whether the...
@@ -60,12 +60,12 @@ end
 
 dr = par_r_new - r; % Translation vectors
 
-if isa(par, 'AGG') % Updating aggregate class objects
-    par = par.TRANSLATE(dr);
+% Updating the locations for the structure/class of aggregates
+if isa(pars, 'AGG')
+    pars = pars.TRANSLATE(dr);
 
-else % Updating the particle structure
-    [par.pp, par.r] = PAR.TRANSLATE(par.pp, par.r, par.n, dr);
-
+else
+    [pars.pp, pars.r] = PAR.TRANSLATE(pars.pp, pars.r, pars.n, dr);
 end
 
 end
