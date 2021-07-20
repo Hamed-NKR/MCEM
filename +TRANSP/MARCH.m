@@ -1,38 +1,38 @@
-function [par, delt_base] = MARCH(par, fl, params_const)
+function [pars, delt_base] = MARCH(pars, fl, params_const)
 % "MARCH" solves the equation of motion of particles and finds their new...
-    % ...location and velocity alomg with their marching time scale.
-
+%   ...location and velocity alomg with their marching time scale.
+%   
 % Note: For more detail on the equations used here, see a tutorial on...
-    % ...on Langevin Dynamics modeling of aerosols by Suresh &...
-    % ...Gopalakrishnan (2021).
+%   ...on Langevin Dynamics modeling of aerosols by Suresh &...
+%   ...Gopalakrishnan (2021).
 % ----------------------------------------------------------------------- %
-
+% 
 % Input/Outputs:
-    % par: Particle information structure
-    % fl: Fluid info structure
-    % params_const: Problem's table of constant physical properties
-    % delt_base: The universal marching times-step for the poulation of...
-        % ...particles
+%   pars: The particle information structure/class
+%   fl: Fluid info structure
+%   params_const: Problem's table of constant physical properties
+%   delt_base: The universal marching times-step for the poulation of...
+%   ...particles
 % ----------------------------------------------------------------------- %
 
-% Compile primary particles across multiple aggregates.
-if isa(par, 'AGG')
-    n_par = size(par, 1);
+% Total number of (independent) particles
+if isa(pars, 'AGG')
+    n_par = length(pars);
 else
-    n_par = size(par.n, 1); % Total number of particles
+    n_par = size(pars.n, 1);
 end
 
 kb = params_const.Value(3); % Boltzmann's constant (j/k)
 
-% Copy properties locally.
-m = cat(1, par.m);
-v = cat(1, par.v);
-f = cat(1, par.f);
-delt0 = cat(1, par.delt);
+% Compiling/copying properties locally
+m = cat(1, pars.m);
+v = cat(1, pars.v);
+f = cat(1, pars.f);
+delt = cat(1, pars.delt);
 
-delt_base = min(delt0); % The baseline time step chosen as the one...
+delt_base = min(delt); % The baseline time step chosen as the one...
     % ...for the smallest particle
-z_par = ceil(delt0 ./ delt_base); % Integer marching coefficients
+z_par = ceil(delt ./ delt_base); % Integer marching coefficients
 delt = delt_base .* z_par; % This is to avoid numerical instabilities.
 
 % Solving the equation of motion
@@ -50,18 +50,18 @@ dr = (m ./ f) .* (par_v_new + v) .*...
     sqrt(rr_dot_rr ./ 3) .* [randn(n_par, 1), randn(n_par, 1),...
     randn(n_par, 1)];  % Translation vectors
 
-if isa(par, 'AGG') % Updating aggregate class objects
-    for ii=1:length(par)
-        par(ii).v = par_v_new(ii, :);
+% Updating the locations for the structure/class of aggregates
+if isa(pars, 'AGG')
+    for i = 1 : n_par
+        pars(i).v = par_v_new(i, :);
     end
-    par = par.TRANSLATE(dr ./ z_par);
-
-else % Updating the particle structure
-    % ~ the primary particle and aggregate locations
-    [par.pp, par.r] = PAR.TRANSLATE(par.pp, par.r, par.n, dr ./ z_par);
+    pars = pars.TRANSLATE(dr ./ z_par);
+    
+else
+    % Moving the primary particles and their center of mass
+    [pars.pp, pars.r] = PAR.TRANSLATE(pars.pp, pars.r, pars.n, dr ./ z_par);
         % The displacements are interpoldated for the baseline timestep
-    par.v = par_v_new; % ~ the velocities
-
+    pars.v = par_v_new; % Renewing the velocities
 end
 
 end

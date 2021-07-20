@@ -1,11 +1,11 @@
-function [pp1, pp2] = CONNECT_SIMPLE(pp1, pp2)
-% "CONNECT_SIMPLE" joins two approaching aggregates toward the minimum...
-    % ...distance between their primaries.
+function [pp1, pp2] = CONNECT(pp1, pp2)
+% "CONNECT" joins two approaching aggregates toward the minimum distance...
+%     ...between their primaries.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/Outputs:
-    % pp1: Primary particle info array for aggregate 1
-    % pp2: ~ for aggregate 2
+%     pp1: Primary particle info array for aggregate 1
+%     pp2: ~ for aggregate 2
 % ----------------------------------------------------------------------- %
 
 n_pp1 = size(pp1, 1); % Number of primary particles within aggregate 1

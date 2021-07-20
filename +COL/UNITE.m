@@ -1,15 +1,15 @@
-function [par, i_list] = UNITE(par, i_col)
+function [pars, i_list] = UNITE(pars, i_col)
 % "UNITE" unifies the properties of a set of colliding aggregate pairs
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs/Outputs:
-    % par: Particle characteristics structure
-    % i_col: An N*2 particle index set for colliding pairs
-    % i_list: A list of independent particle indices before (column 1)...
-        % ...and after (column 2) merging
+%     pars: Particle characteristics structure
+%     i_col: An N*2 particle index set for colliding pairs
+%     i_list: A list of independent particle indices before (column 1)...
+%         ...and after (column 2) merging
 % ----------------------------------------------------------------------- %
 
-n_par0 = size(par.n, 1); % Initial total number of independent particles
+n_par0 = size(pars.n, 1); % Initial total number of independent particles
 i_list = zeros(n_par0,3); % Initializing the list of indices
 i_list(:,1:2) = repmat((1 : n_par0)', 1, 2); % Partcile indices before...
     % ...merging
@@ -24,12 +24,12 @@ for i = 1 : n_col
         % Initial update of second set of indices
     
     % Merging primary particle info cells
-    par.pp{i_col(i,1)} = cat(1, par.pp{i_col(i,1)}, par.pp{i_col(i,2)});
+    pars.pp{i_col(i,1)} = cat(1, pars.pp{i_col(i,1)}, pars.pp{i_col(i,2)});
     
     % Merging nearest neighbor lists
-    par.nnl{i_col(i,1)} = cat(1, par.nnl{i_col(i,1)}, par.nnl{i_col(i,2)});
-    par.nnl{i_col(i,1)}((par.nnl{i_col(i,1)} == i_col(i,1)) |...
-        (par.nnl{i_col(i,1)} == i_col(i,2))) = []; % Removing the...
+    pars.nnl{i_col(i,1)} = cat(1, pars.nnl{i_col(i,1)}, pars.nnl{i_col(i,2)});
+    pars.nnl{i_col(i,1)}((pars.nnl{i_col(i,1)} == i_col(i,1)) |...
+        (pars.nnl{i_col(i,1)} == i_col(i,2))) = []; % Removing the...
             % ...colliding aggregates from neighbor list 
 end
 
@@ -42,33 +42,39 @@ end
 i_list(:,2) = [];
 
 % Updating aggregate level properties
-par.n(i_col(:,1)) = par.n(i_col(:,1)) + par.n(i_col(:,2)); % Number of...
-    % ...primaries
-[par.r(i_col(:,1),:), par.d(i_col(:,1),1)] = ...
-    COL.EQUIV(par.pp(i_col(:,1)), par.n(i_col(:,1))); % Center of mass...
-        % ...locations and volumetic sizes
-par.v(i_col(:,1),:) = (par.m(i_col(:,1)) .* par.v(i_col(:,1),:) +...
-    par.m(i_col(:,2)) .* par.v(i_col(:,2),:)) ./ (par.m(i_col(:,1)) +...
-    par.m(i_col(:,2))); % Net velocties
-par.m(i_col(:,1)) = par.m(i_col(:,1)) + par.m(i_col(:,2)); % Total mass
+pars.n(i_col(:,1)) = pars.n(i_col(:,1)) + pars.n(i_col(:,2)); % Number...
+    % ...of primaries
+pars.r(i_col(:,1),:) = PAR.COM(pars.pp(i_col(:,1)), pars.n(i_col(:,1)));
+    % Center of mass locations
+pars.v(i_col(:,1),:) = (pars.m(i_col(:,1)) .* pars.v(i_col(:,1),:) +...
+    pars.m(i_col(:,2)) .* pars.v(i_col(:,2),:)) ./ (pars.m(i_col(:,1)) +...
+    pars.m(i_col(:,2))); % Net velocties
+pars.m(i_col(:,1)) = pars.m(i_col(:,1)) + pars.m(i_col(:,2)); % Total mass
 
 % Removing redundant pre-collision data
-par.pp(i_col(:,2)) = [];
-par.nnl(i_col(:,2)) = [];
-par.n(i_col(:,2)) = [];
-par.d(i_col(:,2),:) = [];
-par.r(i_col(:,2),:) = [];
-par.v(i_col(:,2),:) = [];
-par.m(i_col(:,2)) = [];
+pars.pp(i_col(:,2)) = [];
+pars.nnl(i_col(:,2)) = [];
+pars.n(i_col(:,2)) = [];
+pars.r(i_col(:,2),:) = [];
+pars.v(i_col(:,2),:) = [];
+pars.m(i_col(:,2)) = [];
+
+% Resetting sizes
+pars.dv = [];
+pars.dg = [];
+pars.dm = [];
+pars.da = [];
+pars.dpp = [];
+pars.dmax = [];
 
 % Resetting mass mobility properties
-par.rho = [];
-par.delt = [];
-par.tau = [];
-par.f = [];
-par.diff = [];
-par.lambda = [];
-par.kn = [];
+pars.rho = [];
+pars.delt = [];
+pars.tau = [];
+pars.f = [];
+pars.diff = [];
+pars.lambda = [];
+pars.kn = [];
 
 end
 

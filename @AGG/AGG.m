@@ -1,17 +1,25 @@
-% "AGG" is a class containing the aggregate properties and functions.
-
-%  by: Tim Sipkens, 05-2021
-% ----------------------------------------------------------------------- %
-
 classdef AGG
+% "AGG" is a class containing the aggregate properties and functions.
+%
+% Original author: Timothy Sipkens, 05-2021
+% Revised by: Hamed Nikookar, 07-2021
+% ----------------------------------------------------------------------- %
     
     properties
-        pp = struct()   % primary particle information
-        n = []          % number of primary particles
         
-        dmax = []       % maximum extent of diameter
-        r = []          % center of mass
-        v = []          % aggregate velocity
+        pp = struct('r', [], 'd', [], 'id', [])   % Primary particle...
+            % ...properties structure
+        n = []          % Number of primary particles within the aggregates
+        
+        dv = []         % Aggregates equivalent volumetric diameter
+        dg = []         % ~ gyration diameter
+        dm = []         % ~ mobility diameter
+        da = []         % ~ aerodynamic diameter
+        dpp = []        % ~ mean + std of diameter of primaries
+        dmax = []       % ~ maximum extent of diameter
+        
+        r = []          % ~ center of mass
+        v = []          % ~ velocity
         
         m = []          % ~ mass
         rho = []        % ~ effective density
@@ -20,163 +28,176 @@ classdef AGG
         f = []          % ~ friction factor
         diff = []       % ~ diffusivity
         lambda = []     % ~ diffusive mean free path
-        kn = []         % Knudsen number (both kinetic and diffusive)
+        kn_kin = []     % ~ kinetic Knudsen number
+        kn_diff = []    % ~ diffusive Knudsen number
         nnl = []        % ~ nearest neighbor list
+        
     end
+% ----------------------------------------------------------------------- %
     
     methods
-        %== AGG ==========================================================%
+        
+        % === AGG ======================================================= %
         function obj = AGG(pp)
-         % Function to initialize the aggregate object.
+        % "AGG" initializes the aggregate objects.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % obj: Aggregate object
+        % --------------------------------------------------------------- %
             
             if nargin == 0; return; end
             
-            % Assign aggregate velocity.
-            if ~exist('v', 'var'); v = []; end
-            if isempty(v); v = [0, 0, 0]; end  % no velocity be default
-            obj.v = v;
-            
-            % Assign primary particle information.
+            % Assigning the aggregate properties
             obj.pp = pp;
-            obj.n = size(pp.r, 1);
-            
+            obj.n = size(pp.id, 1);
             obj.r = obj.COM(pp);
-            obj.dmax = obj.TERRITORY(pp, obj.r);
-            
+            if isempty(obj.v); obj.v = [0, 0, 0]; end  % Zero velocity...
+                % ...be default
         end
         
-        
-        %== TRANSLATE ====================================================%
+        % === TRANSLATE ================================================= %
         function objs = TRANSLATE(objs, dr)
-            
-            for ii=1:length(objs)
-                objs(ii).pp.r = objs(ii).pp.r + dr(ii, :);
-                
-                objs(ii).r = objs.COM(objs(ii).pp);
+        % "TRANSLATE" moves the aggregates in certain directions.
+        % --------------------------------------------------------------- %
+        %
+        % objs: Aggregate objects
+        % dr: translation vectors
+        % --------------------------------------------------------------- %
+        
+            for i = 1 : length(objs)
+                objs(i).pp.r = objs(i).pp.r + dr(i,:); % Moving the...
+                    % ...primaries
+                objs(i).r = objs(i).r + dr(i,:); % ~ the center of mass
             end
             
-            % TERRITORY (max. outer diameter) does not change.
         end
         
-        
-        %== RENDER =======================================================%
-        function h = RENDER(obj, idx, cm)
+        % === ROTATE ==================================================== %
+        function objs = ROTATE(objs, dtheta)
+        % "ROTATE" turns the aggregates in certain intrinsic angles.
+        % --------------------------------------------------------------- %
+        %
+        % objs: Aggregate objects
+        % dtheta: Intrinsic rotation angles
+        % --------------------------------------------------------------- %
             
-            % Select only idx (first if not given) aggregate.
-            if ~exist('idx', 'var'); idx = []; end
-            if isempty(idx); idx = 1; end
-            obj = obj(idx);
+            n_objs = length(objs); % Number of aggregates
             
-            % Set default colormap as "summer".
-            if ~exist('cm', 'var'); cm = []; end
-            if isempty(cm); cm = summer; end
-            
-            pp0 = obj.pp;  % shorten subsequent references to pp
-            n_pp = length(pp0.dp);
-            
-            disp('Rendering:');
-            UTILS.TEXTBAR([0, n_pp]);
-            
-            clf; axis equal; hold on;
-            colormap(cm);
-            
-            % Plot spheres.
-            [X,Y,Z] = sphere(60);
-            for ii=1:n_pp
-                h = surf(X .* pp0.dp(ii) ./ 2 + pp0.r(ii,1), ...
-                    Y .* pp0.dp(ii) ./ 2 + pp0.r(ii,2), ...
-                    Z .* pp0.dp(ii) ./ 2 + pp0.r(ii,3));
-                lightangle(-45,30)
-                h.FaceLighting = 'gouraud';
-                h.AmbientStrength = 0.8;
-                h.DiffuseStrength = 0.2;
-                h.SpecularStrength = 0.05;
-                h.SpecularExponent = 2;
-                h.BackFaceLighting = 'lit';
+            for i = 1 : n_objs
                 
-                UTILS.TEXTBAR([ii, n_pp]);
+                % Transformation matrix for yaw rotation
+                yaw = [cos(dtheta(i,1)), -sin(dtheta(i,1)), 0;...
+                    sin(dtheta(i,1)), cos(dtheta(i,1)), 0; 0, 0, 1];
+                    
+                % ~ pitch
+                pitch = [cos(dtheta(i,2)), 0, sin(dtheta(i,2));...
+                     0, 1, 0; -sin(dtheta(i,2)), 0, cos(dtheta(i,2))];
+                
+                % ~ roll
+                roll = [1, 0, 0; 0, cos(dtheta(i,3)), -sin(dtheta(i,3));...
+                    0, sin(dtheta(i,3)), cos(dtheta(i,3))];
+
+                % The net rotation matrix
+                rot = yaw * pitch * roll;
+                
+                % Rotating pimaries around the center of mass
+                r_com = objs(i).COM(objs(i).pp);
+                objs(i).pp.r = (rot * (objs(i).pp.r - r_com)')' + r_com;
+                
             end
-            disp(' ');
+        end
+        
+    end
+% ----------------------------------------------------------------------- %
+    
+    methods(Static)
+        
+        % === COM ======================================================= %
+        function r_com = COM(pp)
+        % "COM" computes the center of mass of an ensemble of primaries.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % r_com: Center of mass coordinates
+        % --------------------------------------------------------------- %
             
-            % Format plot.
-            disp('Formatting plot ...');
-            camlight('right');
-            shading interp;
-            view([-37, 20]);
-            h = gca;
-            axis('off');
+            c_m = pp.d .^ 3; % Volumetric coefficients
+            r_com = pp.r .* c_m;
+            r_com = sum(r_com, 1) ./ sum(c_m);
             
-            disp('DONE.');
-            disp(' ');
+        end
+        
+        % === TERRITORY ================================================= %
+        function dmax = TERRITORY(pp)
+        % "TERRIROY" gets the maximum extent of the aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dmax: Maximum distance of aggregate domain from its center of...
+        %   ...mass
+        % --------------------------------------------------------------- %
             
-            figure(gcf);
-            hold off;
+            r_com = AGG.COM(pp); % Center of mass coordinates
+            dmax = max(sum(sqrt((pp.r - r_com) .^ 2) + pp.d ./ 2, 2));
             
-            if nargout==0
-                clear h; 
+        end
+        
+        % === COMPILEPP ================================================= %
+        % "COMPILEPP" compiles a primary particle information set across...
+        %   ...multiple aggregates.
+        %
+        % Note: This will be useful for some functions that aim to be...
+        %   ...able to run in both "structure" and "class" modes.
+        % --------------------------------------------------------------- %
+        %
+        % objs: Aggregate objects
+        % pp_glob: Concatinated primary particle data
+        % --------------------------------------------------------------- %
+        
+        function pp_glob = COMPILEPP(objs)
+            
+            n = cat(1, objs.n); % Compiling number of primaries data
+            n_pp = sum(n); % Total number of primaries
+            pp_glob = zeros(n_pp, 5); % Initializing the global array
+            ii = 1; % Data calling index
+            
+            for i = 1 : length(objs)
+                % Adding the i^th primary's data
+            	pp_glob(ii : ii - 1 + n(i), :) =...
+                    [objs(i).pp.id, objs(i).pp.d, objs(i).pp.r];
+                ii = ii + n(i); % Updating the number of row to be...
+                    % ...called
             end
+            
+        end
+        
+        % === COMPILE =================================================== %
+        % "COMPILEPROP" compiles a general property over multiple...
+        %   ...aggregates.
+        %
+        % Note: The purpose is again to make different functions...
+        %   ...compatible with both "structure" and "class" modes.
+        % --------------------------------------------------------------- %
+        %
+        % objs: Aggregate objects
+        % propname: Property to be concatinated
+        % prop: The concatinated outcome
+        % --------------------------------------------------------------- %
+        
+        function prop = COMPILEPROP(objs, propname)
+            
+            % Initializing the data storage array
+            prop = zeros(length(objs), size(objs(1).(propname), 2));
+            
+            for i = 1 : length(objs)
+            	prop(i,:) = objs(i).(propname); % Adding the i^th...
+                    % ...aggregate data
+            end
+            
         end
         
     end
     
-    methods(Static)
-        
-        %== COM ======================================================%
-        function com = COM(pp)
-        % Computed the center of mass of the aggregate.
-            
-            m = pp.dp .^ 3;
-            
-            com = pp.r .* m;
-            com = sum(com, 1) ./ sum(m);
-        end
-        
-        
-        %== GET_MAX ======================================================%
-        function dmax = TERRITORY(pp, com)
-        % Get the maximum extent of the aggregate.
-            
-            % Most distant primary ppticle.
-            [dmax, imax] = ...
-                max(sum(sqrt((pp.r - com) .^ 2), 2));
-            
-            dmax = dmax + pp.dp(imax) ./ 2;  % add the primary ppt. diameter
-            
-        end
-        
-        
-        %== CHECK_OVERLAP ===========================================s=====%
-        function f_overlap = OVR(pp)
-        % Output is a logical indicating if a ppticle is overlapping another.
-            
-            % Loop through ppticles to check overlap.
-            
-        end
-        
-        
-        %== COMPILEPP ====================================================%
-        %   Compile primary particle information across multiple
-        %   aggregates.
-        function pp = COMPILEPP(objs)
-            
-            pp = [];
-            for ii=1:length(objs)
-            	pp = [pp; ...
-                      [objs(ii).pp.id, ...
-                       objs(ii).pp.dp, ...
-                       objs(ii).pp.r]];
-            end
-        end
-        
-        %== COMPILE ======================================================%
-        %   Compile another property over multiple aggregates.
-        function prop = COMPILE(objs, propname)
-            
-            prop = [];
-            for ii=1:length(objs)
-            	prop = [prop; objs(ii).(propname)];
-            end
-        end
-    end
 end
 
