@@ -49,24 +49,24 @@ disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations and velocities, and nearest...
     % ...neighbor lists
-figure
-h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
-    'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
-    'render', 'on');
-
-figure
-ind_trg_test = (randperm(params_ud.Value(4),...
-    min([params_ud.Value(4), 2])))'; % A random portion of target...
-        ...indices for nearest neighbor testing
-h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
-    coef_trg(ind_trg_test));
-
+% figure
+% h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
+%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
+%     'render', 'on');
+% 
+% figure
+% ind_trg_test = (randperm(params_ud.Value(4),...
+%     min([params_ud.Value(4), 2])))'; % A random portion of target...
+%         ...indices for nearest neighbor testing
+% h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
+%     coef_trg(ind_trg_test));
+%
 figure
 h0_3d = UTILS.RENDER(pars);
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 500; % Marching index limit
+k_max = 5000; % Marching index limit
 time = zeros(k_max,1);
 % t_plt = 10; % Defining a plotting timeframe criterion
 % t_nns = 10; % The timeframe for nearest neighbor search

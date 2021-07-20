@@ -15,7 +15,7 @@ n_agg = size(n_pp,1); % Total number of aggregates
 r_com = zeros(n_agg,3);
 
 for i = 1 : n_agg
-    r_com(i,:) = sum((pp{i}(:,2) .^ 3) .* pp{i}(:,3:5)) ./...
+    r_com(i,:) = sum((pp{i}(:,2) .^ 3) .* pp{i}(:,3:5), 1) ./...
         sum(pp{i}(:,2) .^ 3); % The center of mass
 end
 
