@@ -39,6 +39,8 @@ kf = exp(pfit(2)); % Fractal prefactor
 x_fit = min(c_d) : range(c_d) / (10 * numel(c_d)) : max(c_d);
 y_fit = kf .* x_fit .^ df;
 plot(x_fit, y_fit, 'Color', 'r', 'LineStyle', '--');
+set(gca, 'XScale', 'log')
+set(gca, 'YScale', 'log')
 title('Population-based fractal properties')
 xlabel('dg / dpp,g')
 ylabel('npp')
