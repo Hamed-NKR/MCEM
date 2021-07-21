@@ -66,7 +66,7 @@ h0_3d = UTILS.RENDER(pars);
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 5000; % Marching index limit
+k_max = 2000; % Marching index limit
 time = zeros(k_max,1);
 % t_plt = 10; % Defining a plotting timeframe criterion
 % t_nns = 10; % The timeframe for nearest neighbor search
@@ -98,8 +98,8 @@ UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 for k = 2 : k_max
-    if length(cat(1, pars.n)) > params_ud.Value(4) / 3 % Checking if the...
-        ...number of aggregates within the domain is reasonable
+    if length(cat(1, pars.n)) > (params_ud.Value(4) / 3) % Checking if...
+            % ...the number of aggregates within the domain is reasonable
         
         [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
             % ...equation of motions
