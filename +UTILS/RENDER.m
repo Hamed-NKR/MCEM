@@ -33,7 +33,8 @@ n_pp = cat(1, pars.n); % Compiling/copying number distribution of primaries
 n_tot = sum(n_pp); % Total number of primaries
 
 % Displaying overal progress
-disp('Rendering:');
+disp(' ')
+disp('Rendering:')
 UTILS.TEXTBAR([0, n_tot]);
 
 % Initializing the figure handle

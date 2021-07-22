@@ -14,7 +14,7 @@ function dmax = TERRITORY(pp, n_pp)
 % ----------------------------------------------------------------------- %
 
 n_agg = size(n_pp,1); % Total number of aggregates
-dmax = zeros(n_agg,1);
+dmax = zeros(n_agg,1); % Initializing the size array
 r_com = PAR.COM(pp, n_pp); % Center of mass coordinates of aggregates
 
 for i = 1 : n_agg

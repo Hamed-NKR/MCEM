@@ -8,11 +8,11 @@ function r_com = COM(pp, n_pp)
 % ----------------------------------------------------------------------- %
 % 
 % Outputs:
-%     r_com: Aggregate center of mass position
+%     r_com: Aggregates center of mass position
 % ----------------------------------------------------------------------- %
 
 n_agg = size(n_pp,1); % Total number of aggregates
-r_com = zeros(n_agg,3);
+r_com = zeros(n_agg,3); % Initializing the location array
 
 for i = 1 : n_agg
     r_com(i,:) = sum((pp{i}(:,2) .^ 3) .* pp{i}(:,3:5), 1) ./...

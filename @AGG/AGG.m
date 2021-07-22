@@ -130,7 +130,7 @@ classdef AGG
         
         % === TERRITORY ================================================= %
         function dmax = TERRITORY(pp)
-        % "TERRIROY" gets the maximum extent of the aggregate.
+        % "TERRIROY" gives the maximum extent of the aggregate.
         % --------------------------------------------------------------- %
         %
         % pp: Primary particle structure
@@ -140,6 +140,54 @@ classdef AGG
             
             r_com = AGG.COM(pp); % Center of mass coordinates
             dmax = max(sum(sqrt((pp.r - r_com) .^ 2) + pp.d ./ 2, 2));
+            
+        end
+        
+        % === Gyration ================================================== %
+        function dg = GYRATION(pp)
+        % "TERRIROY" calculates the gyration diameter of the aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dg: Gyration diameter
+        % --------------------------------------------------------------- %
+            
+            r_com = AGG.COM(pp); % Center of mass coordinates
+            a2 = sum((r_com - (pp.r .^ 2)), 2); % Distance between...
+                % ...center of primaries and aggregate center of mass
+            radg2 = 0.6 .* (pp.d ./ 2).^2; % Radius of gyration of...
+                % ...primaries squared
+            dg = 2 .* sqrt(sum((pp.d .^ 3) .* (a2 + radg2)) ./...
+                sum((pp.d) .^ 3)); % Gyration diameter
+            
+        end
+        
+        % === EQUIV ===================================================== %
+        function dv = EQUIV(pp)
+        % "EQUIV" computes the equivalent volumetric diameter of the...
+        %   ...aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dv: Volumetric diameter
+        % --------------------------------------------------------------- %
+            
+            dv = nthroot(sum(pp.d .^ 3), 3);
+            
+        end
+        
+        % === MEANPP ==================================================== %
+        function dpp = MEANPP(pp)
+        % "MEANPP" gives the mean and standard deviation of primary...
+        %   ...particles within an aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dpp: Primary particles average diameter + sample std
+        % --------------------------------------------------------------- %
+            
+            dpp(1) = mean(pp.d); % Mean size
+            dpp(2) = std(pp.d); % Standard deviation
             
         end
         
@@ -168,31 +216,6 @@ classdef AGG
                     [objs(i).pp.id, objs(i).pp.d, objs(i).pp.r];
                 ii = ii + n(i); % Updating the number of row to be...
                     % ...called
-            end
-            
-        end
-        
-        % === COMPILE =================================================== %
-        % "COMPILEPROP" compiles a general property over multiple...
-        %   ...aggregates.
-        %
-        % Note: The purpose is again to make different functions...
-        %   ...compatible with both "structure" and "class" modes.
-        % --------------------------------------------------------------- %
-        %
-        % objs: Aggregate objects
-        % propname: Property to be concatinated
-        % prop: The concatinated outcome
-        % --------------------------------------------------------------- %
-        
-        function prop = COMPILEPROP(objs, propname)
-            
-            % Initializing the data storage array
-            prop = zeros(length(objs), size(objs(1).(propname), 2));
-            
-            for i = 1 : length(objs)
-            	prop(i,:) = objs(i).(propname); % Adding the i^th...
-                    % ...aggregate data
             end
             
         end

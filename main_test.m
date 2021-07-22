@@ -28,7 +28,7 @@ pars.pp = PAR.INIT_MORPH(pars.pp);
 pars = PAR.INIT_LOC(params_ud.Value(1:3), pars);
 
 % Finding the equivalent particle sizes
-[pars.dv, pars.dg, pars.dmax, pars.dpp] = PAR.SIZING(pars);
+pars = PAR.SIZING(pars);
 
 % Finding the initial mobility propeties of particles
 pars = TRANSP.MOBIL(pars, fl, params_const);
@@ -60,13 +60,13 @@ disp("The computational domain is successfully initialized...")
 %         ...indices for nearest neighbor testing
 % h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
 %     coef_trg(ind_trg_test));
-%
-figure
-h0_3d = UTILS.RENDER(pars);
+% 
+% figure
+% h0_3d = UTILS.RENDER(pars);
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 2000; % Marching index limit
+k_max = 200; % Marching index limit
 time = zeros(k_max,1);
 % t_plt = 10; % Defining a plotting timeframe criterion
 % t_nns = 10; % The timeframe for nearest neighbor search
@@ -110,7 +110,7 @@ for k = 2 : k_max
         pars = COL.GROW(pars); % Checking for collisions and updating...
           % ...particle structures upon new clusterations
 
-        [pars.dv, pars.dg, pars.dmax, pars.dpp] = PAR.SIZING(pars);
+        pars = PAR.SIZING(pars);
             % Updating the size-related properties
 
         pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the...
