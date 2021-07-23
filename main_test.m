@@ -42,8 +42,8 @@ coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 pars.nnl = COL.NNS(pars, ind_trg, coef_trg);
 
-% % Converting the global structure to aggregate objects
-% pars = PAR.PAR2AGG(pars);
+% Converting the global structure to aggregate objects
+pars = PAR.PAR2AGG(pars);
 
 disp("The computational domain is successfully initialized...")
 
@@ -51,8 +51,7 @@ disp("The computational domain is successfully initialized...")
     % ...neighbor lists
 % figure
 % h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
-%     'render', 'on');
+%     'equivalent_size', 'on', 'velocity_vector', 'on', 'render', 'on');
 % 
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...

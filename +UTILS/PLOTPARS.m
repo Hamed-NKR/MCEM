@@ -7,14 +7,15 @@ function h_pars = PLOTPARS(pars, dom_size, varargin)
 %     pars: The particle information structure/class
 %     varargin: An optional varying argument that contains the...
 %         ...visibility status of various particle properties:
-%         (a) 'equivalent_volumetric_size': 'on'/'off' (or: 'ON/OFF',...
-%           ...'On/Off')
+%         (a) 'equivalent_size': 'on'/'off' (or: 'ON/OFF', 'On/Off')
 %         (b) 'velocity_vector': 'on'/'off' (or: ~)
 %
-% Note: Visibility inputs MUST match the above-mentioned format.
+% Note 1: Visibility inputs MUST match the above-mentioned format.
+% Note 2: Equivalent size displayed here is the maximum extent of the
+%   ...aggregates.
 % ----------------------------------------------------------------------- %
 %
-% Outputs
+% Outputs:
 %     h_main: Figure handle for spatial distribution of particles, and...
 %         ...possibly their equivalent size and velocity
 % ----------------------------------------------------------------------- %        
@@ -24,7 +25,7 @@ hold off
 h_pars = gcf;
 
 % Initializing visibility variables
-vis_equiv = 0; % Equivalent size visibility status
+vis_equi = 0; % Equivalent size visibility status
 vis_vel = 0; % Velocity ~
 vis_rend = 0; % Render ~
 
@@ -59,12 +60,12 @@ if nargin > 2
             switch varargin_spec{i}
                 
                 % Checking the status of aggregate equivalents visibility
-                case 'equivalent_volumetric_size'
-                    vis_equiv = strcmp(varargin{2*i},'on') ||...
+                case 'equivalent_size'
+                    vis_equi = strcmp(varargin{2*i},'on') ||...
                         strcmp(varargin{2*i},'ON') ||...
                         strcmp(varargin{2*i},'On');
                     % Checking for invalid status variables
-                    if ~ (vis_equiv || strcmp(varargin{2*i},'off') ||...
+                    if ~ (vis_equi || strcmp(varargin{2*i},'off') ||...
                         strcmp(varargin{2*i},'OFF') ||...
                         strcmp(varargin{2*i},'Off'))
                         error('Error: Invalid input argument number %d \n',...
@@ -133,8 +134,8 @@ else
 end
 
 % Concatinating the aggregates global info
-if vis_equiv
-    dv = cat(1, pars.dmax);
+if vis_equi
+    d = cat(1, pars.dmax);
     r = cat(1, pars.r);
 end
 
@@ -152,8 +153,8 @@ viscircles([pp(:,3), pp(:,4)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth', 0.5); % Plotting primaries
 hold on
 % Plotting equivalent spheres representing the aggregates
-if vis_equiv
-    viscircles([r(:,1), r(:,2)], dv ./ 2, 'EnhanceVisibility', false,...
+if vis_equi
+    viscircles([r(:,1), r(:,2)], d ./ 2, 'EnhanceVisibility', false,...
         'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 % Plotting velocity vectors
@@ -176,8 +177,8 @@ delete(ca.Children);
 viscircles([pp(:,3), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
 hold on
-if vis_equiv
-    viscircles([r(:,1), r(:,3)], dv ./ 2, 'EnhanceVisibility', false,...
+if vis_equi
+    viscircles([r(:,1), r(:,3)], d ./ 2, 'EnhanceVisibility', false,...
         'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 if vis_vel
@@ -198,8 +199,8 @@ delete(ca.Children);
 hold on
 viscircles([pp(:,4), pp(:,5)], pp(:,2)./2, 'EnhanceVisibility', false,...
     'Color', cm1, 'LineWidth' ,0.5);
-if vis_equiv
-    viscircles([r(:,2), r(:,3)], dv ./ 2, 'EnhanceVisibility', false,...
+if vis_equi
+    viscircles([r(:,2), r(:,3)], d ./ 2, 'EnhanceVisibility', false,...
         'Color', cm2, 'LineWidth', 2, 'LineStyle', '--');
 end
 if vis_vel
@@ -224,11 +225,11 @@ else
         'filled');
 end
 hold on
-if vis_equiv
+if vis_equi
     if vis_rend
-        UTILS.PLOTPP(r(:,1), r(:,2), r(:,3), dv, cm2, 0.3);
+        UTILS.PLOTPP(r(:,1), r(:,2), r(:,3), d, cm2, 0.3);
     else
-        scatter3(r(:,1), r(:,2), r(:,3), (dv ./ 2) .* 2e9, cm2);
+        scatter3(r(:,1), r(:,2), r(:,3), (d ./ 2) .* 2e9, cm2);
     end
 end
 if vis_vel

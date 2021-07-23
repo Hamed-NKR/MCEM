@@ -51,7 +51,9 @@ classdef AGG
             % Assigning the aggregate properties
             obj.pp = pp;
             obj.n = size(pp.id, 1);
-            obj.r = obj.COM(pp);
+            obj.r = AGG.COM(pp);
+            obj.dv = AGG.EQUIV(pp);
+            obj.dmax = AGG.TERRITORY(pp);
             if isempty(obj.v); obj.v = [0, 0, 0]; end  % Zero velocity...
                 % ...be default
         end
@@ -139,7 +141,7 @@ classdef AGG
         % --------------------------------------------------------------- %
             
             r_com = AGG.COM(pp); % Center of mass coordinates
-            dmax = max(sum(sqrt((pp.r - r_com) .^ 2) + pp.d ./ 2, 2));
+            dmax = max(2 .* sqrt(sum((pp.r - r_com) .^ 2, 2)) + pp.d);
             
         end
         

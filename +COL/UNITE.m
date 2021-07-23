@@ -19,13 +19,6 @@ end
 i_list = zeros(n_par0,3); % Initializing the list of indices
 i_list(:,1:2) = repmat((1 : n_par0)', 1, 2); % Partcile indices before...
     % ...merging
-i_temp = unique(i_list(:,2), 'stable'); % Extracting remaining old indices
-i_temp = [(1 : numel(i_temp))', i_temp]; % Adding new indices
-% Asigning new indices to the aggregate populations
-for i = 1 : n_par0
-    i_list(i,3) = i_temp(find(i_temp(:,2) == i_list(i,2), 1), 1);
-end
-i_list(:,2) = [];
 
 n_col = size(i_col, 1); % Number of colliding pairs
 
@@ -72,6 +65,14 @@ for i = 1 : n_col
     end
     
 end
+
+i_temp = unique(i_list(:,2), 'stable'); % Extracting remaining old indices
+i_temp = [(1 : numel(i_temp))', i_temp]; % Adding new indices
+% Asigning new indices to the aggregate populations
+for i = 1 : n_par0
+    i_list(i,3) = i_temp(find(i_temp(:,2) == i_list(i,2), 1), 1);
+end
+i_list(:,2) = [];
 
 if ~ isa(pars, 'AGG')
     
