@@ -58,8 +58,8 @@ if ~ isempty(find(ovrs == 1, 1))
                 pp1 = AGG.COMPILEPP(pars(ind_chk(i,1)));
                 pp2 = AGG.COMPILEPP(pars(ind_chk(i,2)));
                 [pp1, pp2] = COL.CONNECT(pp1, pp2);
-                pars(ind_chk(i,1)).r = pp1(3:5);
-                pars(ind_chk(i,2)).r = pp2(3:5);
+                pars(ind_chk(i,1)).r = pp1(:,3:5);
+                pars(ind_chk(i,2)).r = pp2(:,3:5);
             else
                 [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}] =...
                     COL.CONNECT(pars.pp{ind_chk(i,1)},...

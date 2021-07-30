@@ -15,6 +15,8 @@ function h_rend = RENDER(pars, dom_size, cm)
 %     h_rend: The output figure handle
 % ----------------------------------------------------------------------- %
 
+warning('off')
+
 % Setting default domain size as empty
 if ~exist('dom_size', 'var'); dom_size = []; end
 

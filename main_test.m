@@ -8,6 +8,11 @@ close all
 
 %% Part 1. Setting the initial domain conditions
 
+% Setting the run-time record sheet
+timetable = struct('start', [], 'pregrowth', [], 'postgrowth', [],...
+    'end', [], 'total', [], 'growth', []);
+timetable.start = clock;
+
 [params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
     % ...physical parameters to be used in the simulations
 
@@ -43,7 +48,10 @@ coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
 pars.nnl = COL.NNS(pars, ind_trg, coef_trg);
 
 % Converting the global structure to aggregate objects
-pars = PAR.PAR2AGG(pars);
+% pars = PAR.PAR2AGG(pars);
+
+% Saving the initial population-based particle properties
+parsdata = UTILS.SAVEPARS(pars, 0, 1, params_ud);
 
 disp("The computational domain is successfully initialized...")
 
@@ -60,15 +68,16 @@ disp("The computational domain is successfully initialized...")
 % h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
 %     coef_trg(ind_trg_test));
 % 
-% figure
-% h0_3d = UTILS.RENDER(pars);
+figure
+h0_3d = UTILS.RENDER(pars);
 
 %% Part 2: Simulating the particle aggregations
 
 k_max = 200; % Marching index limit
 time = zeros(k_max,1);
-% t_plt = 10; % Defining a plotting timeframe criterion
-% t_nns = 10; % The timeframe for nearest neighbor search
+t_rec = 10; % Data recording timeframe
+% t_plt = 10; % Particle movements plotting ~
+% t_nns = 10; % Nearest neighbor search ~
 
 % prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
 % str = input(prompt,'s'); % Animation saving variable (yes/no)
@@ -97,7 +106,7 @@ UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 for k = 2 : k_max
-    if length(cat(1, pars.n)) > (params_ud.Value(4) / 3) % Checking if...
+    if length(cat(1, pars.n)) > (params_ud.Value(4) / 10) % Checking if...
             % ...the number of aggregates within the domain is reasonable
         
         [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
@@ -105,22 +114,30 @@ for k = 2 : k_max
 
         pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
             % ...periodic boundary conditions
-
+        
+        timetable.pregrowth = [timetable.pregrowth; clock];
         pars = COL.GROW(pars); % Checking for collisions and updating...
           % ...particle structures upon new clusterations
-
-        pars = PAR.SIZING(pars);
-            % Updating the size-related properties
+        timetable.postgrowth = [timetable.postgrowth; clock];
+        
+        pars = PAR.SIZING(pars); % Updating the size-related properties
 
         pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the...
             % ...mobility propeties
-
-    %     if mod(k-2, t_nns) == 0
-    %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Updating the...
+        
+    %     if mod(k-1, t_nns) == 0
+    %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Finding the...
     %             % ...nearest neighbors
     %     end
-
-    %     if mod(k-2, t_plt) == 0
+        
+        time(k) = time(k-1) + delt; % Updating time
+        
+        if mod(k-1, t_rec) == 0
+            parsdata = UTILS.SAVEPARS(pars, time, k, [], parsdata);
+                % Saving particle data over time
+        end
+        
+    %     if mod(k-1, t_plt) == 0
     %         h_anim = UTILS.PLOTPARS(pars, params_ud.Value(1:3)); % Plotting...
     %             % ...every t_plt time steps
     %         drawnow; % Drawing the plot at the desired time steps
@@ -131,11 +148,9 @@ for k = 2 : k_max
     %             writeVideo(video_par, framenow); % Saving the video
     %         end
     %     end
-
-        time(k) = time(k-1) + delt; % Updating time
-
+        
         UTILS.TEXTBAR([k, k_max]); % Updating textbar
-    
+        
     end
 end
 
@@ -148,5 +163,20 @@ end
 % Obtaining fractal properties
 [df, kf] = PAR.FRACTALITY(pars);
 
+% Morphology of the final population
 figure
-h_3d = UTILS.RENDER(pars); % Morphology of the final population
+h_3d = UTILS.RENDER(pars);
+
+% Plotting kinetic properties
+figure
+h_kin = UTILS.PLOTKINETICS(parsdata);
+
+% Finalizing the run-time results
+timetable.end = clock;
+timetable.total = 3600 * (timetable.end(4) - timetable.start(4)) +...
+    60 * (timetable.end(5) - timetable.start(5)) +...
+    timetable.end(6) - timetable.start(6);
+timetable.growth = sum(3600 * (timetable.postgrowth(:,4) -...
+    timetable.pregrowth(:,4)) + 60 * (timetable.postgrowth(:,5) -...
+    timetable.pregrowth(:,5)) + timetable.postgrowth(:,6) -...
+    timetable.pregrowth(:,6)) / timetable.total;

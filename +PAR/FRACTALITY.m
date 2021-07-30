@@ -2,14 +2,14 @@ function [df, kf, h_fract] = FRACTALITY(pars)
 % "FRACTALITY" estimates the fractal properties of an aggregate population.
 % ----------------------------------------------------------------------- %
 %
-% Inputs:
+% Input:
 %   pars: Particle information structure/class
 % ----------------------------------------------------------------------- %
 %
-% Output:
+% Outputs:
 %   df: Fractal dimension
 %   kf: Fractal prefactor
-%   h_fract: the output figure handle
+%   h_fract: The output figure handle
 % ----------------------------------------------------------------------- %
 
 % Initializing the results plot
@@ -42,8 +42,8 @@ plot(x_fit, y_fit, 'Color', 'r', 'LineStyle', '--');
 set(gca, 'XScale', 'log')
 set(gca, 'YScale', 'log')
 title('Population-based fractal properties')
-xlabel('dg / dpp,g')
-ylabel('npp')
+xlabel('dg / dpp,g (-)')
+ylabel('npp (#)')
 axis padded
 txt = "kf = " + num2str(kf, '%.1f') + ", df = " + num2str(df, '%.1f') +...
     "  "; % Overal results to be annotated on the plot

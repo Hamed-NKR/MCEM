@@ -194,6 +194,7 @@ classdef AGG
         end
         
         % === COMPILEPP ================================================= %
+        function pp_glob = COMPILEPP(objs)
         % "COMPILEPP" compiles a primary particle information set across...
         %   ...multiple aggregates.
         %
@@ -204,9 +205,7 @@ classdef AGG
         % objs: Aggregate objects
         % pp_glob: Concatinated primary particle data
         % --------------------------------------------------------------- %
-        
-        function pp_glob = COMPILEPP(objs)
-            
+                    
             n = cat(1, objs.n); % Compiling number of primaries data
             n_pp = sum(n); % Total number of primaries
             pp_glob = zeros(n_pp, 5); % Initializing the global array
