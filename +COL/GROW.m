@@ -61,14 +61,14 @@ if ~ isempty(find(ovrs == 1, 1))
                 pars(ind_chk(i,1)).r = pp1(:,3:5);
                 pars(ind_chk(i,2)).r = pp2(:,3:5);
             else
-                [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}] =...
-                    COL.CONNECT(pars.pp{ind_chk(i,1)},...
+                [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}, colstat]...
+                    = COL.CONNECT(pars.pp{ind_chk(i,1)},...
                     pars.pp{ind_chk(i,2)}); 
             end
-            
-            % Initializing collision status variable (1 --> collided,...
-                % ...0 --> uncollided)
-            if ~exist('colstat', 'var'); colstat = 1; end
+%             
+%             % Initializing collision status variable (1 --> collided,...
+%                 % ...0 --> uncollided)
+%             if ~exist('colstat', 'var'); colstat = 1; end
             
             if colstat
                 

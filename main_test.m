@@ -105,38 +105,38 @@ disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
-for k = 2 : k_max
-    if length(cat(1, pars.n)) > (params_ud.Value(4) / 10) % Checking if...
-            % ...the number of aggregates within the domain is reasonable
-        
-        [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
-            % ...equation of motions
-
-        pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
-            % ...periodic boundary conditions
-        
-        timetable.pregrowth = [timetable.pregrowth; clock];
-        pars = COL.GROW(pars); % Checking for collisions and updating...
-          % ...particle structures upon new clusterations
-        timetable.postgrowth = [timetable.postgrowth; clock];
-        
-        pars = PAR.SIZING(pars); % Updating the size-related properties
-
-        pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the...
-            % ...mobility propeties
-        
+k = 2; % Iteration index
+while (k <= k_max) && (length(cat(1, pars.n)) > (params_ud.Value(4) / 10))
+    % Checking if the number of aggregates within the domain is reasonable
+    
+    [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
+        % ...equation of motions
+    
+    pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
+        % ...periodic boundary conditions
+    
+    timetable.pregrowth = [timetable.pregrowth; clock];
+    pars = COL.GROW(pars); % Checking for collisions and updating...
+        % ...particle structures upon new clusterations
+    timetable.postgrowth = [timetable.postgrowth; clock];
+    
+    pars = PAR.SIZING(pars); % Updating the size-related properties
+    
+    pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the...
+        % ...mobility propeties
+    
     %     if mod(k-1, t_nns) == 0
     %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Finding the...
     %             % ...nearest neighbors
     %     end
-        
-        time(k) = time(k-1) + delt; % Updating time
-        
-        if mod(k-1, t_rec) == 0
-            parsdata = UTILS.SAVEPARS(pars, time, k, [], parsdata);
-                % Saving particle data over time
-        end
-        
+    
+    time(k) = time(k-1) + delt; % Updating time
+    
+    if mod(k-1, t_rec) == 0
+        parsdata = UTILS.SAVEPARS(pars, time, k, [], parsdata);
+        % Saving particle data over time
+    end
+    
     %     if mod(k-1, t_plt) == 0
     %         h_anim = UTILS.PLOTPARS(pars, params_ud.Value(1:3)); % Plotting...
     %             % ...every t_plt time steps
@@ -148,11 +148,14 @@ for k = 2 : k_max
     %             writeVideo(video_par, framenow); % Saving the video
     %         end
     %     end
-        
-        UTILS.TEXTBAR([k, k_max]); % Updating textbar
-        
-    end
+    
+    UTILS.TEXTBAR([k, k_max]); % Updating textbar
+    
+    k = k + 1;
+    
 end
+
+k = k - 1;
 
 % if (str == 'Y') || (str == 'y')
 %     close(video_par); % Closing the video file
