@@ -9,8 +9,9 @@ close all
 %% Part 1. Setting the initial domain conditions
 
 % Setting the run-time record sheet
-timetable = struct('start', [], 'pregrowth', [], 'postgrowth', [],...
-    'end', [], 'total', [], 'growth', []);
+timetable = struct('start', [], 'end', [], 'total', [],...
+    'prerender', [], 'postrender', [], 'render', [],...
+    'pregrowth', [], 'postgrowth', [], 'growth', []);
 timetable.start = clock;
 
 [params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
@@ -55,7 +56,7 @@ parsdata = UTILS.SAVEPARS(pars, 0, 1, params_ud);
 
 disp("The computational domain is successfully initialized...")
 
-% Visualizing the initial particle locations and velocities, and nearest...
+% Visualizing the initial particle locations, velocities, and nearest...
     % ...neighbor lists
 % figure
 % h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
@@ -68,14 +69,16 @@ disp("The computational domain is successfully initialized...")
 % h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
 %     coef_trg(ind_trg_test));
 % 
+timetable.prerender = clock;
 figure
 h0_3d = UTILS.RENDER(pars);
+timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 200; % Marching index limit
+k_max = 1e5; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 10; % Data recording timeframe
+t_rec = 1e2; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
@@ -171,8 +174,10 @@ figure
 h_3d = UTILS.RENDER(pars);
 
 % Plotting kinetic properties
+timetable.prerender = [timetable.prerender; clock];
 figure
 h_kin = UTILS.PLOTKINETICS(parsdata);
+timetable.postrender = [timetable.postrender; clock];
 
 % Finalizing the run-time results
 timetable.end = clock;
