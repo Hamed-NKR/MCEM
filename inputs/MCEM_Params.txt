@@ -1,14 +1,14 @@
 Name            Value           Unit            Description
 -------------------------------------------------------------------------------------------------------------------------------------------
-dom_size(1)	5e-6		[m]		Computational domain length
-dom_size(2)	5e-6		[m]		Computational domain width
-dom_size(3)	5e-6		[m]		Computational domain height
-n_par		10000		[-]		Total number of initial particles
-n_pp(1)		1		[-]		Mean number of primaries within the particles
-n_pp(2)		0		[-]		Standard deviation of primary numbers within the particles
+dom_size(1)	1e-6		[m]		Computational domain length
+dom_size(2)	1e-6		[m]		Computational domain width
+dom_size(3)	1e-6		[m]		Computational domain height
+n_par		20		[-]		Total number of initial particles
+n_pp(1)		5		[-]		Mean number of primaries within the particles
+n_pp(2)		2		[-]		Standard deviation of primary numbers within the particles
 d_pp(1)		5e-8		[m]		Global mean size of primaries
-d_pp(2)		1e-9		[m]		Standard deviation of primary size variations between the particles
-d_pp(3)		0		[m]		Standard deviation of primary size variations within the particles
+d_pp(2)		5e-9		[m]		Standard deviation of primary size variations between the particles
+d_pp(3)		1e-9		[m]		Standard deviation of primary size variations within the particles
 temp_f		3000		[k]		Flow temperature 
 v_f(1)		0		[m/s]		Flow x velcoity 
 v_f(2)		0		[m/s]		Flow y velocity 

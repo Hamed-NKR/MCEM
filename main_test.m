@@ -76,7 +76,7 @@ timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e5; % Marching index limit
+k_max = 1000; % Marching index limit
 time = zeros(k_max,1);
 t_rec = 1e2; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
@@ -109,7 +109,7 @@ UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 k = 2; % Iteration index
-while (k <= k_max) && (length(cat(1, pars.n)) > (params_ud.Value(4) / 10))
+while (k <= k_max) && all(pars.n(:) < (params_ud.Value(4) / 2))
     % Checking if the number of aggregates within the domain is reasonable
     
     [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
@@ -181,10 +181,11 @@ timetable.postrender = [timetable.postrender; clock];
 
 % Finalizing the run-time results
 timetable.end = clock;
-timetable.total = 3600 * (timetable.end(4) - timetable.start(4)) +...
-    60 * (timetable.end(5) - timetable.start(5)) +...
-    timetable.end(6) - timetable.start(6);
-timetable.growth = sum(3600 * (timetable.postgrowth(:,4) -...
-    timetable.pregrowth(:,4)) + 60 * (timetable.postgrowth(:,5) -...
-    timetable.pregrowth(:,5)) + timetable.postgrowth(:,6) -...
-    timetable.pregrowth(:,6)) / timetable.total;
+timetable.total = UTILS.TIMEDIFF(timetable.start, timetable.end);
+timetable.growth = sum(UTILS.TIMEDIFF(timetable.pregrowth,...
+    timetable.postgrowth));
+timetable.growth = [timetable.growth, timetable.growth / timetable.total];
+timetable.render = sum(UTILS.TIMEDIFF(timetable.prerender,...
+    timetable.postrender));
+timetable.render = [timetable.render, timetable.render / timetable.total];
+
