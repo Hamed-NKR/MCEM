@@ -1,4 +1,4 @@
-function h_rend = RENDER(pars, dom_size, cm)
+function h_rend = RENDER(pars, dom_size, cm, q)
 % "RENDER" depicts the posture of an aggregate population in space.
 % 
 % Original author: Timothy Sipkens, 05-2021
@@ -9,11 +9,14 @@ function h_rend = RENDER(pars, dom_size, cm)
 %     pars: Particle information structure/class
 %     dom_size: Computational domain dimensions
 %     cm: Plot colormap
+%     q: Quality of render.
 % ----------------------------------------------------------------------- %
 % 
 % Output:
 %     h_rend: The output figure handle
 % ----------------------------------------------------------------------- %
+
+warning('off')
 
 % Setting default domain size as empty
 if ~exist('dom_size', 'var'); dom_size = []; end
@@ -21,6 +24,10 @@ if ~exist('dom_size', 'var'); dom_size = []; end
 % Setting default colormap as "summer"
 if ~exist('cm', 'var'); cm = []; end
 if isempty(cm); cm = summer; end
+
+% Setting default quality to 60 points in the sphere.
+if ~exist('q', 'var'); q = []; end
+if isempty(q); q = 60; end
 
 % Compiling primary particles across multiple aggregates
 if isa(pars, 'AGG')
@@ -33,7 +40,8 @@ n_pp = cat(1, pars.n); % Compiling/copying number distribution of primaries
 n_tot = sum(n_pp); % Total number of primaries
 
 % Displaying overal progress
-disp('Rendering:');
+disp(' ')
+disp('Rendering:')
 UTILS.TEXTBAR([0, n_tot]);
 
 % Initializing the figure handle
@@ -47,7 +55,7 @@ set(h_rend, 'color', 'white');
 colormap(cm); % Setting colormap
 
 % Plotting aggregates
-[X,Y,Z] = sphere(60);
+[X,Y,Z] = sphere(q);
 
 for i = 1 : n_par    
     for j = 1 : n_pp(i)

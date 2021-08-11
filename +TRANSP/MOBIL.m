@@ -17,7 +17,7 @@ else
 end
 
 % Compiling/copying properties locally
-dv = cat(1, pars.dv);
+dv = cat(1, pars.dv); % Volumetric size
 
 kn_kin = (2 * fl.lambda) ./ dv; % Kinetic (momentum) Knudsen number (-)
 alpha = 1.254; 

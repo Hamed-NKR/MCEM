@@ -8,6 +8,14 @@ close all
 
 %% Part 1. Setting the initial domain conditions
 
+% Setting the run-time record sheet
+timetable = struct('start', [], 'end', [], 'total', [],...
+    'prerender', [], 'postrender', [], 'render', [],...
+    'pregrowth', [], 'postgrowth', [], 'growth', [],...
+    'preoverlap', [], 'postoverlap', [], 'overlap', [],...
+    'preconnect', [], 'postconnect', [], 'connect', []);
+timetable.start = clock;
+
 [params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
     % ...physical parameters to be used in the simulations
 
@@ -28,7 +36,7 @@ pars.pp = PAR.INIT_MORPH(pars.pp);
 pars = PAR.INIT_LOC(params_ud.Value(1:3), pars);
 
 % Finding the equivalent particle sizes
-[pars.dv, pars.dg, pars.dmax, pars.dpp] = PAR.SIZING(pars);
+pars = PAR.SIZING(pars);
 
 % Finding the initial mobility propeties of particles
 pars = TRANSP.MOBIL(pars, fl, params_const);
@@ -42,17 +50,19 @@ coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
     % ...coefficients
 pars.nnl = COL.NNS(pars, ind_trg, coef_trg);
 
-% % Converting the global structure to aggregate objects
+% Converting the global structure to aggregate objects
 % pars = PAR.PAR2AGG(pars);
+
+% Saving the initial population-based particle properties
+parsdata = UTILS.SAVEPARS(pars, 0, 1, params_ud);
 
 disp("The computational domain is successfully initialized...")
 
-% Visualizing the initial particle locations and velocities, and nearest...
+% Visualizing the initial particle locations, velocities, and nearest...
     % ...neighbor lists
 % figure
 % h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
-%     'equivalent_volumetric_size', 'on', 'velocity_vector', 'on',...
-%     'render', 'on');
+%     'equivalent_size', 'on', 'velocity_vector', 'on', 'render', 'on');
 % 
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...
@@ -60,16 +70,19 @@ disp("The computational domain is successfully initialized...")
 %         ...indices for nearest neighbor testing
 % h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
 %     coef_trg(ind_trg_test));
-%
+% 
+timetable.prerender = clock;
 figure
-h0_3d = UTILS.RENDER(pars);
+UTILS.RENDER(pars);
+timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
 k_max = 5e2; % Marching index limit
 time = zeros(k_max,1);
-% t_plt = 10; % Defining a plotting timeframe criterion
-% t_nns = 10; % The timeframe for nearest neighbor search
+t_rec = 5e1; % Data recording timeframe
+% t_plt = 10; % Particle movements plotting ~
+% t_nns = 10; % Nearest neighbor search ~
 
 % prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
 % str = input(prompt,'s'); % Animation saving variable (yes/no)
@@ -97,31 +110,39 @@ disp('Simulating:');
 UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
-for k = 2 : k_max
-    if length(cat(1, pars.n)) > (params_ud.Value(4) / 3) % Checking if...
-            % ...the number of aggregates within the domain is reasonable
-        
-        [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
-            % ...equation of motions
-
-        pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
-            % ...periodic boundary conditions
-
-        pars = COL.GROW(pars); % Checking for collisions and updating...
-          % ...particle structures upon new clusterations
-
-        [pars.dv, pars.dg, pars.dmax, pars.dpp] = PAR.SIZING(pars);
-            % Updating the size-related properties
-
-        pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the...
-            % ...mobility propeties
-
-    %     if mod(k-2, t_nns) == 0
-    %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Updating the...
+k = 2; % Iteration index
+while (k <= k_max) % && all(cat(1, pars.n) < (params_ud.Value(4) / 2))
+    % Checking if the number of aggregates within the domain is reasonable
+    
+    [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
+        % ...equation of motions
+    
+    pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
+        % ...periodic boundary conditions
+    
+    timetable.pregrowth = [timetable.pregrowth; clock];
+    pars = COL.GROW(pars); % Checking for collisions and updating...
+        % ...particle structures upon new clusterations
+    timetable.postgrowth = [timetable.postgrowth; clock];
+    
+    pars = PAR.SIZING(pars); % Updating the size-related properties
+    
+    pars = TRANSP.MOBIL(pars, fl, params_const); % Updating the...
+        % ...mobility propeties
+    
+    %     if mod(k-1, t_nns) == 0
+    %         par.nnl = COL.NNS(par, ind_trg, coef_trg); % Finding the...
     %             % ...nearest neighbors
     %     end
-
-    %     if mod(k-2, t_plt) == 0
+    
+    time(k) = time(k-1) + delt; % Updating time
+    
+    if mod(k-1, t_rec) == 0
+        parsdata = UTILS.SAVEPARS(pars, time, k, [], parsdata);
+        % Saving particle data over time
+    end
+    
+    %     if mod(k-1, t_plt) == 0
     %         h_anim = UTILS.PLOTPARS(pars, params_ud.Value(1:3)); % Plotting...
     %             % ...every t_plt time steps
     %         drawnow; % Drawing the plot at the desired time steps
@@ -132,13 +153,14 @@ for k = 2 : k_max
     %             writeVideo(video_par, framenow); % Saving the video
     %         end
     %     end
-
-        time(k) = time(k-1) + delt; % Updating time
-
-        UTILS.TEXTBAR([k, k_max]); % Updating textbar
     
-    end
+    UTILS.TEXTBAR([k, k_max]); % Updating textbar
+    
+    k = k + 1;
+    
 end
+
+k = k - 1;
 
 % if (str == 'Y') || (str == 'y')
 %     close(video_par); % Closing the video file
@@ -149,5 +171,35 @@ end
 % Obtaining fractal properties
 [df, kf] = PAR.FRACTALITY(pars);
 
+% Morphology of the final population
 figure
-h_3d = UTILS.RENDER(pars); % Morphology of the final population
+UTILS.RENDER(pars);
+
+% Plotting kinetic properties
+timetable.prerender = [timetable.prerender; clock];
+figure
+UTILS.PLOTKINETICS(parsdata);
+timetable.postrender = [timetable.postrender; clock];
+
+% Finalizing the run-time results
+timetable.end = clock;
+
+timetable.total = UTILS.TIMEDIFF(timetable.start, timetable.end);
+
+timetable.render = sum(UTILS.TIMEDIFF(timetable.prerender,...
+    timetable.postrender));
+timetable.render = [timetable.render, timetable.render / timetable.total];
+
+timetable.growth = sum(UTILS.TIMEDIFF(timetable.pregrowth,...
+    timetable.postgrowth));
+timetable.growth = [timetable.growth, timetable.growth / timetable.total];
+
+timetable.overlap = sum(UTILS.TIMEDIFF(timetable.preoverlap,...
+    timetable.postoverlap));
+timetable.overlap = [timetable.overlap, timetable.overlap /...
+    timetable.growth];
+
+timetable.connect = sum(UTILS.TIMEDIFF(timetable.preconnect,...
+    timetable.postconnect));
+timetable.connect = [timetable.connect, timetable.connect /...
+    timetable.growth];

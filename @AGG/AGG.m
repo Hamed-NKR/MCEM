@@ -51,7 +51,9 @@ classdef AGG
             % Assigning the aggregate properties
             obj.pp = pp;
             obj.n = size(pp.id, 1);
-            obj.r = obj.COM(pp);
+            obj.r = AGG.COM(pp);
+            obj.dv = AGG.EQUIV(pp);
+            obj.dmax = AGG.TERRITORY(pp);
             if isempty(obj.v); obj.v = [0, 0, 0]; end  % Zero velocity...
                 % ...be default
         end
@@ -130,7 +132,7 @@ classdef AGG
         
         % === TERRITORY ================================================= %
         function dmax = TERRITORY(pp)
-        % "TERRIROY" gets the maximum extent of the aggregate.
+        % "TERRIROY" gives the maximum extent of the aggregate.
         % --------------------------------------------------------------- %
         %
         % pp: Primary particle structure
@@ -139,11 +141,60 @@ classdef AGG
         % --------------------------------------------------------------- %
             
             r_com = AGG.COM(pp); % Center of mass coordinates
-            dmax = max(sum(sqrt((pp.r - r_com) .^ 2) + pp.d ./ 2, 2));
+            dmax = max(2 .* sqrt(sum((pp.r - r_com) .^ 2, 2)) + pp.d);
+            
+        end
+        
+        % === Gyration ================================================== %
+        function dg = GYRATION(pp)
+        % "TERRIROY" calculates the gyration diameter of the aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dg: Gyration diameter
+        % --------------------------------------------------------------- %
+            
+            r_com = AGG.COM(pp); % Center of mass coordinates
+            a2 = sum((r_com - (pp.r .^ 2)), 2); % Distance between...
+                % ...center of primaries and aggregate center of mass
+            radg2 = 0.6 .* (pp.d ./ 2).^2; % Radius of gyration of...
+                % ...primaries squared
+            dg = 2 .* sqrt(sum((pp.d .^ 3) .* (a2 + radg2)) ./...
+                sum((pp.d) .^ 3)); % Gyration diameter
+            
+        end
+        
+        % === EQUIV ===================================================== %
+        function dv = EQUIV(pp)
+        % "EQUIV" computes the equivalent volumetric diameter of the...
+        %   ...aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dv: Volumetric diameter
+        % --------------------------------------------------------------- %
+            
+            dv = nthroot(sum(pp.d .^ 3), 3);
+            
+        end
+        
+        % === MEANPP ==================================================== %
+        function dpp = MEANPP(pp)
+        % "MEANPP" gives the mean and standard deviation of primary...
+        %   ...particles within an aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dpp: Primary particles average diameter + sample std
+        % --------------------------------------------------------------- %
+            
+            dpp(1) = mean(pp.d); % Mean size
+            dpp(2) = std(pp.d); % Standard deviation
             
         end
         
         % === COMPILEPP ================================================= %
+        function pp_glob = COMPILEPP(objs)
         % "COMPILEPP" compiles a primary particle information set across...
         %   ...multiple aggregates.
         %
@@ -154,9 +205,7 @@ classdef AGG
         % objs: Aggregate objects
         % pp_glob: Concatinated primary particle data
         % --------------------------------------------------------------- %
-        
-        function pp_glob = COMPILEPP(objs)
-            
+                    
             n = cat(1, objs.n); % Compiling number of primaries data
             n_pp = sum(n); % Total number of primaries
             pp_glob = zeros(n_pp, 5); % Initializing the global array
@@ -168,31 +217,6 @@ classdef AGG
                     [objs(i).pp.id, objs(i).pp.d, objs(i).pp.r];
                 ii = ii + n(i); % Updating the number of row to be...
                     % ...called
-            end
-            
-        end
-        
-        % === COMPILE =================================================== %
-        % "COMPILEPROP" compiles a general property over multiple...
-        %   ...aggregates.
-        %
-        % Note: The purpose is again to make different functions...
-        %   ...compatible with both "structure" and "class" modes.
-        % --------------------------------------------------------------- %
-        %
-        % objs: Aggregate objects
-        % propname: Property to be concatinated
-        % prop: The concatinated outcome
-        % --------------------------------------------------------------- %
-        
-        function prop = COMPILEPROP(objs, propname)
-            
-            % Initializing the data storage array
-            prop = zeros(length(objs), size(objs(1).(propname), 2));
-            
-            for i = 1 : length(objs)
-            	prop(i,:) = objs(i).(propname); % Adding the i^th...
-                    % ...aggregate data
             end
             
         end

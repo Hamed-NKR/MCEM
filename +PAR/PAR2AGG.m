@@ -28,16 +28,28 @@ for i = 1 : n_agg
     % Generating aggregate objects
     aggs(i) = AGG(pp);
     
-    % Assigning the aggregates physical properties
-    aggs(i).dv = pars.dv(i);               % Volumetric diameter
+    % Assigning the aggregate-level properties
+    if isempty(aggs(i).n)
+        aggs(i).n = pars.n(i);             % Number of primaries
+    end
+
+    if isempty(aggs(i).dv)
+        aggs(i).dv = pars.dv(i);           % Volumetric diameter
+    end
+    if isempty(aggs(i).dmax)
+        aggs(i).dmax = pars.dmax(i);       % Maximum extent diameter
+    end
     aggs(i).dg = pars.dg(i);               % Gyration diameter
+    aggs(i).dpp = pars.dpp(i,:);           % Maximum extent diameter
 %     aggs(i).dm = pars.dm(i);               % Mobility diameter
 %     aggs(i).da = pars.da(i);               % Aerodynamic diameter
-    aggs(i).dpp = pars.dpp(i,:);           % Maximum extent diameter
-    aggs(i).dmax = pars.dmax(i);           % Maximum extent diameter
     
-    aggs(i).r = pars.r(i,:);               % Location
-    aggs(i).v = pars.v(i,:);               % Velocity
+    if isempty(aggs(i).r)
+        aggs(i).r = pars.r(i,:);           % Location
+    end
+    if isempty(aggs(i).v) || (~ all(aggs(i).v))
+        aggs(i).v = pars.v(i,:);           % Velocity
+    end
     
     aggs(i).m = pars.m(i);                 % Mass
     aggs(i).rho = pars.rho(i);             % Effective density

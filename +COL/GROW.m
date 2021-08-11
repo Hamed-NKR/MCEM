@@ -4,12 +4,21 @@
 % ----------------------------------------------------------------------- %
 % 
 % Input/Output:
-%     pars: Particle structure
+%     pars: Particle info structure/class
 % ----------------------------------------------------------------------- %
 
-n_par = size(pars.n, 1);  % Total number of particles
-dmax = PAR.TERRITORY(pars.pp, pars.n); % Maximum distance within...
-    % ...the aggregates from their center of mass
+% Total number of (independent) particles
+if isa(pars, 'AGG')
+    n_par = length(pars);
+else
+    n_par = size(pars.n, 1);
+end
+
+% Compiling/copying properties locally
+dmax = cat(1, pars.dmax); % Maximum distance within the aggregates from...
+    % ...their center of mass
+r = cat(1, pars.r);
+
 % Making particle pair indices
 ind_pars = (1 : n_par)';
 ind_pars = [repelem(ind_pars, n_par, 1), repmat(ind_pars, n_par, 1)];
@@ -25,15 +34,15 @@ rmv = rmv1 + rmv2;
 ind_pars(rmv,:) = [];
 
 % Generating the "OVR" inputs:
-d_pars = [repelem(dmax, n_par, 1), repmat(dmax, n_par, 1)];
+d_pairs = [repelem(dmax, n_par, 1), repmat(dmax, n_par, 1)];
     % size input
-d_pars(rmv,:) = [];
-r_pars = [repelem(pars.r, n_par, 1), repmat(pars.r, n_par, 1)];
-    % location input
-r_pars(rmv,:) = [];
+d_pairs(rmv,:) = [];
+r_pairs = [repelem(r, n_par, 1), repmat(r, n_par, 1)]; % Pairs of...
+    % ...coordinates
+r_pairs(rmv,:) = [];
 
 % Checking overlapping
-ovrs = COL.OVR(r_pars, d_pars);
+ovrs = COL.OVR(r_pairs, d_pairs);
 
 % Updating the location of overlapped particles
 if ~ isempty(find(ovrs == 1, 1))
@@ -45,12 +54,21 @@ if ~ isempty(find(ovrs == 1, 1))
         if ind_chk(i,1) ~= ind_chk(i,2)
 
             % Sticking the two colliding particles
-            [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}] =...
-                COL.CONNECT(pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}); 
-            
-            % Defining collision status variable(1 --> collided. 0 -->...
-                % ...uncollided)
-            if ~exist('colstat', 'var'); colstat = 1; end
+            if isa(pars, 'AGG')
+                pp1 = AGG.COMPILEPP(pars(ind_chk(i,1)));
+                pp2 = AGG.COMPILEPP(pars(ind_chk(i,2)));
+                [pp1, pp2, colstat] = COL.CONNECT(pp1, pp2);
+                pars(ind_chk(i,1)).r = pp1(:,3:5);
+                pars(ind_chk(i,2)).r = pp2(:,3:5);
+            else
+                [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}, colstat]...
+                    = COL.CONNECT(pars.pp{ind_chk(i,1)},...
+                    pars.pp{ind_chk(i,2)}); 
+            end
+%             
+%             % Initializing collision status variable (1 --> collided,...
+%                 % ...0 --> uncollided)
+%             if ~exist('colstat', 'var'); colstat = 1; end
             
             if colstat
                 
@@ -58,8 +76,8 @@ if ~ isempty(find(ovrs == 1, 1))
                 [pars, ind_new] = COL.UNITE(pars, [ind_chk(i,1),...
                     ind_chk(i,2)]);
 
-                % Updating the general overlap checking indices after each...
-                    % ...unification
+                % Updating the general overlap checking indices after...
+                    % ...each unification
                 for j = 1 : n_chk
                     ind_chk(j,1) = ind_new(find(ind_new(:,1) ==...
                         ind_chk(j,1), 1), 2);
