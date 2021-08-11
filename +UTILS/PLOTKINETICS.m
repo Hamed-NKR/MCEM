@@ -33,6 +33,7 @@ yyaxis right
 plot(parsdata.t, parsdata.beta);
 ylabel('beta (1/s)')
 title ('Total number vs. time')
+set(gca, 'XScale', 'log')
 
 % Size distributions of particles mass over time
 subplot(1,2,2)
@@ -43,7 +44,7 @@ ind = (0 : 1 / (n_data - 1) : 1)';
 ind = 1 + (length(cl) - 1) .* ind;
 ind = round(ind);
 txt = cell(n_data,1);
-for i = 1 : n_data
+for i = round(1 : (n_data - 1) / 10 : n_data)
     plot(parsdata.dm_dlogdv{i}(:,2), parsdata.dm_dlogdv{i}(:,1),...
         'Color', cl(ind(i),:));
     txt{i} = "t = " + num2str(parsdata.t(i), '%1.1e') + " (s)"; % Time...
@@ -51,7 +52,7 @@ for i = 1 : n_data
     hold on
 end
 legend(txt)
-% set(gca, 'XScale', 'log')
+set(gca, 'XScale', 'log')
 % set(gca, 'YScale', 'log')
 xlabel('dv (m)')
 ylabel('dm/dlogdv (-)')

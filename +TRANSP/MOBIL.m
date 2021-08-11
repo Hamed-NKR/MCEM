@@ -17,22 +17,14 @@ else
 end
 
 % Compiling/copying properties locally
-dv = cat(1, pars.dv); % Volumetric size
+dm = 0.75 * cat(1, pars.dg); % Mobility size
 
-kn_kin = (2 * fl.lambda) ./ dv; % Kinetic (momentum) Knudsen number (-)
+kn_kin = (2 * fl.lambda) ./ dm; % Kinetic (momentum) Knudsen number (-)
 alpha = 1.254; 
 beta = 0.4;
 gamma = 1.1;
 cc = 1 + (kn_kin(:,1)) .* (alpha + beta .* exp(-gamma ./ (kn_kin(:,1))));
     % Cunningham correction factor (-)
-
-rho_bc = params_const.Value(1); % Black Carbon bulk density (kg/m3)
-rho = rho_bc .* ones(n_par,1); % Effective density (kg/m3)
-tau = rho .* (dv.^2) .* cc ./ (18 * fl.mu); % Response (relaxation) time (s)
-kb = params_const.Value(3); % Boltzmann's constant (j/k)
-f = (3 * pi * fl.mu) .* (dv) ./ cc; % Friction factor (-)
-delt = f .* (dv.^2) ./ (6 * kb * fl.temp); % Marching timestep
-diff = (kb * (fl.temp)) ./ f; % Particle diffusivity (m2/s)
 
 % Aggregate mass (kg)
 m = ones(n_par,1);
@@ -44,8 +36,15 @@ for i = 1 : n_par
     end
 end
 
+rho = (6 / pi) * (m ./ (dm.^3)); % Effective density (kg/m3)
+tau = rho .* (dm.^2) .* cc ./ (18 * fl.mu); % Response (relaxation) time (s)
+kb = params_const.Value(3); % Boltzmann's constant (j/k)
+f = (3 * pi * fl.mu) .* (dm) ./ cc; % Friction factor (-)
+delt = f .* (dm.^2) ./ (6 * kb * fl.temp); % Marching timestep
+diff = (kb * (fl.temp)) ./ f; % Particle diffusivity (m2/s)
+
 lambda = sqrt(m .* kb .* (fl.temp)) ./ f; % Diffusive mean free path (m)
-kn_diff = 2 * lambda ./ dv; % Diffusive Knudsen number (-)
+kn_diff = 2 * lambda ./ dm; % Diffusive Knudsen number (-)
 
 % Updating the transport properties for the structure/class of aggregates
 if isa(pars, 'AGG')
