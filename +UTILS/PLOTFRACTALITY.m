@@ -5,7 +5,7 @@ function [df_compiled, kf_compiled, h_fract] = PLOTFRACTALITY(parsdata, kk)
 %
 % Input:
 %   parsdata: Stored particle information over time
-%   kk: Indices of stored data to be plotted
+%   kk: Marching indices of stored data to be plotted
 % ----------------------------------------------------------------------- %
 %
 % Outputs:
@@ -19,6 +19,8 @@ if ~exist('kk', 'var'); kk = []; end
 if isempty(kk)
     kk = unique(round(1 : (length(parsdata.ii) - 1) / 10 :...
         length(parsdata.ii)));
+else
+    kk = unique(kk);
 end
 
 % Initializing the results plot
@@ -30,10 +32,18 @@ end
 set(h_fract, 'color', 'white');
 ms = 25; % Marker size
 
+% Setting a color distribution for the second plot lines
+cl = autumn;
+ii = unique(round(20 + (length(cl) - 20) .*...
+    (0 : 1 / (length(kk) - 1) : 1)'));
+cl = cl(ii,:);
+ntot = cat(1, parsdata.ntot(kk));
+cl = repelem(cl, ntot, ones(3,1));
+
 % Compiling number distribution and size ratio across aggregates
 dg_dpp = cat(1, parsdata.dg_dpp{kk});
 npp = cat(1, parsdata.npp{kk});
-scatter(dg_dpp, npp, ms, 'filled');
+scatter(dg_dpp, npp, ms, cl, 'filled');
 hold on
 
 pfit = polyfit(log(dg_dpp), log(npp), 1); % Fitting a power function...

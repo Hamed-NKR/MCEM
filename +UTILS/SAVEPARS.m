@@ -12,7 +12,7 @@ function parsdata = SAVEPARS(pars, time, k, params_ud, parsdata)
 
 % Initializing the output structure
 if ~exist('parsdata', 'var')
-    parsdata = struct('ii', [], 't', [], 'n_tot', [], 'vf', [],...
+    parsdata = struct('ii', [], 't', [], 'ntot', [], 'vf', [],...
         'beta', [], 'dn_dlogdv', [], 'dm_dlogdv', [], 'dg_dpp', [],...
         'npp',[], 'df', [], 'kf', []);
 end
@@ -28,10 +28,10 @@ parsdata.ii = [parsdata.ii; k]; % Adding iteration index
 parsdata.t = [parsdata.t; time(k)]; % Time
 
 if isa(pars, 'AGG')
-    parsdata.n_tot = [parsdata.n_tot; length(pars)]; % Total number of...
+    parsdata.ntot = [parsdata.ntot; length(pars)]; % Total number of...
         % ...aggregates
 else
-    parsdata.n_tot = [parsdata.n_tot; size(pars.n, 1)];
+    parsdata.ntot = [parsdata.ntot; size(pars.n, 1)];
 end
 
 if isempty(parsdata.vf)
@@ -48,9 +48,9 @@ if isempty(parsdata.beta)
     parsdata.beta = NaN;
 else
     kk = length(parsdata.ii);
-    parsdata.beta = [parsdata.beta; -2 * (parsdata.n_tot(kk) -...
-        parsdata.n_tot(kk - 1)) /(parsdata.t(kk) - parsdata.t(kk - 1)) /...
-        (parsdata.n_tot(kk) .^ 2)]; % Collision frequency
+    parsdata.beta = [parsdata.beta; -2 * (parsdata.ntot(kk) -...
+        parsdata.ntot(kk - 1)) /(parsdata.t(kk) - parsdata.t(kk - 1)) /...
+        (parsdata.ntot(kk) .^ 2)]; % Collision frequency
 end
 
 [dn_dlogdv, dv_discrete] = TRANSP.DISTRIBUTION(ones(length(dv),1), dv);

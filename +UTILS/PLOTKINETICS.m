@@ -26,7 +26,7 @@ end
 % Changes of number and collision frequency over time
 subplot(1,2,1)
 yyaxis left
-plot(parsdata.t, parsdata.n_tot);
+plot(parsdata.t, parsdata.ntot);
 xlabel('t (s)')
 ylabel('ntot (#)')
 yyaxis right
@@ -40,10 +40,8 @@ set(gca, 'XScale', 'log')
 subplot(1,2,2)
 n_data = length(parsdata.t); % Number of datasets to be plotted
 % Setting a color distribution for the second plot lines
-cl = turbo;
-ii1 = (0 : 1 / (n_data - 1) : 1)';
-ii1 = 1 + (length(cl) - 1) .* ii1;
-ii1 = round(ii1);
+cl = jet;
+ii1 = unique(round(20 + (length(cl) - 20) .* (0 : 1 / (n_data - 1) : 1)'));
 ii2 = unique(round(1 : (n_data - 1) / 10 : n_data));
 txt = cell(length(ii2),1);
 for i = 1 : length(ii2)
