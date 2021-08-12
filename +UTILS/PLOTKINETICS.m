@@ -33,6 +33,7 @@ yyaxis right
 plot(parsdata.t, parsdata.beta);
 ylabel('beta (1/s)')
 title ('Total number vs. time')
+% set(gca, 'YScale', 'log')
 set(gca, 'XScale', 'log')
 
 % Size distributions of particles mass over time
@@ -40,15 +41,16 @@ subplot(1,2,2)
 n_data = length(parsdata.t); % Number of datasets to be plotted
 % Setting a color distribution for the second plot lines
 cl = turbo;
-ind = (0 : 1 / (n_data - 1) : 1)';
-ind = 1 + (length(cl) - 1) .* ind;
-ind = round(ind);
-txt = cell(n_data,1);
-for i = round(1 : (n_data - 1) / 10 : n_data)
-    plot(parsdata.dm_dlogdv{i}(:,2), parsdata.dm_dlogdv{i}(:,1),...
-        'Color', cl(ind(i),:));
-    txt{i} = "t = " + num2str(parsdata.t(i), '%1.1e') + " (s)"; % Time...
-        % ...legend
+ii1 = (0 : 1 / (n_data - 1) : 1)';
+ii1 = 1 + (length(cl) - 1) .* ii1;
+ii1 = round(ii1);
+ii2 = unique(round(1 : (n_data - 1) / 10 : n_data));
+txt = cell(length(ii2),1);
+for i = 1 : length(ii2)
+    plot(parsdata.dm_dlogdv{ii2(i)}(:,2),...
+        parsdata.dm_dlogdv{ii2(i)}(:,1),'Color', cl(ii1(ii2(i)),:));
+    txt{i} = "t = " + num2str(parsdata.t(ii2(i)), '%1.1e') + " (s)";
+        % Time legend
     hold on
 end
 legend(txt)

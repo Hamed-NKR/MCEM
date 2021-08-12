@@ -13,8 +13,16 @@ function parsdata = SAVEPARS(pars, time, k, params_ud, parsdata)
 % Initializing the output structure
 if ~exist('parsdata', 'var')
     parsdata = struct('ii', [], 't', [], 'n_tot', [], 'vf', [],...
-        'beta', [], 'dn_dlogdv', [], 'dm_dlogdv', []);
+        'beta', [], 'dn_dlogdv', [], 'dm_dlogdv', [], 'dg_dpp', [],...
+        'npp',[], 'df', [], 'kf', []);
 end
+
+% Compiling properties across aggregates
+dv = cat(1, pars.dv);
+m = cat(1, pars.m);
+dg = cat(1, pars.dg);
+dpp = cat(1, pars.dpp);
+npp = cat(1, pars.n);
 
 parsdata.ii = [parsdata.ii; k]; % Adding iteration index
 parsdata.t = [parsdata.t; time(k)]; % Time
@@ -45,15 +53,20 @@ else
         (parsdata.n_tot(kk) .^ 2)]; % Collision frequency
 end
 
-dv = cat(1, pars.dv);
-
 [dn_dlogdv, dv_discrete] = TRANSP.DISTRIBUTION(ones(length(dv),1), dv);
 parsdata.dn_dlogdv = [parsdata.dn_dlogdv; {[dn_dlogdv, dv_discrete]}];
     % Number size distribution
 
-m = cat(1, pars.m);
 dm_dlogdv = TRANSP.DISTRIBUTION(m, dv);
 parsdata.dm_dlogdv = [parsdata.dm_dlogdv, {[dm_dlogdv, dv_discrete]}];
     % Mass size distribution
+
+dg_dpp = dg ./ dpp(:,1); % Aggregate to primary particles size ratio
+parsdata.dg_dpp = [parsdata.dg_dpp, {dg_dpp}];
+pfit = polyfit(log(dg_dpp), log(npp), 1); % Fitting a power function...
+    % ...to the number vs. size ratio variations
+parsdata.npp = [parsdata.npp, {npp}]; % Primaries number distribution
+parsdata.df = [parsdata.df; pfit(1)]; % Fractal dimension
+parsdata.kf = [parsdata.kf; exp(pfit(2))]; % Fractal prefactor
 
 end

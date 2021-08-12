@@ -79,9 +79,9 @@ timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e5; % Marching index limit
+k_max = 1e3; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 1e2; % Data recording timeframe
+t_rec = 1e1; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
@@ -112,7 +112,7 @@ UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 k = 2; % Iteration index
-while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(4) / 20))
+while (k <= k_max)% && all(cat(1, pars.n) < (params_ud.Value(4) / 2))
     % Checking if the number of aggregates within the domain is reasonable
     
     [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
@@ -170,12 +170,12 @@ k = k - 1;
 
 %% Part 3: Postprocessing the results
 
-% Obtaining fractal properties
-[df, kf] = PAR.FRACTALITY(pars);
-
 % Morphology of the final population
 figure
 UTILS.RENDER(pars);
+
+% Obtaining fractal properties
+[df_compiled, kf_compiled] = UTILS.PLOTFRACTALITY(parsdata);
 
 % Plotting kinetic properties
 timetable.prerender = [timetable.prerender; clock];
