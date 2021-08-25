@@ -210,3 +210,5 @@ UTILS.PLOTKINETICS(parsdata);
 %     timetable.postunite));
 % timetable.unite = [timetable.unite, timetable.unite /...
 %     timetable.growth(1)];
+
+clear timetable
