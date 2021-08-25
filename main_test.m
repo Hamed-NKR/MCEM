@@ -9,13 +9,13 @@ close all
 %% Part 1. Setting the initial domain conditions
 
 % Setting the run-time record sheet
-timetable = struct('start', [], 'end', [], 'total', [],...
-    'prerender', [], 'postrender', [], 'render', [],...
-    'pregrowth', [], 'postgrowth', [], 'growth', [],...
-    'preoverlap', [], 'postoverlap', [], 'overlap', [],...
-    'preconnect', [], 'postconnect', [], 'connect', [],...
-    'preunite', [], 'postunite', [], 'unite', []);
-timetable.start = clock;
+% timetable = struct('start', [], 'end', [], 'total', [],...
+%     'prerender', [], 'postrender', [], 'render', [],...
+%     'pregrowth', [], 'postgrowth', [], 'growth', [],...
+%     'preoverlap', [], 'postoverlap', [], 'overlap', [],...
+%     'preconnect', [], 'postconnect', [], 'connect', [],...
+%     'preunite', [], 'postunite', [], 'unite', []);
+% timetable.start = clock;
 
 [params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
     % ...physical parameters to be used in the simulations
@@ -72,14 +72,14 @@ disp("The computational domain is successfully initialized...")
 % h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
 %     coef_trg(ind_trg_test));
 % 
-timetable.prerender = clock;
+% timetable.prerender = clock;
 figure
 UTILS.RENDER(pars);
-timetable.postrender = clock;
+% timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 2e3; % Marching index limit
+k_max = 1e5; % Marching index limit
 time = zeros(k_max,1);
 t_rec = 1e1; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
@@ -121,11 +121,11 @@ while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(4) / 10))
     pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
         % ...periodic boundary conditions
     
-    timetable.pregrowth = [timetable.pregrowth; clock];
+%     timetable.pregrowth = [timetable.pregrowth; clock];
     [pars, timetable] = COL.GROW(pars, timetable); % Checking for...
         % ...collisions and updating particle structures upon new...
         % ...clusterations
-    timetable.postgrowth = [timetable.postgrowth; clock];
+%     timetable.postgrowth = [timetable.postgrowth; clock];
     
     pars = PAR.SIZING(pars); % Updating the size-related properties
     
@@ -171,42 +171,42 @@ k = k - 1;
 %% Part 3: Postprocessing the results
 
 % Morphology of the final population
+% timetable.prerender = [timetable.prerender; clock];
 figure
 UTILS.RENDER(pars);
+% timetable.postrender = [timetable.postrender; clock];
 
 % Obtaining fractal properties
 [df_compiled, kf_compiled] = UTILS.PLOTFRACTALITY(parsdata);
 
 % Plotting kinetic properties
-timetable.prerender = [timetable.prerender; clock];
 figure
 UTILS.PLOTKINETICS(parsdata);
-timetable.postrender = [timetable.postrender; clock];
 
 % Finalizing the run-time results
-timetable.end = clock;
-
-timetable.total = UTILS.TIMEDIFF(timetable.start, timetable.end);
-
-timetable.render = sum(UTILS.TIMEDIFF(timetable.prerender,...
-    timetable.postrender));
-timetable.render = [timetable.render, timetable.render / timetable.total];
-
-timetable.growth = sum(UTILS.TIMEDIFF(timetable.pregrowth,...
-    timetable.postgrowth));
-timetable.growth = [timetable.growth, timetable.growth / timetable.total];
-
-timetable.overlap = sum(UTILS.TIMEDIFF(timetable.preoverlap,...
-    timetable.postoverlap));
-timetable.overlap = [timetable.overlap, timetable.overlap /...
-    timetable.growth(1)];
-
-timetable.connect = sum(UTILS.TIMEDIFF(timetable.preconnect,...
-    timetable.postconnect));
-timetable.connect = [timetable.connect, timetable.connect /...
-    timetable.growth(1)];
-
-timetable.unite = sum(UTILS.TIMEDIFF(timetable.preunite,...
-    timetable.postunite));
-timetable.unite = [timetable.unite, timetable.unite /...
-    timetable.growth(1)];
+% timetable.end = clock;
+% 
+% timetable.total = UTILS.TIMEDIFF(timetable.start, timetable.end);
+% 
+% timetable.render = sum(UTILS.TIMEDIFF(timetable.prerender,...
+%     timetable.postrender));
+% timetable.render = [timetable.render, timetable.render / timetable.total];
+% 
+% timetable.growth = sum(UTILS.TIMEDIFF(timetable.pregrowth,...
+%     timetable.postgrowth));
+% timetable.growth = [timetable.growth, timetable.growth / timetable.total];
+% 
+% timetable.overlap = sum(UTILS.TIMEDIFF(timetable.preoverlap,...
+%     timetable.postoverlap));
+% timetable.overlap = [timetable.overlap, timetable.overlap /...
+%     timetable.growth(1)];
+% 
+% timetable.connect = sum(UTILS.TIMEDIFF(timetable.preconnect,...
+%     timetable.postconnect));
+% timetable.connect = [timetable.connect, timetable.connect /...
+%     timetable.growth(1)];
+% 
+% timetable.unite = sum(UTILS.TIMEDIFF(timetable.preunite,...
+%     timetable.postunite));
+% timetable.unite = [timetable.unite, timetable.unite /...
+%     timetable.growth(1)];
