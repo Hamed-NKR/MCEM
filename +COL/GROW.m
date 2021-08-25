@@ -19,7 +19,7 @@ dmax = cat(1, pars.dmax); % Maximum distance within the aggregates from...
     % ...their center of mass
 r = cat(1, pars.r);
 
-timetable.preoverlap = [timetable.preoverlap; clock];
+% timetable.preoverlap = [timetable.preoverlap; clock];
 % Making particle pair indices
 ind_pars = (1 : n_par)';
 ind_pars = [repelem(ind_pars, n_par, 1), repmat(ind_pars, n_par, 1)];
@@ -44,7 +44,7 @@ r_pairs(rmv,:) = [];
 
 % Checking overlapping
 ovrs = COL.OVR(r_pairs, d_pairs);
-timetable.postoverlap = [timetable.postoverlap; clock];
+% timetable.postoverlap = [timetable.postoverlap; clock];
 
 % Updating the location of overlapped particles
 if ~ isempty(find(ovrs == 1, 1))
@@ -55,7 +55,7 @@ if ~ isempty(find(ovrs == 1, 1))
     for i = 1 : n_chk
         if ind_chk(i,1) ~= ind_chk(i,2)
             
-            timetable.preconnect = [timetable.preconnect; clock];
+%             timetable.preconnect = [timetable.preconnect; clock];
             % Sticking the two colliding particles
             if isa(pars, 'AGG')
                 pp1 = AGG.COMPILEPP(pars(ind_chk(i,1)));
@@ -68,13 +68,13 @@ if ~ isempty(find(ovrs == 1, 1))
                     = COL.CONNECT(pars.pp{ind_chk(i,1)},...
                     pars.pp{ind_chk(i,2)}); 
             end
-            timetable.postconnect = [timetable.postconnect; clock];
+%             timetable.postconnect = [timetable.postconnect; clock];
             
 %             % Initializing collision status variable (1 --> collided,...
 %                 % ...0 --> uncollided)
 %             if ~exist('colstat', 'var'); colstat = 1; end
             
-            timetable.preunite = [timetable.preunite; clock];
+%             timetable.preunite = [timetable.preunite; clock];
             if colstat
                 
                 % Merging the particles info
@@ -90,7 +90,7 @@ if ~ isempty(find(ovrs == 1, 1))
                         ind_chk(j,2), 1), 2);
                 end
             end
-            timetable.postunite = [timetable.postunite; clock];
+%             timetable.postunite = [timetable.postunite; clock];
             
         end
     end
