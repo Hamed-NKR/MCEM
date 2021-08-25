@@ -26,32 +26,33 @@ end
 % Changes of number and collision frequency over time
 subplot(1,2,1)
 yyaxis left
-plot(parsdata.t, parsdata.n_tot);
+plot(parsdata.t, parsdata.ntot);
 xlabel('t (s)')
 ylabel('ntot (#)')
 yyaxis right
 plot(parsdata.t, parsdata.beta);
 ylabel('beta (1/s)')
 title ('Total number vs. time')
+% set(gca, 'YScale', 'log')
+set(gca, 'XScale', 'log')
 
 % Size distributions of particles mass over time
 subplot(1,2,2)
 n_data = length(parsdata.t); % Number of datasets to be plotted
 % Setting a color distribution for the second plot lines
-cl = turbo;
-ind = (0 : 1 / (n_data - 1) : 1)';
-ind = 1 + (length(cl) - 1) .* ind;
-ind = round(ind);
-txt = cell(n_data,1);
-for i = 1 : n_data
-    plot(parsdata.dm_dlogdv{i}(:,2), parsdata.dm_dlogdv{i}(:,1),...
-        'Color', cl(ind(i),:));
-    txt{i} = "t = " + num2str(parsdata.t(i), '%1.1e') + " (s)"; % Time...
-        % ...legend
+cl = jet;
+ii1 = unique(round(20 + (length(cl) - 20) .* (0 : 1 / (n_data - 1) : 1)'));
+ii2 = unique(round(1 : (n_data - 1) / 10 : n_data));
+txt = cell(length(ii2),1);
+for i = 1 : length(ii2)
+    plot(parsdata.dm_dlogdv{ii2(i)}(:,2),...
+        parsdata.dm_dlogdv{ii2(i)}(:,1),'Color', cl(ii1(ii2(i)),:));
+    txt{i} = "t = " + num2str(parsdata.t(ii2(i)), '%1.1e') + " (s)";
+        % Time legend
     hold on
 end
 legend(txt)
-% set(gca, 'XScale', 'log')
+set(gca, 'XScale', 'log')
 % set(gca, 'YScale', 'log')
 xlabel('dv (m)')
 ylabel('dm/dlogdv (-)')

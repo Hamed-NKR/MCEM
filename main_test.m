@@ -13,7 +13,8 @@ timetable = struct('start', [], 'end', [], 'total', [],...
     'prerender', [], 'postrender', [], 'render', [],...
     'pregrowth', [], 'postgrowth', [], 'growth', [],...
     'preoverlap', [], 'postoverlap', [], 'overlap', [],...
-    'preconnect', [], 'postconnect', [], 'connect', []);
+    'preconnect', [], 'postconnect', [], 'connect', [],...
+    'preunite', [], 'postunite', [], 'unite', []);
 timetable.start = clock;
 
 [params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
@@ -78,9 +79,9 @@ timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 5e2; % Marching index limit
+k_max = 2e3; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 5e1; % Data recording timeframe
+t_rec = 1e1; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
@@ -102,16 +103,16 @@ t_rec = 5e1; % Data recording timeframe
 %     error('Error saving the animation (invalid user response)!\n')
 % end
 
+disp('Simulating:');
+UTILS.TEXTBAR([0, k_max]); % Initializing textbar
+
 % % Initializing the animation plot
 % figure
 % h_anim = UTILS.PLOTPARS(pars, params_ud.Value(1:3));
-
-disp('Simulating:');
-UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 k = 2; % Iteration index
-while (k <= k_max) % && all(cat(1, pars.n) < (params_ud.Value(4) / 2))
+while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(4) / 10))
     % Checking if the number of aggregates within the domain is reasonable
     
     [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
@@ -121,8 +122,9 @@ while (k <= k_max) % && all(cat(1, pars.n) < (params_ud.Value(4) / 2))
         % ...periodic boundary conditions
     
     timetable.pregrowth = [timetable.pregrowth; clock];
-    pars = COL.GROW(pars); % Checking for collisions and updating...
-        % ...particle structures upon new clusterations
+    [pars, timetable] = COL.GROW(pars, timetable); % Checking for...
+        % ...collisions and updating particle structures upon new...
+        % ...clusterations
     timetable.postgrowth = [timetable.postgrowth; clock];
     
     pars = PAR.SIZING(pars); % Updating the size-related properties
@@ -168,12 +170,12 @@ k = k - 1;
 
 %% Part 3: Postprocessing the results
 
-% Obtaining fractal properties
-[df, kf] = PAR.FRACTALITY(pars);
-
 % Morphology of the final population
 figure
 UTILS.RENDER(pars);
+
+% Obtaining fractal properties
+[df_compiled, kf_compiled] = UTILS.PLOTFRACTALITY(parsdata);
 
 % Plotting kinetic properties
 timetable.prerender = [timetable.prerender; clock];
@@ -197,9 +199,14 @@ timetable.growth = [timetable.growth, timetable.growth / timetable.total];
 timetable.overlap = sum(UTILS.TIMEDIFF(timetable.preoverlap,...
     timetable.postoverlap));
 timetable.overlap = [timetable.overlap, timetable.overlap /...
-    timetable.growth];
+    timetable.growth(1)];
 
 timetable.connect = sum(UTILS.TIMEDIFF(timetable.preconnect,...
     timetable.postconnect));
 timetable.connect = [timetable.connect, timetable.connect /...
-    timetable.growth];
+    timetable.growth(1)];
+
+timetable.unite = sum(UTILS.TIMEDIFF(timetable.preunite,...
+    timetable.postunite));
+timetable.unite = [timetable.unite, timetable.unite /...
+    timetable.growth(1)];
