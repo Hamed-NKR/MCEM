@@ -41,12 +41,12 @@ subplot(1,2,2)
 n_data = length(parsdata.t); % Number of datasets to be plotted
 % Setting a color distribution for the second plot lines
 cl = jet;
-ii1 = unique(round(20 + (length(cl) - 20) .* (0 : 1 / (n_data - 1) : 1)'));
-ii2 = unique(round(1 : (n_data - 1) / 10 : n_data));
+ii1 = unique(round(10 + (length(cl) - 10) .* (0 : 1 / 10 : 1)'));
+ii2 = unique(round(1 : (n_data - 1) / 10 : n_data)');
 txt = cell(length(ii2),1);
 for i = 1 : length(ii2)
     plot(parsdata.dm_dlogdv{ii2(i)}(:,2),...
-        parsdata.dm_dlogdv{ii2(i)}(:,1),'Color', cl(ii1(ii2(i)),:));
+        parsdata.dm_dlogdv{ii2(i)}(:,1),'Color', cl(ii1(i),:));
     txt{i} = "t = " + num2str(parsdata.t(ii2(i)), '%1.1e') + " (s)";
         % Time legend
     hold on
