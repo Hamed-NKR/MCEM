@@ -78,9 +78,9 @@ title('Time- & aggregate-ensembled fractal properties')
 xlabel('dg / dpp,g (-)')
 ylabel('npp (#)')
 axis padded
-txt_compiled = "kfens = " + num2str(kf_compiled, '%.1f') +...
-    ", dfens = " +num2str(df_compiled, '%.1f') + "  "; % Overal...
-        % ...results to be annotated on the plot
+txt_compiled = "df(ens) = " + num2str(df_compiled, '%.1f') + ", "...
+    + newline + " kf(ens) = " +num2str(df_compiled, '%.1f') + " ";
+        % Overal results to be annotated on the plot
 annotation('textarrow', [0.65 0.75], [0.8 0.6], 'String', txt_compiled);
 
 disp(' ')
