@@ -1,17 +1,17 @@
-function par_v = INIT_VEL(pp, n_pp ,fl_temp, params_const)
+function pars_v = INIT_VEL(pp, n_pp ,fl_temp, params_const)
 % "INIT_VEL" gives size dependent initial velocities to the primary...
-    % ...particles along random orientations.
+%     ...particles along random orientations.
 % ----------------------------------------------------------------------- %
-
+% 
 % Inputs:
-    % par_pp: Primary particle infomration cell array
-    % par_n: Number distribution of primaries
-    % fl_temp: Flame temperature
-    % params_const: Problem's table of constant physical properties
+%     pp: Primary particle infomration cell array
+%     n_pp: Number distribution of primaries
+%     fl_temp: Flame temperature
+%     params_const: Problem's table of constant physical properties
 % ----------------------------------------------------------------------- %
-
+% 
 % Output:
-    % par_v: Primary particle velocities
+%     pars_v: Primary particle velocities
 % ----------------------------------------------------------------------- %
 
 rho_bc = params_const.Value(1); % Black Carbon's bulk density (kg/m3)
@@ -33,11 +33,11 @@ vmb_mean_par = ((8 * kb * fl_temp / pi) ./ m_par).^(1/2); % Maxwell-...
 theta_pp = pi * rand(n_par,1);
 phi_pp = 2 * pi * rand(n_par,1);
 
-par_v = zeros(n_par,3); % Initialization of the velocity array
+pars_v = zeros(n_par,3); % Initialization of the velocity array
 % Assigning random movements to the primaries
-par_v(:,1) = vmb_mean_par .* sin(theta_pp) .* cos(phi_pp);
-par_v(:,2) = vmb_mean_par .* sin(theta_pp) .* sin(phi_pp);
-par_v(:,3) = vmb_mean_par .* cos(theta_pp);
+pars_v(:,1) = vmb_mean_par .* sin(theta_pp) .* cos(phi_pp);
+pars_v(:,2) = vmb_mean_par .* sin(theta_pp) .* sin(phi_pp);
+pars_v(:,3) = vmb_mean_par .* cos(theta_pp);
 
 end
 

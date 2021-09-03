@@ -17,8 +17,11 @@ To accomplish the above steps the following packages come with MCEM:
 "+TRANSP" computes important transport properties of fluid and particles, solves the particle equation of motions and applies the proper boundary conditions,
 "+COL" contains different tools to check collisions and cluster the particles,
 and "+UTILS" implements different tools to visualize and post-process the results.
-In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program.
-To run the program, two scripts are included in the main directory named as "main_test" and "main_fast". The former one is written to monitor and troubleshoot the outputs while the latter aims to run the code in the lightest form possible to get the results at the lowest computational cost.
+Moreover, "+DEPOT" includes useful tools generated through development of the program, but not employed in the final version for different reasons.
+
+In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program. To run the program, two scripts are included in the main directory named as "main_test" and "main_fast". The former one is written to monitor and troubleshoot the outputs while the latter aims to run the code in the lightest form possible to get the results at the lowest computational cost. The program can also be run in two different modes of data storage:
+(a) via a simpler global structure having a concatinated form of aggregates information. This is expected to be faster as a result of to lower amounts of looping, but trickier to develop due to complexity,
+(b) with a class of aggregates containing different global and internal information of each aggregate object within them. This is more intuitive and easier to deal with, but requires more computational demand.
 
 References:
 1. Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
