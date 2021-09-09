@@ -1,4 +1,5 @@
-# Monodisperse clustering external mixing (MCEM) program: An algorithm for more realistic aggregation modeling of soot
+Monodisperse clustering external mixing (MCEM) program: An algorithm for more realistic aggregation modeling of soot
+===
 
 The present code aims to generate fractal soot aggregates from clustering of primary particle populations. The aggregation phenomenon studied here is in the diffusion-limited cluster-cluster aggregation (DLCA) regime. The numerical algorithm used consists of solving transport equation for the particles in a Langevin Dynamics (LD) framewrok [1] and simulating their growth upon collision with each other. The primary particles considered are nascent soot in typical flame conditions having a polydisperse size distribution. The long-term goal for this project is to model the aggregation in a new way which assumes a hierarchical clustering suggested by External Mixing Hypothesis [2]. This will results in aggeragtes which are externally polydisperse (in terms of primary particle size) while having an internally monodisperse morphology.
 
@@ -10,18 +11,17 @@ LD-DLCA algorithms such as MCEM typically follow the below steps to generate agg
 5. Checking for particle collisions over time,
 6. Attaching the collided particles as larger clusters,
 7. Maintianing the volume fraction by enlarging the main computational domain upon clusteraions,
-8. Exporting and plotting the aggregation data.
-
+8. Exporting and plotting the aggregation data.  
 To accomplish the above steps the following packages come with MCEM:
-"+PAR" initializes different properties of particles,
-"+TRANSP" computes important transport properties of fluid and particles, solves the particle equation of motions and applies the proper boundary conditions,
-"+COL" contains different tools to check collisions and cluster the particles,
-and "+UTILS" implements different tools to visualize and post-process the results.
-Moreover, "+DEPOT" includes useful tools generated through development of the program, but not employed in the final version for different reasons.
+* "+PAR" initializes different properties of particles,
+* "+TRANSP" computes important transport properties of fluid and particles, solves the particle equation of motions and applies the proper boundary conditions,
+* "+COL" contains different tools to check collisions and cluster the particles,
+* "+UTILS" implements different tools to visualize and post-process the results.
+* "+DEPOT" includes useful tools generated through development of the program, but not employed in the final version for different reasons.
 
 In addition to these, the "input" and "output" folders, respectively, contain the initialization parameters and final results of the program. To run the program, two scripts are included in the main directory named as "main_test" and "main_fast". The former one is written to monitor and troubleshoot the outputs while the latter aims to run the code in the lightest form possible to get the results at the lowest computational cost. The program can also be run in two different modes of data storage:
-(a) via a simpler global structure having a concatinated form of aggregates information. This is expected to be faster as a result of to lower amounts of looping, but trickier to develop due to complexity,
-(b) with a class of aggregates containing different global and internal information of each aggregate object within them. This is more intuitive and easier to deal with, but requires more computational demand.
+* via a simpler global structure having a concatinated form of aggregates information. This is expected to be faster as a result of to lower amounts of looping, but trickier to develop due to complexity,
+* with a class of aggregates containing different global and internal information of each aggregate object within them. This is more intuitive and easier to deal with, but requires more computational demand.  
 
 References:
 1. Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
