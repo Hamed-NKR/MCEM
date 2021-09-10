@@ -24,7 +24,7 @@ In addition to these, the "input" and "output" folders, respectively, contain th
 * via a simpler global structure having a concatinated form of aggregates information. This is expected to be faster as a result of to lower amounts of looping, but trickier to develop due to complexity,
 * with a class of aggregates containing different global and internal information of each aggregate object within them. This is more intuitive and easier to deal with, but requires more computational demand.
 
-# References:
+## References:
 1. Suresh, V., & Gopalakrishnan, R. (2021). Tutorial: Langevin Dynamics methods for aerosol particle trajectory simulations and collision rate constant modeling. Journal of Aerosol Science, 155, 105746.
 2. Olfert, J., & Rogak, S. (2019). Universal relations between soot effective density and primary particle size for common combustion sources. Aerosol Science and Technology, 53(5), 485-492.
 3. Heine, M. C., & Pratsinis, S. E. (2007). Brownian coagulation at high concentration. Langmuir, 23(19), 9882-9890.
