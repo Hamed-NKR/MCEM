@@ -79,9 +79,9 @@ timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e3; % Marching index limit
+k_max = 1e6; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 1e1; % Data recording timeframe
+t_rec = 1e3; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
