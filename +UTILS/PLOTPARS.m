@@ -122,9 +122,9 @@ end
 set(h_pars, 'color', 'white');
 
 % Initialing the colors of different plot elements
-cm1 = [0.2,0.3,1]; % Color of primaries
-cm2 = [0.2,0.8,1]; % Color of spherical aggregate equivalents
-cm3 = [1,0.8,0.2]; % Color of velocity vectors
+cm1 = [0.15, 0.6, 0.4]; % Color of primaries
+cm2 = [0.5, 0.75, 0.4]; % Color of spherical aggregate equivalents
+cm3 = [0.9, 0.95, 0.4]; % Color of velocity vectors
 
 % Compiling primary particles across multiple aggregates
 if isa(pars, 'AGG')

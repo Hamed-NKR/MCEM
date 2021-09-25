@@ -23,7 +23,7 @@ kn_kin = (2 * fl.lambda) ./ dm; % Kinetic (momentum) Knudsen number (-)
 alpha = 1.254; 
 beta = 0.4;
 gamma = 1.1;
-cc = 1 + (kn_kin(:,1)) .* (alpha + beta .* exp(-gamma ./ (kn_kin(:,1))));
+cc = 1 + kn_kin .* (alpha + beta .* exp(-gamma ./ kn_kin));
     % Cunningham correction factor (-)
 
 % Aggregate mass (kg)
@@ -39,7 +39,7 @@ end
 rho = (6 / pi) * (m ./ (dm.^3)); % Effective density (kg/m3)
 tau = rho .* (dm.^2) .* cc ./ (18 * fl.mu); % Response (relaxation) time (s)
 kb = params_const.Value(3); % Boltzmann's constant (j/k)
-f = (3 * pi * fl.mu) .* (dm) ./ cc; % Friction factor (-)
+f = (3 * pi * fl.mu) .* dm ./ cc; % Friction factor (-)
 delt = f .* (dm.^2) ./ (6 * kb * fl.temp); % Marching timestep
 diff = (kb * (fl.temp)) ./ f; % Particle diffusivity (m2/s)
 

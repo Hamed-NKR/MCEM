@@ -1,4 +1,4 @@
- function [pars, timetable] = GROW(pars, timetable)
+function [pars, timetable] = GROW(pars, timetable)
 % "GROW" monitors collision of particles and updates the particle...
 %     ...structure based on the post-aggregation data.
 % ----------------------------------------------------------------------- %
@@ -20,36 +20,20 @@ dmax = cat(1, pars.dmax); % Maximum distance within the aggregates from...
 r = cat(1, pars.r);
 
 % timetable.preoverlap = [timetable.preoverlap; clock];
-% Making particle pair indices
-ind_pars = (1 : n_par)';
-ind_pars = [repelem(ind_pars, n_par, 1), repmat(ind_pars, n_par, 1)];
 
-% identifying repeating pairs
-rmv1 = (1 : n_par)';
-rmv1 = repelem((rmv1 - 1) .* n_par, 1 : n_par);
-rmv2 = repmat((1 : n_par)', [1 n_par]);
-rmv2 = triu(rmv2);
-rmv2 = reshape(rmv2, n_par^2, 1);
-rmv2(rmv2 == 0) = [];
-rmv = rmv1 + rmv2;
-ind_pars(rmv,:) = [];
-
-% Generating the "OVR" inputs:
-d_pairs = [repelem(dmax, n_par, 1), repmat(dmax, n_par, 1)];
-    % size input
-d_pairs(rmv,:) = [];
-r_pairs = [repelem(r, n_par, 1), repmat(r, n_par, 1)]; % Pairs of...
-    % ...coordinates
-r_pairs(rmv,:) = [];
+ind_pairs = nchoosek(1 : n_par, 2); % Making particle pair indices
+d_pairs = [dmax(ind_pairs(:,1)), dmax(ind_pairs(:,2))]; % Pair of sizes
+r_pairs = [r(ind_pairs(:,1),:), r(ind_pairs(:,2),:)]; % Pair of coordinates
 
 % Checking overlapping
 ovrs = COL.OVR(r_pairs, d_pairs);
+
 % timetable.postoverlap = [timetable.postoverlap; clock];
 
 % Updating the location of overlapped particles
-if ~ isempty(find(ovrs == 1, 1))
+if any(ovrs == 1)
     
-    ind_chk = ind_pars(ovrs == 1, :); % Indices of colliding pairs
+    ind_chk = ind_pairs(ovrs == 1, :); % Indices of colliding pairs
     n_chk = size(ind_chk,1); % Number of colliding pairs
     
     for i = 1 : n_chk
