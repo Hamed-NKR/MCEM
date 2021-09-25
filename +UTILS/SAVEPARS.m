@@ -63,10 +63,12 @@ parsdata.dm_dlogdv = [parsdata.dm_dlogdv, {[dm_dlogdv, dv_discrete]}];
 
 dg_dpp = dg ./ dpp(:,1); % Aggregate to primary particles size ratio
 parsdata.dg_dpp = [parsdata.dg_dpp, {dg_dpp}];
-pfit = polyfit(log(dg_dpp), log(npp), 1); % Fitting a power function...
-    % ...to the number vs. size ratio variations
 parsdata.npp = [parsdata.npp, {npp}]; % Primaries number distribution
-parsdata.df = [parsdata.df; pfit(1)]; % Fractal dimension
-parsdata.kf = [parsdata.kf; exp(pfit(2))]; % Fractal prefactor
+lrfit = fitlm(table(log(dg_dpp), log(npp)), 'linear'); % A linear...
+    % ...regression fit to the log of number vs. size ratio variations
+parsdata.df = [parsdata.df; lrfit.Coefficients.Estimate(2)]; % Fractal...
+    % ...dimension
+parsdata.kf = [parsdata.kf; exp(lrfit.Coefficients.Estimate(1))];
+    % Fractal prefactor
 
 end
