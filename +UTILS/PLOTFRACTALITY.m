@@ -104,8 +104,8 @@ df2 = fit2.b;
 kf2 = fit2.a;
 y_fit2 = kf2 .* xfit .^ df2;
 
-anotxt2 = "df2 = " + num2str(df0, '%.2f') +...
-    ", kf2 = " +num2str(kf0, '%.2f');
+anotxt2 = "df2 = " + num2str(df2, '%.2f') +...
+    ", kf2 = " +num2str(kf2, '%.2f');
 cl2 = [0.9290 0.6940 0.1250];
 plot(xfit, y_fit2, 'Color', cl2, 'LineStyle', '-.');
 annotation('textbox', [0.8 0.14 1 0.12], 'String', anotxt2,...
@@ -118,8 +118,8 @@ kf3 = fit3.a;
 y_fit3 = kf3 .* xfit .^ df3;
 
 cl3 = [0 0.4470 0.7410];
-anotxt3 = "df3 = " + num2str(df0, '%.2f') +...
-    ", kf3 = " +num2str(kf0, '%.2f');
+anotxt3 = "df3 = " + num2str(df3, '%.2f') +...
+    ", kf3 = " +num2str(kf3, '%.2f');
 plot(xfit, y_fit3, 'Color', cl3, 'LineStyle', '-.');
 annotation('textbox', [0.8 0.16 1 0.14], 'String', anotxt3,...
     'Color', cl3, 'EdgeColor', cl3, 'FitBoxToText', 'on');
@@ -132,8 +132,8 @@ kf4 = exp(fit4.Coefficients.Estimate(1));
 y_fit4 = kf4 .* xfit .^ df4;
 
 cl4 = [0.4940 0.1840 0.5560];
-anotxt4 = "df4 = " + num2str(df0, '%.2f') +...
-    ", kf4 = " +num2str(kf0, '%.2f');
+anotxt4 = "df4 = " + num2str(df4, '%.2f') +...
+    ", kf4 = " +num2str(kf4, '%.2f');
 plot(xfit, y_fit4, 'Color', cl4, 'LineStyle', ':');
 annotation('textbox', [0.8 0.18 1 0.16], 'String', anotxt4,...
     'Color', cl4, 'EdgeColor', cl4, 'FitBoxToText', 'on');
@@ -149,8 +149,8 @@ axis padded
 
 disp(' ')
 disp('Compiled average fractal properties:')
-fprintf('df_ens = %.2f \n', df1)
-fprintf('kf_ens = %.2f \n', kf1)
+fprintf('df_ens = %.2f \n', df5)
+fprintf('kf_ens = %.2f \n', kf5)
 
 if nargout < 3
     clear h_fract;  % Deleting figure handle if not requested as an output
