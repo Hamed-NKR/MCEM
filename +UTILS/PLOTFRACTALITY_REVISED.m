@@ -80,9 +80,10 @@ y_fit1 = kf1 .* xfit .^ df1;
 anotxt1 = "df = " + num2str(df1, '%.2f') +...
     ", kf = " +num2str(kf1, '%.2f');
 cl1 = [0.4660 0.6740 0.1880];
-plot(xfit, y_fit1, 'Color', cl1, 'LineStyle', '--', 'LineWidth', 1.5);
-annotation('textbox', [0.8 0.14 1 0.12], 'String', anotxt1,...
-    'Color', cl1, 'EdgeColor', cl1, 'FitBoxToText', 'on');
+plot(xfit, y_fit1, 'Color', cl1, 'LineStyle', '--', 'LineWidth', 2.5);
+annotation('textbox', [0.8 0.15 1 0.125], 'String', anotxt1,...
+    'Color', cl1, 'EdgeColor', cl1, 'FitBoxToText', 'on',...
+    'FontName', 'Times New Roman', 'FontSize', 14, 'FontWeight', 'bold');
 
 % DLCA benchmark
 df0 = 1.78;
@@ -92,18 +93,24 @@ yfit0 = kf0 .* xfit .^ df0;
 anotxt0 = "df_0 = " + num2str(df0, '%.2f') +...
     ", kf_0 = " +num2str(kf0, '%.2f');
 cl0 = [0.5 0.5 0.5];
-plot(xfit, yfit0, 'Color', cl0, 'LineStyle', '-.', 'LineWidth', 2.5);
+plot(xfit, yfit0, 'Color', cl0, 'LineStyle', '-.', 'LineWidth', 1.5);
     % Plotting the fit
-annotation('textbox', [0.8 0.12 1 0.1], 'String', anotxt0,...
-    'Color', cl0, 'EdgeColor', cl0, 'FitBoxToText', 'on');
-        % Fractal properties annotated
+annotation('textbox', [0.8 0.125 1 0.1], 'String', anotxt0,...
+    'Color', cl0, 'EdgeColor', cl0, 'FitBoxToText', 'on',...
+    'FontName', 'Times New Roman', 'FontSize', 14); % Fractal properties...
+        % ...annotated
 
 legtxt = [legtxt; 'Power series'; 'Sorensen (2011)'];
 
-title('Time- & aggregate-ensembled fractal properties')
-xlabel('d_g / d_p_p (-)')
-ylabel('n_p_p (-)')
-legend(legtxt, 'Location', 'northwest')
+title('Time- & population-ensembled fractal properties',...
+    'FontName', 'Times New Roman', 'FontSize', 20, 'FontWeight', 'bold');
+xlabel('d_g / d_p_p (-)', 'FontName', 'Times New Roman', 'FontSize', 18,...
+    'FontWeight', 'bold')
+ylabel('n_p_p (-)', 'FontName', 'Times New Roman', 'FontSize', 18,...
+    'FontWeight', 'bold')
+set(gca, 'FontName', 'Times New Roman', 'FontSize', 18)
+legend(legtxt, 'Location', 'northwest', 'FontName', 'Times New Roman',...
+    'FontSize', 14)
 axis padded
 
 disp(' ')
