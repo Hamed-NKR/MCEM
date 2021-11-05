@@ -74,15 +74,23 @@ npp = cat(1, parsdata.npp{kk});
 % set(gca, 'XScale', 'log')
 % set(gca, 'YScale', 'log') % Logarithmic axes scales
 
-% Instantaneous (Power series, Without intercept)
-fit1 = fit(dg_dpp, npp, 'power1'); % fitting y = a*x^b
-df1 = fit1.b;
-kf1 = fit1.a;
-xfit = min(dg_dpp) : range(dg_dpp) / (10 * numel(dg_dpp)) : max(dg_dpp);
-y_fit1 = kf1 .* xfit .^ df1;
+% Instantaneous (Logarithmic, Linear regression, Without intercept)
+% fit1 = fit(dg_dpp, npp, 'power1'); % fitting y = a*x^b
+fit1 = fitlm(table(log(dg_dpp), log(npp)), 'linear');
+% df1 = fit1.b;
+% kf1 = fit1.a;
+df1 = [fit1.Coefficients.Estimate(2), lrfit.Coefficients.SE(2)];
+kf1 = [exp(fit1.Coefficients.Estimate(1)),...
+    lrfit.Coefficients.SE(1) * exp(lrfit.Coefficients.Estimate(1))];
+xfit = (min(dg_dpp) : range(dg_dpp) / (10 * numel(dg_dpp)) : max(dg_dpp))';
+y_fit1 = [kf1(1) .* xfit .^ df1(1),... % the main fit
+    (kf1(1) + kf1(2)) .* xfit .^ (df1(1) + df1(2)),... % upper bound
+    (kf1(1) - kf1(2)) .* xfit .^ (df1(1) - df1(2))]; % lower bound
 
-anotxt1 = "d_f = " + num2str(df1, '%.2f') +...
-    ", k_f = " +num2str(kf1, '%.2f');
+anotxt1 = "d_f = " + num2str(df1(1), '%.2f') + " +/- " +...
+    num2str(df1(2), '%.2f') + newline +...
+    ", k_f = " + num2str(kf1(1), '%.2f') + " +/- " +...
+    num2str(kf1(2), '%.2f');
 cl1 = [0.4660 0.6740 0.1880];
 plot(xfit, y_fit1, 'Color', cl1, 'LineStyle', '--', 'LineWidth', 2.5);
 annotation('textbox', [0.77 0.15 0.5 0.1], 'String', anotxt1,...
@@ -104,7 +112,7 @@ annotation('textbox', [0.77 0.1 0.5 0.1], 'String', anotxt0,...
     'FontName', 'Times New Roman', 'FontSize', 14); % Fractal properties...
         % ...annotated
 
-legtxt = [legtxt; 'Power series'; 'Sorensen (2011)'];
+legtxt = [legtxt; 'Linear regression'; 'Sorensen (2011)'];
 
 title('Time- & population-averaged fractal properties',...
     'FontName', 'Times New Roman', 'FontSize', 20, 'FontWeight', 'bold');
