@@ -27,14 +27,18 @@ end
 subplot(1,2,1)
 yyaxis left
 plot(parsdata.t, parsdata.ntot);
-xlabel('t (s)')
-ylabel('ntot (#)')
+xlabel('t (s)', 'FontName', 'Times New Roman', 'FontSize', 18,...
+    'FontWeight', 'bold')
+ylabel('n_a_g_g (-)', 'FontName', 'Times New Roman', 'FontSize', 18,...
+    'FontWeight', 'bold')
 yyaxis right
 plot(parsdata.t, parsdata.beta);
-ylabel('beta (1/s)')
-title ('Total number vs. time')
+ylabel('\beta (1/s)', 'FontName', 'Times New Roman', 'FontSize', 18,...
+    'FontWeight', 'bold')
+title ('Time variations of total aggregate number and collision frequency',...
+    'FontName', 'Times New Roman', 'FontSize', 20, 'FontWeight', 'bold')
 % set(gca, 'YScale', 'log')
-set(gca, 'XScale', 'log')
+set(gca, 'FontName', 'Times New Roman', 'FontSize', 18, 'XScale', 'log')
 
 % Size distributions of particles mass over time
 subplot(1,2,2)
@@ -51,12 +55,16 @@ for i = 1 : length(ii2)
         % Time legend
     hold on
 end
-legend(txt)
-set(gca, 'XScale', 'log')
+legend(txt, 'Location', 'northeast', 'FontName', 'Times New Roman',...
+    'FontSize', 14)
+set(gca, 'FontName', 'Times New Roman', 'FontSize', 18, 'XScale', 'log')
 % set(gca, 'YScale', 'log')
-xlabel('dv (m)')
-ylabel('dm/dlogdv (-)')
-title ('Mass based size distribution')
+xlabel('d_v (m)', 'FontName', 'Times New Roman', 'FontSize', 18,...
+    'FontWeight', 'bold')
+ylabel('d(m)/d(log(d_v)) (-)', 'FontName', 'Times New Roman',...
+    'FontSize', 18', 'FontWeight', 'bold')
+title('Mass based size distribution', 'FontName', 'Times New Roman',...
+    'FontSize', 20, 'FontWeight', 'bold')
 hold off
 
 if nargout == 0
