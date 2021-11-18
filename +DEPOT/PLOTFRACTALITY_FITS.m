@@ -67,8 +67,8 @@ dg_dpp = cat(1, parsdata.dg_dpp{kk});
 npp = cat(1, parsdata.npp{kk});
 
 %%% Data fits
-% set(gca, 'XScale', 'log')
-% set(gca, 'YScale', 'log') % Logarithmic axes scales
+set(gca, 'XScale', 'log')
+set(gca, 'YScale', 'log') % Logarithmic axes scales
 
 % #0. DLCA
 df0 = 1.78;

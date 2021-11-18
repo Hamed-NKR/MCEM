@@ -17,7 +17,9 @@ function [df1, kf1, h_fract] = PLOTFRACTALITY(parsdata, kk)
 % Setting default indices of data to be plotted
 if ~exist('kk', 'var'); kk = []; end
 if isempty(kk)
-    kk = unique(round(1 : (length(parsdata.ii) - 1) / 10 :...
+    i_start = min(max(10, ceil(length(parsdata.ii) / 10)),...
+        parsdata.ii(end)); % Start index for data to be plotted
+    kk = unique(round(i_start : (length(parsdata.ii) - i_start) / 10 :...
         length(parsdata.ii)));
 else
     kk = unique(kk);
@@ -69,6 +71,9 @@ legtxt = "t = " + num2str(parsdata.t(kk), '%1.1e') + " (s)"; % Time legend
 % Compiling number distribution and size ratio across aggregates
 dg_dpp = cat(1, parsdata.dg_dpp{kk});
 npp = cat(1, parsdata.npp{kk});
+
+dg_dpp(npp < 5) = []; 
+npp(npp < 5) = []; 
 
 %%% Data fits
 set(gca, 'XScale', 'log')
