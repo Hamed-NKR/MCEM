@@ -24,7 +24,7 @@ function [mu_f, lambda_f] = FLPROPS(fl, params_const)
 % lambda_f = mu_f / (0.499*(fl.p)*sqrt(8*M_air/(pi*Ru*(fl.temp)))); % Mean...
 %     % ...free path 
 
-mu_f = 1.836e-5; % Viscosity (Pa.s, @ 298 k)
+mu_f = 5.782e-5; % Viscosity (Pa.s, @ 1500 k: typical of soot formation)
 lambda_f = 6.8e-8; % Mean free path (m, @ ambient pressure)
 
 end
