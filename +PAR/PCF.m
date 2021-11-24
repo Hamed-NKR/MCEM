@@ -16,7 +16,7 @@ function [g, r, morph, h] = PCF(pars, kk_pars, kk_h)
 %   r: A discrete set of distances from COM for PCF calculations
 %   morph: A data structure containing the fratcal properties of the...
 %       ...individual aggregates
-%   h: Output figure handle
+%   h: Output figure (g vs. r for different aggregates) handle
 % ----------------------------------------------------------------------- %
 
 % Total number of aggregates
@@ -40,7 +40,7 @@ end
 if isempty(kk_h)
     h = [];
 elseif length(kk_h) > 24
-    error('Invalid number of output images! (should be <= 24)')
+    error('Out of range number of output images! (should be <= 24)')
 else
     hold off
     h = gcf;
@@ -149,6 +149,7 @@ for i = 1 : n_agg
     morph.df(i) = m(1) * 4 * pi * (dpp(i)^(m(2) + 3)) / (m(2) + 3);
         % Packing factor
     
+    % Plotting the results
     if ismember(kk_pars(i), kk_h)
         nexttile
         
@@ -161,7 +162,7 @@ for i = 1 : n_agg
         plot(r_discrete, pcfit(m, r_discrete), 'Color',...
             [0 0.4470 0.7410], 'LineWidth', 2);
         
-         % Set axis scales to be logarithmic
+        % Set axis scales to be logarithmic
         set(gca, 'XScale', 'log')
         set(gca, 'YScale', 'log')
         
@@ -173,8 +174,12 @@ for i = 1 : n_agg
         ylabel('g(r) (m^-^3)', 'FontName', 'Times New Roman',...
             'FontWeight', 'bold')
         set(gca, 'FontName', 'Times New Roman')
-        legend({'PCF data', 'LS fit'}, 'Location', 'northwest',...
-            'FontName', 'Times New Roman')
+        if find(kk_h == kk_pars(i)) == 1 % Only one legend for the whole...
+            % ...plot
+            lgd = legend({'PCF data', 'LS fit'},...
+            'FontName', 'Times New Roman');
+            lgd.Layout.Tile = 'south';
+        end        
 %         anotxt =  "n_pp = " + num2str(n(i), '%d') + newline +...
 %             "d_pp = " + num2str(dpp(i,1), '%1.1e') + " (m)" + newline +...
 %             "d_f = " + num2str(morph.df(i), '%.2f') + newline +...

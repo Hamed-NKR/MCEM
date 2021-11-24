@@ -72,8 +72,15 @@ legtxt = "t = " + num2str(parsdata.t(kk), '%1.1e') + " (s)"; % Time legend
 dg_dpp = cat(1, parsdata.dg_dpp{kk});
 npp = cat(1, parsdata.npp{kk});
 
-dg_dpp(npp < 5) = []; 
-npp(npp < 5) = []; 
+% dg_dpp(npp < 30) = []; 
+% npp(npp < 30) = []; 
+
+% binc = min(npp) : max(n_pp); % Countig the primary number occurrences
+% nc = histc(npp, binc); % Occurrence counts
+% for i = 1 : length(binc)
+%     chk = find(nc(i) > 3);
+%     
+% end
 
 %%% Data fits
 set(gca, 'XScale', 'log')
