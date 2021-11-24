@@ -90,7 +90,7 @@ end
 
 n_agg = length(kk_pars); % Number of aggregates to be analyzed
 
-pa = zeros(n_agg, n_avg); % Initializing the projected area set
+pa = zeros(n_agg, length(rsl_avg)); % Initializing the projected area set
 
 for i = 1 : n_agg
     
@@ -101,44 +101,44 @@ for i = 1 : n_agg
     for j = 1 : rsl_avg
         pp = cell2mat(PAR.ROTATE(pp0(i), n(i), angs(j,:))); % Rotating...
             % ...the aggregate in random direction and converting to matrix
-        pp = repmat(pp, rsl_samp, 1);
         
         x_rng = [min(pp(:,3)), max(pp(:,3))]; % Extension range in x dir.
         y_rng = [min(pp(:,4)), max(pp(:,4))]; % ~ y dir.
         
-        mcpoints = [x_rng(1), y_rng(1)] + [x_rng(2), y_rng(2)] .*...
-             rand(rsl_samp, 2); % Locating the MC uniformly random points
+        pp_temp = repmat(pp, rsl_samp, 1);
         
-        mcstat = sqrt(sum((pp(:, 3:4) - repelem(mcpoints, n(i), 1)).^2,...
-            2)) <= pp(:, 2); % Check if the MC points fall within primaries
+        mcpoints = [x_rng(1), y_rng(1)] + [x_rng(2) - x_rng(1),...
+            y_rng(2) - y_rng(1)] .* rand(rsl_samp, 2); % Locating the...
+                % ...MC uniformly random points 
+        
+        mcstat = sqrt(sum((pp_temp(:, 3:4) -...
+            repelem(mcpoints, n(i), 1)).^2, 2)) <= pp_temp(:, 2);
+                % Check if the MC points fall within primaries
         mcstat = mat2cell(mcstat, n(i) * ones(rsl_samp,1));
         
         % Determine if the MC points are inside the aggregates
         for k = 1 : rsl_samp
-            if any(mcstat{k})
-                mcstat{k} = 1;
-            else
-                mcstat{k} = 0;
-            end
+            mcstat{k} = any(mcstat{k});
         end
+        mcstat = cell2mat(mcstat);
         
         pa(i,j) = nnz(mcstat) / length(mcpoints); % Fraction of points...
             % ...falling inside the domain
         
         % Plotting the results
-        if ismember(kk_pars(i), kk_h) && ismember(j, jj)
+        if ismember(kk_pars(i), kk_h) && ismember(j, jj) % Plotting only...
+                % ...for 4 angles
             nexttile
 
-            % MC points
-            scatter(mcpoints(:,1), mcpoints(:,2), 1,...
-                [0.8500 0.3250 0.0980], 'filled');
-            hold on
-            
-            % The real outline of aggregate (i)
-            viscircles([pp0{i}(:,3), pp0{i}(:,4)], pp0{i}(:,2)./2,...
+            % The original outline of aggregate (i)
+            viscircles([pp(:,3), pp(:,4)], pp(:,2) ./ 2,...
                 'EnhanceVisibility', false, 'Color', [0 0.4470 0.7410],...
-                'FaceAlpha', 0.4); 
-            
+                'LineWidth', 1.5); 
+            hold on
+                        
+            % MC points
+            scatter(mcpoints(mcstat,1), mcpoints(mcstat,2), 1,...
+                [0.8500 0.3250 0.0980], 'filled');
             % Plot specs
             title("Agg id: " + num2str(kk_pars(i), "%d"),...
                 'FontName', 'Times New Roman', 'FontWeight', 'bold');
@@ -146,19 +146,18 @@ for i = 1 : n_agg
                 'FontWeight', 'bold')
             ylabel('y(m)', 'FontName', 'Times New Roman',...
                 'FontWeight', 'bold')
-            xlim([0 dom_size(1)])
-            ylim([0 dom_size(2)])
+            xlim(x_rng)
+            ylim(y_rng)
             set(gca, 'FontName', 'Times New Roman')
-            if find(kk_h == kk_pars(i)) == 1 % Only one legend for the...
-                % ...whole plot
-                lgd = legend({'MC points', 'Agg outline'},...
+            if find(kk_h == kk_pars(i)) == 1 &&...
+                    find(jj == j) == 1 % Only one legend for the whole plot
+                lgd = legend({'Agg outline', 'MC points'},...
                 'FontName', 'Times New Roman');
                 lgd.Layout.Tile = 'south';
             end
             axis padded
         end
     end
-        
 end        
 
 pa_avg = mean(pa,2); % Averaging over orientations
