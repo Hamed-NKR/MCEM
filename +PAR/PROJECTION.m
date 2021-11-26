@@ -63,22 +63,14 @@ if isempty(kk_h)
 elseif length(kk_h) > 6
     error('Out of range number of aggregates requested for plotting! (should be <= 6)')
 else
-    hold off
+    figure;
     h = gcf;
-
-    % Clearing previous data
-    all_axes_in_figure = findall(h, 'type', 'axes');
-    n_ax = numel(all_axes_in_figure);
-    for i = 1 : n_ax
-        cla(all_axes_in_figure(i))
-    end
-
-    figure(h);
-
+    
     % Setting figure size, position and background
     h.Position = [0, 0, 892.1 * length(kk_h) / 4, 892.1];
     set(h, 'color', 'white');
     
+    % Setting the subplots' layout
     tt = tiledlayout(4, length(kk_h));
     tt.TileSpacing = 'compact';
     tt.Padding = 'compact';
@@ -192,13 +184,15 @@ for i = 1 : n_agg
     disp(newline)
 end
 
-title(tt, 'Aggregate projected area in different orientations',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 18)
-subtitle(tt, ' ','FontName', 'SansSerif', 'FontSize', 8)
-xlabel(tt, {'\fontsize{4} ', '\fontsize{14}x (m)'},'interpreter','tex',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold')
-ylabel(tt, {'\fontsize{14}y (m)', '\fontsize{4} '},'interpreter','tex',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold')
+if ~isempty(kk_h)
+    title(tt, 'Aggregate projected area in different orientations',...
+        'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 18)
+    subtitle(tt, ' ','FontName', 'SansSerif', 'FontSize', 8)
+    xlabel(tt, {'\fontsize{4} ', '\fontsize{14}x (m)'},'interpreter','tex',...
+        'FontName', 'SansSerif', 'FontWeight', 'bold')
+    ylabel(tt, {'\fontsize{14}y (m)', '\fontsize{4} '},'interpreter','tex',...
+        'FontName', 'SansSerif', 'FontWeight', 'bold')
+end
 
 pa_avg = mean(pa(:,:,1), 2); % Averaging are over orientations
 af_avg = mean(pa(:,:,2), 2); % Averaged area fraction
