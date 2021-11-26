@@ -73,13 +73,13 @@ disp("The computational domain is successfully initialized...")
 %     coef_trg(ind_trg_test));
 % 
 timetable.prerender = clock;
-figure
-UTILS.RENDER(pars);
+% figure
+% UTILS.RENDER(pars);
 timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e6; % Marching index limit
+k_max = 1e4; % Marching index limit
 time = zeros(k_max,1);
 t_rec = 1e3; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
@@ -172,8 +172,8 @@ k = k - 1;
 
 % Morphology of the final population
 timetable.prerender = [timetable.prerender; clock];
-figure
-UTILS.RENDER(pars);
+% figure
+% UTILS.RENDER(pars);
 timetable.postrender = [timetable.postrender; clock];
 
 % Obtaining fractal properties

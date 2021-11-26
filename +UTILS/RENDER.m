@@ -33,7 +33,7 @@ if isempty(q); q = 60; end
 if isa(pars, 'AGG')
     n_par = length(pars); % Number of independent particles
 else
-    n_par = size(pars.n, 1);
+    n_par = length(pars.n);
 end
 
 n_pp = cat(1, pars.n); % Compiling/copying number distribution of primaries
