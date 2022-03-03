@@ -89,12 +89,15 @@ if ~ isa(pars, 'AGG')
 
     % Removing redundant pre-collision data
     pars.pp(i_col(:,2)) = [];
-    pars.nnl(i_col(:,2)) = [];
     pars.n(i_col(:,2)) = [];
     pars.r(i_col(:,2),:) = [];
     pars.v(i_col(:,2),:) = [];
     pars.m(i_col(:,2)) = [];
-
+    
+    if isfield(pars, 'nnl') && ~isempty(pars.nnl)
+        pars.nnl(i_col(:,2)) = [];
+    end
+    
     % Resetting sizes
     pars.dv = [];
     pars.dg = [];

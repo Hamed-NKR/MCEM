@@ -17,8 +17,8 @@ timetable = struct('start', [], 'end', [], 'total', [],...
 %     'preunite', [], 'postunite', [], 'unite', []);
 timetable.start = clock;
 
-[params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
-    % ...physical parameters to be used in the simulations
+[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_DLCAParams');
+    % Initializing the physical parameters to be used in the simulations
 
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initializing...
     % ...the fluid and particle transport variables
@@ -31,7 +31,7 @@ timetable.start = clock;
 pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n);
 
 % Generating the initial aggregates (if applicable)
-pars.pp = PAR.INIT_MORPH(pars.pp);
+pars.pp = PAR.INIT_MORPH_RAND(pars.pp);
 
 % Assigning the particle initial locations
 pars = PAR.INIT_LOC(params_ud.Value(1:3), pars);
@@ -81,7 +81,7 @@ timetable.postrender = clock;
 
 k_max = 1e4; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 1e3; % Data recording timeframe
+t_rec = 1e2; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
@@ -172,8 +172,8 @@ k = k - 1;
 
 % Morphology of the final population
 timetable.prerender = [timetable.prerender; clock];
-% figure
-% UTILS.RENDER(pars);
+figure
+UTILS.RENDER(pars);
 timetable.postrender = [timetable.postrender; clock];
 
 % Obtaining fractal properties

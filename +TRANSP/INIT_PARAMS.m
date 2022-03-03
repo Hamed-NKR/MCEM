@@ -1,9 +1,10 @@
-function [params_ud, params_const] = INIT_PARAMS()
+function [params_ud, params_const] = INIT_PARAMS(fname)
 % "INIT_PARAMS" computes various equivalent sizes proposed for fractal...
 %   ...aggregates.
 % ----------------------------------------------------------------------- %
 %
 % Output:
+%   fname: filename string
 %   params_ud: Table of constant parametrs
 %   params_const: ~ user-defined parameters
 % ----------------------------------------------------------------------- %
@@ -21,7 +22,8 @@ params_const = table(Name, Value, Unit, Description); % Creating the...
 % Importing the user-defined parameters of domain, particle and flow
 
 % Extracting user data from the input file
-f_id = fopen('inputs\MCEM_Params.txt','r');
+f_adrs = strcat('inputs\', fname, '.txt');
+f_id = fopen(f_adrs,'r');
 import_data = textscan(f_id,'%s%f%s%s','Headerlines',2,...
     'Delimiter','\t','MultipleDelimsAsOne',1);
 fclose(f_id);
