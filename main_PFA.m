@@ -11,6 +11,7 @@ pp_pfa0 = cell(mixlev,1); % Primary particle storage variable
 dpp_std = 1e-8; % pp size std between the iterations
 dpp_mean = params_ud.Value(7); % pp size mean btw. ~
 del_dpp = randn(mixlev,1); % normally random selected dpp size params
+npp0 = params_ud.Value(4); % number of primaries in each population
 
 for i = 1 : mixlev    
     time = zeros(j_max(i),1); % Aggregation time array
@@ -62,7 +63,13 @@ for i = 1 : mixlev
         j = j + 1; % Update iteration ind.
     end
     
-    pp_pfa0{i} = pars.pp;
+    if i >= 2
+        for ii = 1 : length(pars.n)
+            pars.pp{ii}(:,1) = pars.pp{ii}(:,1) + (i-1) * npp0; % update pp indices
+        end
+    end
+    
+    pp_pfa0{i} = pars.pp; % store pp info
 end
 
 % clear pars struct fields
