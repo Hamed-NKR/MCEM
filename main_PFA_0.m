@@ -131,6 +131,7 @@ while (k <= k_max) && (length(cat(1, pars.n)) > (n_agg0 / 5))
     k = k + 1; % Update iteration ind.
 end
 
-figure
-UTILS.RENDER(pars);
+figure(1)
+UTILS.RENDER(pars); % display final aggregates
+
 

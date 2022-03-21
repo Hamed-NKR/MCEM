@@ -1,6 +1,6 @@
 function [params_ud, params_const] = INIT_PARAMS(fname)
-% "INIT_PARAMS" computes various equivalent sizes proposed for fractal...
-%   ...aggregates.
+% "INIT_PARAMS" computes various equivalent sizes proposed for...
+%   ...fractal aggregates in classic DLCA regime.
 % ----------------------------------------------------------------------- %
 %
 % Output:
