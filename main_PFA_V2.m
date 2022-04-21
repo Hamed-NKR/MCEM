@@ -3,26 +3,22 @@ clear
 clf('reset')
 close all
 
-[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
+[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_DLCAParams'); % Read the input file
 
-n_swp = 10; % Number of rescaling sweeps over the primary particle size
 n_str = 5; % Number of data storage occurrences
 j_max = 1e5; % Marching index limit
-jj_max = 100; % Iteration limit parameter
+jj_max = 200; % Iteration limit parameter
 
 dpp_globstd = 1.4; % global geometric std of pp size
-r_dpp = lognrnd(log(params_ud.Value(8)), log(dpp_globstd), [n_swp,1]) / params_ud.Value(8);
-    % Lognormal size conversion ratio
 
 pp0 = cell(n_str,1); % Primary particle data storage cell array for initial monodisperse aggregation
 
-npp_min = 5; % Aggregate filtering criterion
+npp_min = 10; % Aggregate filtering criterion
 pp0_n = cell(n_str,1); % Placeholder for number of primaries withing aggs
 
 i_pp0 = cell(n_str,1); % Placeholder for index of primary particles
 
-ci_uc = 0.5; % Confidence interval to check universal correlation
-f_dil = 0.1; % Dilution factor for 2nd stage aggregation
+f_dil = 0.01; % Dilution factor for 2nd stage aggregation
 
 % Initilize monodisperse pps for classic DLCA
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
@@ -146,7 +142,7 @@ n_agg0 = size(pp0, 1); % % total number of aggregates before rescaling
 pp1 = pp0;
 dpp0 = PAR.MEANPP(pp0);
 dpp0 = dpp0(:,1); % Current mean pp size withing aggs
-dpp_emh = ((17.8^(1/0.35)/100) * (pp0_n / 1.1)^(1 / (2 * 1.08)))^(0.35 / (1 - 0.35)); % Desired mean pp size based on external mixing hypothesis
+dpp_emh = ((17.8^(1/0.35)/100) * (pp0_n / 1.1).^(1 / (2 * 1.08))).^(0.35 / (1 - 0.35)); % Desired mean pp size based on external mixing hypothesis
 r_dpp = dpp_emh ./ dpp0; % Size conversion ratio
 % Rescale stored aggregates
 for i = 1 : n_agg0
@@ -157,7 +153,7 @@ end
 pars = structfun(@(x) [], pars, 'UniformOutput', false);
 
 % Randomize order of aggregates
-i_rnd = randperm(n_agg1);
+i_rnd = randperm(n_agg0);
 pp1 = pp1(i_rnd);
 pp1_n = pp0_n(i_rnd);
 
@@ -165,7 +161,7 @@ pars.pp = pp1; % Assign pp info for stage 2
 pars.n = pp1_n; % Assign number distribution of primaries
 
 disp(newline)
-da1 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e3, 5) / pi); % Get projected area diameter for monodisperse populations
+da1 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected area diameter for monodisperse populations
 dpp1 = PAR.MEANPP(pars.pp);
 dpp1 = dpp1(:,1); % mean primary particle diameter
 
@@ -178,7 +174,7 @@ pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
-k_max = 1e5; % Iteration limit parameter
+k_max = 1e6; % Iteration limit parameter
 kk_max = 5; % Growth limit parameter
 
 disp(newline)
@@ -205,14 +201,11 @@ while (k <= k_max) && (length(cat(1, pars.n)) > round(n_agg0 / kk_max))
     k = k + 1; % Update iteration ind.
 end
 
-figure(1)
-UTILS.RENDER(pars); % display final aggregates
-
-da2 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e3, 5) / pi); % Projected area dimater for polydisperse aggs
+da2 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Projected area dimater for polydisperse aggs
 dpp2 = PAR.MEANPP(pars.pp);
 dpp2 = dpp2(:,1);
 
-figure(2)
+figure(1)
 h2 = gcf;
 if ~all(h2.Position == [0, 0, 800, 800])
     h2.Position = [0, 0, 800, 800];
@@ -222,7 +215,7 @@ set(h2, 'color', 'white');
 p21 = scatter(1e9 * dpp1, 1e9 * da1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
 hold on
 
-p22 = scatter(1e9 * dpp2, 25, 1e9 * da2, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
+p22 = scatter(1e9 * dpp2, 1e9 * da2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
 
 dpp_uc = linspace(5, 65, 1000);
 da_uc = 100 * (dpp_uc / 17.8).^(1 / 0.35);
@@ -243,4 +236,7 @@ set(gca, 'XScale', 'log')
 set(gca, 'YScale', 'log')
 title('Primary particle size vs projected area equivalent size',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 18)
+
+% figure(2)
+% UTILS.RENDER(pars); % display final aggregates
 
