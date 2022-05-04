@@ -44,12 +44,12 @@ if any(ovrs == 1)
             if isa(pars, 'AGG')
                 pp1 = AGG.COMPILEPP(pars(ind_chk(i,1)));
                 pp2 = AGG.COMPILEPP(pars(ind_chk(i,2)));
-                [pp1, pp2, colstat] = COL.CONNECT_RAND(pp1, pp2);
+                [pp1, pp2, colstat] = COL.CONNECT(pp1, pp2);
                 pars(ind_chk(i,1)).r = pp1(:,3:5);
                 pars(ind_chk(i,2)).r = pp2(:,3:5);
             else
                 [pars.pp{ind_chk(i,1)}, pars.pp{ind_chk(i,2)}, colstat]...
-                    = COL.CONNECT_RAND(pars.pp{ind_chk(i,1)},...
+                    = COL.CONNECT(pars.pp{ind_chk(i,1)},...
                     pars.pp{ind_chk(i,2)}); 
             end
 %             timetable.postconnect = [timetable.postconnect; clock];

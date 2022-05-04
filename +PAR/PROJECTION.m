@@ -46,7 +46,7 @@ end
 % Determining the averaging resolution if missing
 if ~exist('rsl_avg', 'var') || isempty(rsl_avg)
     rsl_avg = 20;
-elseif rsl_avg < 10
+elseif rsl_avg < 5
     error('Angular resolution too low! (better be >= 10)')
 end
 jj = round(1 + (rsl_avg - 1) .* (0 : 1/3 : 1)'); % Indices of angles to...
@@ -90,18 +90,18 @@ n_agg = length(kk_pars); % Number of aggregates to be analyzed
 pa = zeros(n_agg, length(rsl_avg), 2); % Initializing the projected area...
     % ...set (average areas & area fractions)
 
-disp('Computing:');
-UTILS.TEXTBAR([0, n_agg]); % Initializing 1st layer textbar (for aggergates)
+disp('Computing projected area...');
+UTILS.TEXTBAR([0, n_agg * rsl_avg]); % Initializing 1st layer textbar (for aggergates)
 
 for i = 1 : n_agg
-    fprintf('Aggregate %d:', i);
-    disp(newline)
+%     fprintf('Aggregate %d:', i);
+%     disp(newline)
     
     angs = 2 * pi * rand(rsl_avg, 3); % A uniform random set of three...
         % ...intrinsic Euler angles for rotating the aggregtes to...
         % ...average the projected area
     
-    UTILS.TEXTBAR([0, rsl_avg]); % Initializing 2nd layer textbar...
+%     UTILS.TEXTBAR([0, rsl_avg]); % Initializing 2nd layer textbar...
         % ...(for orientations)
     
     for j = 1 : rsl_avg
@@ -136,6 +136,8 @@ for i = 1 : n_agg
         pa(i,j,1) = abs(pa(i,j,2) * (x_rng(2) - x_rng(1)) *...
             (y_rng(2) - y_rng(1))); % Multiplying by the total domain...
                 % ...area to get the projected area
+        
+        UTILS.TEXTBAR([(i - 1) * rsl_avg + j, n_agg * rsl_avg]) % Updating textbar
         
         % Plotting the results
         if ismember(kk_pars(i), kk_h) && ismember(j, jj) % Plotting only...
@@ -176,12 +178,12 @@ for i = 1 : n_agg
                 lgd.Layout.Tile = 'north';
             end
             
-            UTILS.TEXTBAR([j, rsl_avg]); % Completing orientation j
+%             UTILS.TEXTBAR([j, rsl_avg]); % Completing orientation j
         end
     end
-    disp(newline)
-    UTILS.TEXTBAR([i, n_agg]); % Finishing j
-    disp(newline)
+%     disp(newline)
+%     UTILS.TEXTBAR([i, n_agg]); % Finishing j
+%     disp(newline)
 end
 
 if ~isempty(kk_h)

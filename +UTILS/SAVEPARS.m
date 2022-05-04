@@ -12,7 +12,7 @@ function parsdata = SAVEPARS(pars, time, k, params_ud, parsdata)
 
 % Initializing the output structure
 if ~exist('parsdata', 'var')
-    parsdata = struct('ii', [], 't', [], 'ntot', [], 'vf', [],...
+    parsdata = struct('ii', [], 't', [], 'ntot', [], 'volf', [],...
         'beta', [], 'dn_dlogdv', [], 'dm_dlogdv', [], 'dg_dpp', [],...
         'npp',[], 'df', [], 'kf', []);
 end
@@ -34,14 +34,16 @@ else
     parsdata.ntot = [parsdata.ntot; size(pars.n, 1)];
 end
 
-if isempty(parsdata.vf)
+if params_ud.Value(1) > 0
+    parsdata.volf = params_ud.Value(1);
+else
     if isa(pars, 'AGG')
         pp = AGG.COMPILEPP(pars);
     else
         pp = cell2mat(pars.pp);
     end
-    parsdata.vf = pi * sum(pp(:,2) .^ 3) / (6 * params_ud.Value(1) *...
-        params_ud.Value(2) * params_ud.Value(3));
+    parsdata.volf = pi * sum(pp(:,2) .^ 3) / (6 * params_ud.Value(2) *...
+        params_ud.Value(3) * params_ud.Value(4));
 end
 
 if isempty(parsdata.beta)

@@ -68,9 +68,9 @@ end
 
 legtxt = "t = " + num2str(parsdata.t(kk), '%1.1e') + " (s)"; % Time legend
 
-% Compiling number distribution and size ratio across aggregates
-dg_dpp = cat(1, parsdata.dg_dpp{kk});
-npp = cat(1, parsdata.npp{kk});
+% % Compiling number distribution and size ratio across aggregates
+% dg_dpp = cat(1, parsdata.dg_dpp{kk});
+% npp = cat(1, parsdata.npp{kk});
 
 % dg_dpp(npp < 30) = []; 
 % npp(npp < 30) = []; 
@@ -81,6 +81,12 @@ npp = cat(1, parsdata.npp{kk});
 %     chk = find(nc(i) > 3);
 %     
 % end
+
+opts.method = 'median'; % Selecting method for particle data filtering
+parsfilter = UTILS.FILTERPARS(parsdata, kk, opts); % Converting raw data...
+    % ...on fractality of the particles to averaged data
+dg_dpp = parsfilter.dg_dpp;
+npp = parsfilter.npp;
 
 %%% Data fits
 set(gca, 'XScale', 'log')

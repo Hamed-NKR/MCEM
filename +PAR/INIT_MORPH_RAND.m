@@ -1,4 +1,4 @@
-function pp = INIT_MORPH(pp)
+function pp = INIT_MORPH_RAND(pp)
 % "INIT_MORPH" assigns initial (random) morpholgy of the primaries...
 %     ...within individual aggregates.
 % 

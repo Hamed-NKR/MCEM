@@ -60,8 +60,9 @@ for i = 1 : n_agg
     aggs(i).lambda = pars.lambda(i);       % Diffusive mean free path
     aggs(i).kn_kin = pars.kn_kin(i,:);     % Kinetic Knudsen number
     aggs(i).kn_diff = pars.kn_diff(i,:);   % Diffusive Knudsen number
-    aggs(i).nnl = pars.nnl{i};             % Nearest neighbor list
-    
+    if ~isempty(pars.nnl)
+        aggs(i).nnl = pars.nnl{i};         % Nearest neighbor list
+    end
 end
 
 end
