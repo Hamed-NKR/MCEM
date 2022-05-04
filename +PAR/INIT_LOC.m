@@ -1,12 +1,27 @@
-function pars = INIT_LOC(dom_size, pars)
+function [pars, params_ud] = INIT_LOC(pars, params_ud)
 % "INIT_LOC" randomly distributes the particles throughout the...
 %     ...computational domain.
 % ----------------------------------------------------------------------- %
 % 
 % Inputs/Output:
-%     dom_size: Computational domain size
 %     pars: Particle information structure
+%     params_ud: User defined parameters (including the domain size)
 % ----------------------------------------------------------------------- %
+
+% Compiling pp info
+if isa(pars, 'AGG')
+    pp = AGG.COMPILEPP(pars);
+else
+    pp = cell2mat(pars.pp);
+end
+
+% Updating the domain size based on the volume fraction 
+if params_ud.Value(1) > 0
+    params_ud.Value(2) = (pi * sum(pp(:,2) .^ 3) / (6 *...
+        params_ud.Value(1)))^(1/3);
+    params_ud.Value(3) = params_ud.Value(2);
+    params_ud.Value(4) = params_ud.Value(2);
+end
 
 % Initialization of the location array
 n_par = size(pars.n,1); % Total number of (independent) particles
@@ -14,7 +29,7 @@ pars.r = PAR.COM(pars.pp, pars.n); % Assigning center of mass as initial...
     % ...location of the aggregates
 dmax = PAR.TERRITORY(pars.pp, pars.n); % Maximum distance from the...
     % ...center of each aggregate
-pars.r = rand(n_par,3) .* (repmat((dom_size)',n_par,1) -...
+pars.r = rand(n_par,3) .* (repmat((params_ud.Value(2:4))',n_par,1) -...
      repmat(dmax,1,3))+ (repmat(dmax,1,3) ./ 2);
 
 % Making particle pair indices
@@ -52,14 +67,14 @@ while ~ isempty(find(ovrs == 1, 1))
     ind_updt = ind_pars(ovrs == 1, 1); % Indices of updated particles
     ind_updt = unique(ind_updt); % removing repeating indices
     pars.r(ind_updt, 1:3) = rand(size(ind_updt,1),3) .*...
-        (repmat((dom_size)', size(ind_updt,1),1) -...
+        (repmat((params_ud.Value(2:4))', size(ind_updt,1),1) -...
         repmat(dmax(ind_updt),1,3)) +...
         (repmat(dmax(ind_updt),1,3) ./ 2);
     r_pars = [repelem(pars.r,n_par,1), repmat(pars.r,n_par,1)];
     r_pars(rmv,:) = [];
     ovrs = COL.OVR(r_pars, d_pars); % Rechecking the overlapping
     
-    if ind_err > 10^4
+    if ind_err > 10^5
         error('Error assigning random initial locations!\n')
     end
     

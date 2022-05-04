@@ -12,7 +12,7 @@ function parsdata = SAVEPARS(pars, time, k, params_ud, parsdata)
 
 % Initializing the output structure
 if ~exist('parsdata', 'var')
-    parsdata = struct('ii', [], 't', [], 'ntot', [], 'vf', [],...
+    parsdata = struct('ii', [], 't', [], 'ntot', [], 'volf', [],...
         'beta', [], 'dn_dlogdv', [], 'dm_dlogdv', [], 'dg_dpp', [],...
         'npp',[], 'df', [], 'kf', []);
 end
@@ -34,14 +34,16 @@ else
     parsdata.ntot = [parsdata.ntot; size(pars.n, 1)];
 end
 
-if isempty(parsdata.vf)
+if params_ud.Value(1) > 0
+    parsdata.volf = params_ud.Value(1);
+else
     if isa(pars, 'AGG')
         pp = AGG.COMPILEPP(pars);
     else
         pp = cell2mat(pars.pp);
     end
-    parsdata.vf = pi * sum(pp(:,2) .^ 3) / (6 * params_ud.Value(1) *...
-        params_ud.Value(2) * params_ud.Value(3));
+    parsdata.volf = pi * sum(pp(:,2) .^ 3) / (6 * params_ud.Value(2) *...
+        params_ud.Value(3) * params_ud.Value(4));
 end
 
 if isempty(parsdata.beta)
@@ -63,10 +65,16 @@ parsdata.dm_dlogdv = [parsdata.dm_dlogdv, {[dm_dlogdv, dv_discrete]}];
 
 dg_dpp = dg ./ dpp(:,1); % Aggregate to primary particles size ratio
 parsdata.dg_dpp = [parsdata.dg_dpp, {dg_dpp}];
-pfit = polyfit(log(dg_dpp), log(npp), 1); % Fitting a power function...
-    % ...to the number vs. size ratio variations
 parsdata.npp = [parsdata.npp, {npp}]; % Primaries number distribution
-parsdata.df = [parsdata.df; pfit(1)]; % Fractal dimension
-parsdata.kf = [parsdata.kf; exp(pfit(2))]; % Fractal prefactor
+% psfit = fit(dg_dpp, npp, 'power1'); % A without-intercept power series...
+%     % ...fit to the number vs. size ratio variations
+% parsdata.df = [parsdata.df; psfit.b]; % Fractal dimension
+% parsdata.kf = [parsdata.kf; psfit.a]; % Fractal prefactor
+lrfit = fitlm(table(log(dg_dpp), log(npp)), 'linear'); % Fitting...
+    % ...log(y) = b*log(x)+log(a)
+parsdata.df = [parsdata.df; lrfit.Coefficients.Estimate(2),...
+    lrfit.Coefficients.SE(2)];
+parsdata.kf = [parsdata.kf; exp(lrfit.Coefficients.Estimate(1)),...
+    lrfit.Coefficients.SE(1) * exp(lrfit.Coefficients.Estimate(1))];
 
 end

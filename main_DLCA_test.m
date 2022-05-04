@@ -1,5 +1,5 @@
 % "main_test" is a script to examine and monitor the performance and...
-%   ...outputs of "MCEM" program.
+    %   ...outputs of "MCEM" program.
 
 clc
 clear
@@ -17,24 +17,24 @@ timetable = struct('start', [], 'end', [], 'total', [],...
 %     'preunite', [], 'postunite', [], 'unite', []);
 timetable.start = clock;
 
-[params_ud, params_const] = TRANSP.INIT_PARAMS(); % Initializing the...
-    % ...physical parameters to be used in the simulations
+[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_DLCAParams');
+    % Initializing the physical parameters to be used in the simulations
 
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initializing...
     % ...the fluid and particle transport variables
 
 % Calculating the primary particle size and number distributions
-[pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(4), params_ud.Value(5:6),...
-    params_ud.Value(7:9));
+[pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(5), params_ud.Value(6:7),...
+    params_ud.Value(8:10));
 
 % Initializing the primary particle field; Assigning the indices and sizes
 pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n);
 
 % Generating the initial aggregates (if applicable)
-pars.pp = PAR.INIT_MORPH(pars.pp);
+pars.pp = PAR.INIT_MORPH_RAND(pars.pp);
 
 % Assigning the particle initial locations
-pars = PAR.INIT_LOC(params_ud.Value(1:3), pars);
+[pars, params_ud] = PAR.INIT_LOC(pars, params_ud);
 
 % Finding the equivalent particle sizes
 pars = PAR.SIZING(pars);
@@ -46,8 +46,8 @@ pars = TRANSP.MOBIL(pars, fl, params_const);
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const);
 
 % Finding the initial nearest neighbors
-ind_trg = (1 : params_ud.Value(4))'; % Indicices of target particles
-coef_trg = 5 .* ones(params_ud.Value(4), 1); % Neighboring enlargement...
+ind_trg = (1 : params_ud.Value(5))'; % Indicices of target particles
+coef_trg = 5 .* ones(params_ud.Value(5), 1); % Neighboring enlargement...
     % ...coefficients
 pars.nnl = COL.NNS(pars, ind_trg, coef_trg);
 
@@ -73,15 +73,15 @@ disp("The computational domain is successfully initialized...")
 %     coef_trg(ind_trg_test));
 % 
 timetable.prerender = clock;
-figure
+% figure
 UTILS.RENDER(pars);
 timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e3; % Marching index limit
+k_max = 1e4; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 1e1; % Data recording timeframe
+t_rec = 1e2; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
@@ -112,13 +112,13 @@ UTILS.TEXTBAR([0, k_max]); % Initializing textbar
 UTILS.TEXTBAR([1, k_max]); % Indicating start of marching
 
 k = 2; % Iteration index
-while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(4) / 10))
+while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(5) / 10))
     % Checking if the number of aggregates within the domain is reasonable
     
     [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solving...
         % ...equation of motions
     
-    pars = TRANSP.PBC(params_ud.Value(1:3), pars); % Applying...
+    pars = TRANSP.PBC(params_ud.Value(2:4), pars); % Applying...
         % ...periodic boundary conditions
     
     timetable.pregrowth = [timetable.pregrowth; clock];
