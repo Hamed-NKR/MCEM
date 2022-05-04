@@ -8,14 +8,44 @@ close all
 
 %% Part 1. Setting the initial domain conditions
 
-% Setting the run-time record sheet
-timetable = struct('start', [], 'end', [], 'total', [],...
-    'prerender', [], 'postrender', [], 'render', [],...
-    'pregrowth', [], 'postgrowth', [], 'growth', []);
-%     'preoverlap', [], 'postoverlap', [], 'overlap', [],...
-%     'preconnect', [], 'postconnect', [], 'connect', [],...
-%     'preunite', [], 'postunite', [], 'unite', []);
-timetable.start = clock;
+disp("Initializing the computational domain...")
+
+% Setting the run-time record structure
+% prompt_maintime = 'Do you want the GLOBAL run-time data to be recorded? Y/N: ';
+% str_maintime = input(prompt_maintime,'s'); % Run-time saving variable (yes/no)
+% prompt_growthtime = 'Do you want the GROWTH FUNCTION run-time data to be recorded? Y/N: ';
+% str_growthtime = input(prompt_growthtime,'s'); % Run-time saving variable (yes/no)
+% disp(' ');
+
+str_maintime = 'y';
+str_growthtime = 'y';
+
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    timedata = struct('start', [], 'end', [], 'total', [],...
+        'prerender', [], 'postrender', [], 'render', [],...
+        'pregrowth', [], 'postgrowth', [], 'growth', []);
+end
+
+if (str_growthtime == 'Y') || (str_growthtime == 'y')
+    
+    timedata.preoverlap = [];
+    timedata.postoverlap = [];
+    timedata.overlap = [];
+    
+    timedata.preconnect = [];
+    timedata.postconnect = [];
+    timedata.connect = [];
+    
+    timedata.preunite = [];
+    timedata.postunite = [];
+    timedata.unite = [];
+    
+end
+
+% Time recording
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    timedata.start = clock;
+end
 
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_DLCAParams');
     % Initializing the physical parameters to be used in the simulations
@@ -61,9 +91,9 @@ disp("The computational domain is successfully initialized...")
 
 % Visualizing the initial particle locations, velocities, and nearest...
     % ...neighbor lists
-% figure
-% h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
-%     'equivalent_size', 'on', 'velocity_vector', 'on', 'render', 'on');
+figure
+h0_pose = UTILS.PLOTPARS(pars, params_ud.Value(1:3),...
+    'equivalent_size', 'on', 'velocity_vector', 'on', 'render', 'on');
 % 
 % figure
 % ind_trg_test = (randperm(params_ud.Value(4),...
@@ -72,10 +102,26 @@ disp("The computational domain is successfully initialized...")
 % h0_nntest = UTILS.PLOTNN(pars, params_ud.Value(1:3), ind_trg_test,...
 %     coef_trg(ind_trg_test));
 % 
+<<<<<<< Updated upstream:main_DLCA_test.m
 timetable.prerender = clock;
 % figure
 UTILS.RENDER(pars);
 timetable.postrender = clock;
+=======
+
+% Time recording
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    timedata.prerender = clock;
+end
+
+figure
+UTILS.RENDER(pars); % The initial population morphology
+
+% Time recording
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    timedata.postrender = clock;
+end
+>>>>>>> Stashed changes:main_test.m
 
 %% Part 2: Simulating the particle aggregations
 
@@ -85,21 +131,21 @@ t_rec = 1e2; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 
-% prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
-% str = input(prompt,'s'); % Animation saving variable (yes/no)
-% str = 'y';
-% if (str == 'Y') || (str == 'y')
+% prompt_anim = 'Do you want the aggregation animation to be saved? Y/N: ';
+% str_anim = input(prompt_anim,'s'); % Animation saving variable (yes/no)
+% str_anim = 'y';
+% if (str_anim == 'Y') || (str_anim == 'y')
 %    % Checking the existence of animation directory
-%     if exist('outputs', 'dir') ~= 7
-%         mkdir('outputs');
+%     if exist('outputs', 'dir') == 7
+%         rmdir outputs s
 %     end
-%     mkdir('outputs');
+%     mkdir outputs
 %     video_par = VideoWriter('outputs\DLCA_anim.avi'); 
 %         % Initializing the video file
 %     video_par.FrameRate = 3; % Setting frame rate
 %     video_par.Quality = 100; % Setting quality
 %     open(video_par); % Opening video file
-% elseif (str ~= 'N') && (str ~= 'n')
+% elseif (str_anim ~= 'N') && (str_anim ~= 'n')
 %     error('Error saving the animation (invalid user response)!\n')
 % end
 
@@ -121,11 +167,23 @@ while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(5) / 10))
     pars = TRANSP.PBC(params_ud.Value(2:4), pars); % Applying...
         % ...periodic boundary conditions
     
-    timetable.pregrowth = [timetable.pregrowth; clock];
-    [pars, timetable] = COL.GROW(pars, timetable); % Checking for...
-        % ...collisions and updating particle structures upon new...
-        % ...clusterations
-    timetable.postgrowth = [timetable.postgrowth; clock];
+    % Time recording
+    if (str_maintime == 'Y') || (str_maintime == 'y')
+        timedata.pregrowth = [timedata.pregrowth; clock];
+    end
+    
+    if (str_growthtime == 'Y') || (str_growthtime == 'y')
+        [pars, newinds, timedata] = COL.GROW(pars, timedata); % Checking...
+            % ...for collisions and updating particle structures upon...
+            % ...new clusterations
+    else
+        [pars, newinds] = COL.GROW(pars);
+    end
+    
+    % Time recording
+    if (str_maintime == 'Y') || (str_maintime == 'y')
+        timedata.postgrowth = [timedata.postgrowth; clock];
+    end
     
     pars = PAR.SIZING(pars); % Updating the size-related properties
     
@@ -149,7 +207,7 @@ while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(5) / 10))
     %             % ...every t_plt time steps
     %         drawnow; % Drawing the plot at the desired time steps
     %         pause(0.1); % Slowing down the animation speed
-    %         if (str == 'Y') || (str == 'y')
+    %         if (str_anim == 'Y') || (str_anim == 'y')
     %             framenow = getframe(h_anim, [0, 0, 1000, 892.1]);
     %                 % Capturing current frame
     %             writeVideo(video_par, framenow); % Saving the video
@@ -164,17 +222,24 @@ end
 
 k = k - 1;
 
-% if (str == 'Y') || (str == 'y')
+% if (str_anim == 'Y') || (str_anim == 'y')
 %     close(video_par); % Closing the video file
 % end
 
 %% Part 3: Postprocessing the results
 
-% Morphology of the final population
-timetable.prerender = [timetable.prerender; clock];
+% Time recording
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    timedata.prerender = [timedata.prerender; clock];
+end
+
 figure
-UTILS.RENDER(pars);
-timetable.postrender = [timetable.postrender; clock];
+UTILS.RENDER(pars); % Morphology of the final population
+
+% Time recording
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    timedata.postrender = [timedata.postrender; clock];
+end
 
 % Obtaining fractal properties
 [df_compiled, kf_compiled] = UTILS.PLOTFRACTALITY(parsdata);
@@ -184,29 +249,38 @@ figure
 UTILS.PLOTKINETICS(parsdata);
 
 % Finalizing the run-time results
-timetable.end = clock;
+if (str_maintime == 'Y') || (str_maintime == 'y')
+    
+    timedata.end = clock;
 
-timetable.total = UTILS.TIMEDIFF(timetable.start, timetable.end);
+    timedata.total = UTILS.TIMEDIFF(timedata.start, timedata.end);
 
-timetable.render = sum(UTILS.TIMEDIFF(timetable.prerender,...
-    timetable.postrender));
-timetable.render = [timetable.render, timetable.render / timetable.total];
+    timedata.render = sum(UTILS.TIMEDIFF(timedata.prerender,...
+        timedata.postrender));
+    timedata.render = [timedata.render, timedata.render / timedata.total];
 
-timetable.growth = sum(UTILS.TIMEDIFF(timetable.pregrowth,...
-    timetable.postgrowth));
-timetable.growth = [timetable.growth, timetable.growth / timetable.total];
+    timedata.growth = sum(UTILS.TIMEDIFF(timedata.pregrowth,...
+        timedata.postgrowth));
+    timedata.growth = [timedata.growth, timedata.growth / timedata.total];
 
-% timetable.overlap = sum(UTILS.TIMEDIFF(timetable.preoverlap,...
-%     timetable.postoverlap));
-% timetable.overlap = [timetable.overlap, timetable.overlap /...
-%     timetable.growth(1)];
-% 
-% timetable.connect = sum(UTILS.TIMEDIFF(timetable.preconnect,...
-%     timetable.postconnect));
-% timetable.connect = [timetable.connect, timetable.connect /...
-%     timetable.growth(1)];
-% 
-% timetable.unite = sum(UTILS.TIMEDIFF(timetable.preunite,...
-%     timetable.postunite));
-% timetable.unite = [timetable.unite, timetable.unite /...
-%     timetable.growth(1)];
+end
+
+if (str_growthtime == 'Y') || (str_growthtime == 'y')
+    
+    timedata.overlap = sum(UTILS.TIMEDIFF(timedata.preoverlap,...
+        timedata.postoverlap));
+    timedata.overlap = [timedata.overlap, timedata.overlap /...
+        timedata.growth(1)];
+    
+    timedata.connect = sum(UTILS.TIMEDIFF(timedata.preconnect,...
+        timedata.postconnect));
+    timedata.connect = [timedata.connect, timedata.connect /...
+        timedata.growth(1)];
+    
+    timedata.unite = sum(UTILS.TIMEDIFF(timedata.preunite,...
+        timedata.postunite));
+    timedata.unite = [timedata.unite, timedata.unite /...
+        timedata.growth(1)];
+    
+end
+
