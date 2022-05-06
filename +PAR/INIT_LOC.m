@@ -1,4 +1,4 @@
-function [pars, params_ud] = INIT_LOC(pars, params_ud)
+function [pars, params_ud] = INIT_LOC(pars, params_ud, n_itr)
 % "INIT_LOC" randomly distributes the particles throughout the...
 %     ...computational domain.
 % ----------------------------------------------------------------------- %
@@ -6,6 +6,7 @@ function [pars, params_ud] = INIT_LOC(pars, params_ud)
 % Inputs/Output:
 %     pars: Particle information structure
 %     params_ud: User defined parameters (including the domain size)
+%     n_itr: maximum number of iterations to locate the particles
 % ----------------------------------------------------------------------- %
 
 % Compiling pp info
@@ -13,6 +14,11 @@ if isa(pars, 'AGG')
     pp = AGG.COMPILEPP(pars);
 else
     pp = cell2mat(pars.pp);
+end
+
+% Initializing number of iterations if not defined
+if ~exist('n_itr', 'var') || isempty(n_itr)
+    n_itr = 1e5;
 end
 
 % Updating the domain size based on the volume fraction 
@@ -58,11 +64,14 @@ ovrs = COL.OVR(r_pars, d_pars); % Checking initial overlapping...
 % ...between the particles
 ind_err = 0; % Initializing error generation index
 
+fprintf('Initializing particle locations...')
+disp(' ')
+UTILS.TEXTBAR([0, n_itr]); % Initialize textbar
+UTILS.TEXTBAR([1, n_itr]); % Iteration 1 already done
+
 % Reinitializing overlapped particles
 while ~ isempty(find(ovrs == 1, 1))
-    
-    ind_err = ind_err + 1; % Updating error index
-    
+        
     % Updating the location of overlapped particles
     ind_updt = ind_pars(ovrs == 1, 1); % Indices of updated particles
     ind_updt = unique(ind_updt); % removing repeating indices
@@ -73,12 +82,16 @@ while ~ isempty(find(ovrs == 1, 1))
     r_pars = [repelem(pars.r,n_par,1), repmat(pars.r,n_par,1)];
     r_pars(rmv,:) = [];
     ovrs = COL.OVR(r_pars, d_pars); % Rechecking the overlapping
-    
-    if ind_err > 10^5
+        
+    if ind_err > n_itr
         error('Error assigning random initial locations!\n')
     end
     
+    ind_err = ind_err + 1; % Updating error index
+    UTILS.TEXTBAR([ind_err, n_itr]); % Update textbar
 end
+
+disp(newline)
 
 % Updating the primary particle locations based on their new random...
     % ...center positions
