@@ -3,7 +3,7 @@ clear
 clf('reset')
 close all
 
-[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_DLCAParams'); % Read the input file
+[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 n_str = 5; % Number of data storage occurrences
 j_max = 1e5; % Marching index limit
@@ -18,7 +18,7 @@ pp0_n = cell(n_str,1); % Placeholder for number of primaries withing aggs
 
 i_pp0 = cell(n_str,1); % Placeholder for index of primary particles
 
-f_dil = 0.01; % Dilution factor for 2nd stage aggregation
+f_dil = 0.1; % Dilution factor for 2nd stage aggregation
 
 % Initilize monodisperse pps for classic DLCA
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
@@ -143,7 +143,7 @@ pp1 = pp0;
 dpp0 = PAR.MEANPP(pp0);
 dpp0 = dpp0(:,1); % Current mean pp size withing aggs
 dpp_emh = ((17.8^(1/0.35)/100) * (pp0_n / 1.1).^(1 / (2 * 1.08))).^(0.35 / (1 - 0.35)); % Desired mean pp size based on external mixing hypothesis
-r_dpp = dpp_emh ./ dpp0; % Size conversion ratio
+r_dpp = 1e-9 * dpp_emh ./ dpp0; % Size conversion ratio
 % Rescale stored aggregates
 for i = 1 : n_agg0
     pp1{i}(:,2:5) = pp1{i}(:,2:5) * r_dpp(i); % Rescale primary particle size
@@ -174,7 +174,7 @@ pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
-k_max = 1e6; % Iteration limit parameter
+k_max = 1e5; % Iteration limit parameter
 kk_max = 5; % Growth limit parameter
 
 disp(newline)
@@ -212,30 +212,31 @@ if ~all(h2.Position == [0, 0, 800, 800])
 end
 set(h2, 'color', 'white');
 
-p21 = scatter(1e9 * dpp1, 1e9 * da1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
-hold on
-
-p22 = scatter(1e9 * dpp2, 1e9 * da2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
-
 dpp_uc = linspace(5, 65, 1000);
 da_uc = 100 * (dpp_uc / 17.8).^(1 / 0.35);
 
-p23 = plot(dpp_uc, da_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
+p21 = plot(dpp_uc, da_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
     'LineWidth', 2.5); % Plot universal correlation
+hold on
 
-axis equal
+p22 = scatter(1e9 * dpp1, 1e9 * da1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
+
+p23 = scatter(1e9 * dpp2, 1e9 * da2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
+
+% axis equal
 box on
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11, 'TickLength', [0.02 0.02])
-legend([p21, p22, p23], {'Monodisperse', 'Hybrid', 'Universal correlation'},...
-    'FontName', 'SansSerif', 'FontSize', 12);
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
 xlabel({'\fontsize{4} ', '\fontsize{14}d_p (nm)'},'interpreter','tex',...
     'FontName', 'SansSerif', 'FontWeight', 'bold')
 ylabel({'\fontsize{14}d_a (nm)', '\fontsize{4} '},'interpreter','tex',...
     'FontName', 'SansSerif', 'FontWeight', 'bold')
+xlim([5, 65])
 set(gca, 'XScale', 'log')
 set(gca, 'YScale', 'log')
+legend([p21, p22, p23], {'Universal correlation', 'Monodisperse', 'Hybrid'},...
+    'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 12);
 title('Primary particle size vs projected area equivalent size',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 18)
+    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
 % figure(2)
 % UTILS.RENDER(pars); % display final aggregates
