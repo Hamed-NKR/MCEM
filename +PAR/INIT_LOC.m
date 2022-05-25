@@ -18,23 +18,26 @@ end
 
 % Initializing number of iterations if not defined
 if ~exist('n_itr', 'var') || isempty(n_itr)
-    n_itr = 1e5;
+    n_itr = 1e4;
 end
 
-% Updating the domain size based on the volume fraction 
-if params_ud.Value(1) > 0
-    params_ud.Value(2) = (pi * sum(pp(:,2) .^ 3) / (6 *...
-        params_ud.Value(1)))^(1/3);
-    params_ud.Value(3) = params_ud.Value(2);
-    params_ud.Value(4) = params_ud.Value(2);
-end
-
-% Initialization of the location array
 n_par = size(pars.n,1); % Total number of (independent) particles
 pars.r = PAR.COM(pars.pp, pars.n); % Assigning center of mass as initial...
     % ...location of the aggregates
 dmax = PAR.TERRITORY(pars.pp, pars.n); % Maximum distance from the...
     % ...center of each aggregate
+
+% Updating the domain size based on the volume fraction 
+if params_ud.Value(1) > 0
+%     params_ud.Value(2) = (pi * sum(pp(:,2) .^ 3) / (6 *...
+%         params_ud.Value(1)))^(1/3);
+    params_ud.Value(2) = (pi * sum(dmax.^3) /...
+        (6 * params_ud.Value(1)))^(1/3);
+    params_ud.Value(3) = params_ud.Value(2);
+    params_ud.Value(4) = params_ud.Value(2);
+end
+
+% Initialization of the location array
 pars.r = rand(n_par,3) .* (repmat((params_ud.Value(2:4))',n_par,1) -...
      repmat(dmax,1,3))+ (repmat(dmax,1,3) ./ 2);
 
@@ -64,7 +67,7 @@ ovrs = COL.OVR(r_pars, d_pars); % Checking initial overlapping...
 % ...between the particles
 ind_err = 0; % Initializing error generation index
 
-fprintf('Initializing particle locations...')
+fprintf('Initializing particle locations based on maximum extents...')
 disp(' ')
 UTILS.TEXTBAR([0, n_itr]); % Initialize textbar
 UTILS.TEXTBAR([1, n_itr]); % Iteration 1 already done
@@ -73,8 +76,8 @@ UTILS.TEXTBAR([1, n_itr]); % Iteration 1 already done
 while ~ isempty(find(ovrs == 1, 1))
         
     % Updating the location of overlapped particles
-    ind_updt = ind_pars(ovrs == 1, 1); % Indices of updated particles
-    ind_updt = unique(ind_updt); % removing repeating indices
+    ind_updt = ind_pars(ovrs == 1, :); % Indices of updated particles
+    ind_updt = unique(ind_updt(:)); % removing repeating indices
     pars.r(ind_updt, 1:3) = rand(size(ind_updt,1),3) .*...
         (repmat((params_ud.Value(2:4))', size(ind_updt,1),1) -...
         repmat(dmax(ind_updt),1,3)) +...
@@ -82,12 +85,17 @@ while ~ isempty(find(ovrs == 1, 1))
     r_pars = [repelem(pars.r,n_par,1), repmat(pars.r,n_par,1)];
     r_pars(rmv,:) = [];
     ovrs = COL.OVR(r_pars, d_pars); % Rechecking the overlapping
+    
+    ind_err = ind_err + 1; % Updating error index
+    if (ind_err > n_itr) && any(ovrs == 1)
         
-    if ind_err > n_itr
+        for i = 1 : size(ovrs, 1)
+            fprintf('Trying one-by-one comparison of primaries for more compact location initialization...')
+            ;
+            
         error('Error assigning random initial locations!\n')
     end
     
-    ind_err = ind_err + 1; % Updating error index
     UTILS.TEXTBAR([ind_err, n_itr]); % Update textbar
 end
 

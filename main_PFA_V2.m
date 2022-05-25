@@ -174,8 +174,8 @@ pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
-k_max = 1e5; % Iteration limit parameter
-kk_max = 5; % Growth limit parameter
+k_max = 1e6; % Iteration limit parameter
+kk_max = 50; % Growth limit parameter
 
 disp(newline)
 disp('Simulating post-flame mixing...')
@@ -215,22 +215,22 @@ set(h2, 'color', 'white');
 dpp_uc = linspace(5, 65, 1000);
 da_uc = 100 * (dpp_uc / 17.8).^(1 / 0.35);
 
-p21 = plot(dpp_uc, da_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
+p21 = plot(da_uc, dpp_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
     'LineWidth', 2.5); % Plot universal correlation
 hold on
 
-p22 = scatter(1e9 * dpp1, 1e9 * da1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
+p22 = scatter(1e9 * da1, 1e9 * dpp1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
 
-p23 = scatter(1e9 * dpp2, 1e9 * da2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
+p23 = scatter(1e9 * da2, 1e9 * dpp2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
 
 % axis equal
 box on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
-xlabel({'\fontsize{4} ', '\fontsize{14}d_p (nm)'},'interpreter','tex',...
+xlabel({'\fontsize{14}d_a (nm)', '\fontsize{4} '},'interpreter','tex',...
     'FontName', 'SansSerif', 'FontWeight', 'bold')
-ylabel({'\fontsize{14}d_a (nm)', '\fontsize{4} '},'interpreter','tex',...
+ylabel({'\fontsize{4} ', '\fontsize{14}d_p (nm)'},'interpreter','tex',...
     'FontName', 'SansSerif', 'FontWeight', 'bold')
-xlim([5, 65])
+ylim([5, 65])
 set(gca, 'XScale', 'log')
 set(gca, 'YScale', 'log')
 legend([p21, p22, p23], {'Universal correlation', 'Monodisperse', 'Hybrid'},...
