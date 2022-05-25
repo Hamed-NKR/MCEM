@@ -87,14 +87,6 @@ while ~ isempty(find(ovrs == 1, 1))
     ovrs = COL.OVR(r_pars, d_pars); % Rechecking the overlapping
     
     ind_err = ind_err + 1; % Updating error index
-    if (ind_err > n_itr) && any(ovrs == 1)
-        
-        for i = 1 : size(ovrs, 1)
-            fprintf('Trying one-by-one comparison of primaries for more compact location initialization...')
-            ;
-            
-        error('Error assigning random initial locations!\n')
-    end
     
     UTILS.TEXTBAR([ind_err, n_itr]); % Update textbar
 end
