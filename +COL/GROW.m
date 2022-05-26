@@ -1,4 +1,4 @@
-function [pars, timetable] = GROW(pars, timetable)
+function [pars, timetable] = GROW(pars, opts, timetable)
 % "GROW" monitors collision of particles and updates the particle...
 %     ...structure based on the post-aggregation data.
 % ----------------------------------------------------------------------- %
@@ -6,6 +6,17 @@ function [pars, timetable] = GROW(pars, timetable)
 % Input/Output:
 %     pars: Particle info structure/class
 % ----------------------------------------------------------------------- %
+
+% initialize option input if not given
+if ~(exist('opts', 'var') && isfield(opts, 'indupdate'))
+    opts = struct('indupdate', []);
+end
+
+opts_indupdate = opts.indupdate;
+
+if isempty(opts_indupdate)
+    opts_indupdate = 'on'; % default to update agg indices after collision
+end
 
 % Total number of (independent) particles
 if isa(pars, 'AGG')
@@ -78,6 +89,13 @@ if any(ovrs == 1)
             
         end
     end
+    
+    if ismember(opts_indupdate, {'ON', 'On', 'on'})
+        for k = 1 : length(pars.n)
+            pars.pp{k}(:,6) = k;
+        end
+    end
 end
+
 
 end

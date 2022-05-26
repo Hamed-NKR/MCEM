@@ -5,9 +5,9 @@ close all
 
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
-n_str = 5; % Number of data storage occurrences
-j_max = 1e5; % Marching index limit
-jj_max = 200; % Iteration limit parameter
+n_str = 3; % Number of data storage occurrences
+j_max = 1e4; % Marching index limit
+jj_max = 100; % Iteration limit parameter
 
 dpp_globstd = 1.4; % global geometric std of pp size
 
@@ -18,7 +18,7 @@ pp0_n = cell(n_str,1); % Placeholder for number of primaries withing aggs
 
 i_pp0 = cell(n_str,1); % Placeholder for index of primary particles
 
-f_dil = 0.1; % Dilution factor for 2nd stage aggregation
+f_dil = 1; % Dilution factor for 2nd stage aggregation
 
 % Initilize monodisperse pps for classic DLCA
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
@@ -26,7 +26,8 @@ f_dil = 0.1; % Dilution factor for 2nd stage aggregation
 [pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(5), params_ud.Value(6:7),...
     params_ud.Value(8:10)); % Initialize pp sizes
 
-pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n); % Assign pp indices and sizes
+pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3),...
+    (1:size(pp_d))'], pars.n); % Assign pp indices and sizes
 
 if params_ud.Value(6) ~= 0
     pars.pp = PAR.INIT_MORPH_RAND(pars.pp); % Randomly initialize pp locations within aggs
@@ -163,7 +164,7 @@ pars.n = pp1_n; % Assign number distribution of primaries
 disp(newline)
 da1 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected area diameter for monodisperse populations
 dpp1 = PAR.MEANPP(pars.pp);
-dpp1 = dpp1(:,1); % mean primary particle diameter
+dpp1 = dpp1(:,1); % Mean primary particle diameter
 
 params_ud.Value(1) = params_ud.Value(1) * f_dil; % Dilute the concentration
 [pars, params_ud] = PAR.INIT_LOC(pars, params_ud); % Assign random locations to aggregates
@@ -174,8 +175,10 @@ pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
-k_max = 1e6; % Iteration limit parameter
-kk_max = 50; % Growth limit parameter
+k_max = 1e4; % Iteration limit parameter
+kk_max = 10; % Growth limit parameter
+
+opts_grow.indupdate = 'off'; 
 
 disp(newline)
 disp('Simulating post-flame mixing...')
@@ -190,7 +193,14 @@ while (k <= k_max) && (length(cat(1, pars.n)) > round(n_agg0 / kk_max))
     
     pars = TRANSP.PBC(params_ud.Value(2:4), pars); % Apply periodic BCs
     
-    pars = COL.GROW(pars); % Cluster the particles
+    pars = COL.GROW(pars, opts_grow); % Cluster the particles
+    
+    % count the number of monodisperse regions within a hybrid...
+        %   ...polydisperse aggregates formed by post-flame agglomeration
+    n_hyb = zeros(length(pars.n), 1);
+    for i = 1 : length(pars.n)
+        n_hyb(i) = length(unique(pars.pp{i}(:,6)));
+    end
     
     pars = PAR.SIZING(pars); % Update sizes
     

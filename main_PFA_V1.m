@@ -30,7 +30,8 @@ f_dil = 0.01; % Dilution factor for 2nd stage aggregation
 [pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(5), params_ud.Value(6:7),...
     params_ud.Value(8:10)); % Initialize pp sizes
 
-pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n); % Assign pp indices and sizes
+pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3),...
+    (1:size(pp_d))'], pars.n); % Assign pp indices and sizes
 
 if params_ud.Value(6) ~= 0
     pars.pp = PAR.INIT_MORPH_RAND(pars.pp); % Randomly initialize pp locations within aggs

@@ -28,7 +28,8 @@ timetable.start = clock;
     params_ud.Value(8:10));
 
 % Initializing the primary particle field; Assigning the indices and sizes
-pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n);
+pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3),...
+    (1:size(pp_d))'], pars.n);
 
 % Generating the initial aggregates (if applicable)
 pars.pp = PAR.INIT_MORPH_RAND(pars.pp);
