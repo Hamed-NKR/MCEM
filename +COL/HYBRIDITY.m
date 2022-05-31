@@ -12,7 +12,7 @@ function n_hyb = HYBRIDITY(pp, n_pp)
 %     n_hyb: number of distincts regions in hybrid aggregates
 % ----------------------------------------------------------------------- %
 
-n_hyb = zeros(n_agg,1); % Initializing the number of regions array
+n_hyb = zeros(length(n_pp), 1); % Initializing the number of regions array
 
 for i = 1 : length(n_pp)
     n_hyb(i) = length(unique(pp{i}(:,6)));

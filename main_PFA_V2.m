@@ -3,9 +3,11 @@ clear
 clf('reset')
 close all
 
+%% 1st stage %%
+
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
-n_str = 3; % Number of data storage occurrences
+n_str = 5; % Number of data storage occurrences
 j_max = 1e4; % Marching index limit
 jj_max = 100; % Iteration limit parameter
 
@@ -70,14 +72,14 @@ while (j <= j_max) &&...
         % Store number of primaries
         pp0_n{jjj} = cat(1, pars.n);
         
-        % Remove small aggregates
-        if jjj == 1
-            pars.pp(pp0_n{jjj} < npp_min) = [];
-            pars.n(pp0_n{jjj} < npp_min) = [];
-            pars.r(pp0_n{jjj} < npp_min, :) = [];
-            pars.v(pp0_n{jjj} < npp_min, :) = [];
-            pp0_n{jjj}(pp0_n{jjj} < npp_min) = [];
-        end
+%         % Remove small aggregates
+%         if jjj == 1
+%             pars.pp(pp0_n{jjj} < npp_min) = [];
+%             pars.n(pp0_n{jjj} < npp_min) = [];
+%             pars.r(pp0_n{jjj} < npp_min, :) = [];
+%             pars.v(pp0_n{jjj} < npp_min, :) = [];
+%             pp0_n{jjj}(pp0_n{jjj} < npp_min) = [];
+%         end
         
         pp0{jjj} = pars.pp; % Store pp info
         
@@ -166,6 +168,8 @@ da1 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected area dia
 dpp1 = PAR.MEANPP(pars.pp);
 dpp1 = dpp1(:,1); % Mean primary particle diameter
 
+%% 2nd stage %%
+
 params_ud.Value(1) = params_ud.Value(1) * f_dil; % Dilute the concentration
 [pars, params_ud] = PAR.INIT_LOC(pars, params_ud); % Assign random locations to aggregates
 
@@ -197,10 +201,11 @@ while (k <= k_max) && (length(cat(1, pars.n)) > round(n_agg0 / kk_max))
     
     % count the number of monodisperse regions within a hybrid...
         %   ...polydisperse aggregates formed by post-flame agglomeration
-    n_hyb = zeros(length(pars.n), 1);
-    for i = 1 : length(pars.n)
-        n_hyb(i) = length(unique(pars.pp{i}(:,6)));
-    end
+%     n_hyb = zeros(length(pars.n), 1);
+%     for i = 1 : length(pars.n)
+%         n_hyb(i) = length(unique(pars.pp{i}(:,6)));
+%     end
+    pars = COL.HYBRIDITY(pars.pp, pars.n);
     
     pars = PAR.SIZING(pars); % Update sizes
     
@@ -217,8 +222,8 @@ dpp2 = dpp2(:,1);
 
 figure(1)
 h2 = gcf;
-if ~all(h2.Position == [0, 0, 800, 800])
-    h2.Position = [0, 0, 800, 800];
+if ~all(h2.Position == [0, 0, 600, 600])
+    h2.Position = [0, 0, 600, 600];
 end
 set(h2, 'color', 'white');
 
