@@ -102,9 +102,9 @@ for i = 1 : n_bin
     n0 = nnz(ii); % number of pre-sampling particles in each bin
     fn0(i) = n0 / n_agg0; % size frequency of pre-sampling population   
     
-    fn_fit(i) = logncdf(d_bin(i+1), mu_d, sigma_d) -...
-        logncdf(d_bin(i), mu_d, sigma_d); % the lognormal fit to the...
-            % ...frequency data
+    fn_fit(i) = (normcdf(log(d_bin(i+1)), log(mu_d), log(sigma_d)) -...
+        normcdf(log(d_bin(i)), log(mu_d), log(sigma_d))); % the lognormal fit to the...
+            % ...frequency data 
     n_fit = round(fn_fit(i) * n_agg0); % number of particles to be...
         % ...selected in each bin
     
@@ -129,7 +129,7 @@ for i = 1 : n_bin
     ind{i} = ind{i}(iii);
     d{i} = d{i}(iii);
     
-    fn(i) = length(d) / n_agg0; % get post-sampling frequency
+    fn(i) = length(d{i}) / n_agg0; % get post-sampling frequency
 end
 
 % plot the pre- and post-sampling distributions if requested
@@ -152,47 +152,47 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     % initial size distribution
     x0 = 1e9 * [d_bin(1); repelem(d_bin(2 : end - 1), 2); d_bin(end)];
     y11 = 100 * repelem(fn0,2);
-    p11 = plot(x0, y11, 'Color', [0 0.4470 0.7410], 'LineWidth', 2.5);
+    p11 = plot(x0, y11, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2.5);
     hold on
     
     % desired size distribution
-    x12 = 1e9 * exp(linspace(log(del_d(1)), log(del_d(2)), 1000));
-    y12 = 100 * exp(-(log(x12) - mu_d).^2 / (2 * sigma_d)^2) ./...
-        (sqrt(2 * pi) * x12 * sigma_d);
-    p12 = plot(x12, y12, 'Color', [0.8500 0.3250 0.0980],...
+    x12 = (1e9 * exp(linspace(log(del_d(1)), log(del_d(2)), 1000)))';
+    y12 = 100 * exp(-(log(x12) - log(1e9 * mu_d)).^2 / (2 * (log(sigma_d))^2)) ./...
+        (sqrt(2 * pi) * log(sigma_d) * log(x12));
+    p12 = plot(x12, y12, 'Color', [0.4660 0.6740 0.1880],...
         'LineWidth', 2.5, 'LineStyle', '-.');
     
     box on
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
-    xlabel(x_lb + ' (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
-        'FontSize', 14)
-    ylabel('dn/dlog(' + x_lb + ') (%)', 'FontName', 'SansSerif',...
-        'FontWeight', 'bold', 'FontSize', 14)
-    xlim(1e9 * [del_d(1), del_d(2)])
-%     ylim([0, 100])
     set(gca, 'XScale', 'log')
-    legend([p11, p12], {'Preliminary distribution', 'Lognormal fit'},...
-        'Location', 'northeast', 'FontName', 'SansSerif', 'FontSize', 12);
-    title(tt1, 'Before filtering', 'FontName', 'SansSerif',...
+    title(tt1, 'Before sampling', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 16)
     
     tt2 = nexttile;
     
     % final size distribution
     y2 = 100 * repelem(fn,2);
-    plot(x0, y2, 'Color', [0 0.4470 0.7410], 'LineWidth', 2.5)
+    p2 = plot(x0, y2, 'Color', [0 0.4470 0.7410], 'LineWidth', 2.5);
     
     box on
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
-    xlabel(x_lb + ' (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
-        'FontSize', 14)
-    ylabel('dn/dlog(' + x_lb + ') (%)', 'FontName', 'SansSerif',...
-        'FontWeight', 'bold', 'FontSize', 14)
-    xlim(1e9 * [del_d(1), del_d(2)])
-%     ylim([0, 100])
     set(gca, 'XScale', 'log')
-    title(tt2, 'After filtering', 'FontName', 'SansSerif',...
-        'FontWeight', 'bold', 'FontSize', 16)    
+    title(tt2, 'After sampling', 'FontName', 'SansSerif',...
+        'FontWeight', 'bold', 'FontSize', 16)
+    
+    xlabel(tt, x_lb + ' (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
+        'FontSize', 14)
+    ylabel(tt, 'f_n (%)', 'FontName', 'SansSerif',...
+        'FontWeight', 'bold', 'FontSize', 14)
+    
+    linkaxes([tt1 tt2], 'xy')
+    tt1.XLim = 1e9 * [del_d(1), del_d(2)];
+    tt1.YLim = max([y11; y12; y2]);
+    
+    lgd = legend([p11, p12, p2], {'Preliminary distribution',...
+        'Lognormal target', 'Filtered distribution'},...
+        'FontName', 'SansSerif', 'FontSize', 12, 'Orientation','horizontal');
+    lgd.Layout.Tile = 'north';
 end
 
 end
