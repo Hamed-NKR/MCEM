@@ -104,7 +104,7 @@ for i = 1 : n_bin
     
     fn_fit(i) = (normcdf(log(d_bin(i+1)), log(mu_d), log(sigma_d)) -...
         normcdf(log(d_bin(i)), log(mu_d), log(sigma_d))); % the lognormal fit to the...
-            % ...frequency data 
+            % ...frequency data
     n_fit = round(fn_fit(i) * n_agg0); % number of particles to be...
         % ...selected in each bin
     
@@ -151,14 +151,16 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     % initial size distribution
     x0 = 1e9 * [d_bin(1); repelem(d_bin(2 : end - 1), 2); d_bin(end)];
-    y11 = 100 * repelem(fn0,2);
+    dn0_dlogda = fn0 ./ log(d_bin(2 : end) ./ d_bin(1 : end - 1));
+    y11 = repelem(dn0_dlogda,2);
     p11 = plot(x0, y11, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2.5);
     hold on
     
     % desired size distribution
     x12 = (1e9 * exp(linspace(log(del_d(1)), log(del_d(2)), 1000)))';
-    y12 = 100 * exp(-(log(x12) - log(1e9 * mu_d)).^2 / (2 * (log(sigma_d))^2)) ./...
-        (sqrt(2 * pi) * log(sigma_d) * log(x12));
+%     y12 = 100 * exp(-(log(x12) - log(1e9 * mu_d)).^2 / (2 * (log(sigma_d))^2)) ./...
+%         (sqrt(2 * pi) * log(sigma_d) * log(x12));
+    y12 = pdf('Normal', log(x12), log(1e9 * mu_d), log(sigma_d));
     p12 = plot(x12, y12, 'Color', [0.4660 0.6740 0.1880],...
         'LineWidth', 2.5, 'LineStyle', '-.');
     
@@ -171,8 +173,13 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     tt2 = nexttile;
     
     % final size distribution
-    y2 = 100 * repelem(fn,2);
-    p2 = plot(x0, y2, 'Color', [0 0.4470 0.7410], 'LineWidth', 2.5);
+    dn_dlogda = fn ./ log(d_bin(2 : end) ./ d_bin(1 : end - 1));
+    y2 = repelem(dn_dlogda,2);
+    p21 = plot(x0, y2, 'Color', [0 0.4470 0.7410], 'LineWidth', 2.5);
+    hold on
+    
+    plot(x12, y12, 'Color', [0.4660 0.6740 0.1880],...
+        'LineWidth', 2.5, 'LineStyle', '-.')
     
     box on
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
@@ -182,14 +189,15 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     xlabel(tt, x_lb + ' (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
         'FontSize', 14)
-    ylabel(tt, 'f_n (%)', 'FontName', 'SansSerif',...
+    ylabel(tt, 'dn / dlog(' + x_lb + ') (nm^-^1)', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 14)
     
     linkaxes([tt1 tt2], 'xy')
     tt1.XLim = 1e9 * [del_d(1), del_d(2)];
-    tt1.YLim = max([y11; y12; y2]);
+%     ymax = max([y11; y12; y2]);
+%     tt1.YLim = [0, ceil(ymax / 5) * 5];
     
-    lgd = legend([p11, p12, p2], {'Preliminary distribution',...
+    lgd = legend([p11, p12, p21], {'Preliminary distribution',...
         'Lognormal target', 'Filtered distribution'},...
         'FontName', 'SansSerif', 'FontSize', 12, 'Orientation','horizontal');
     lgd.Layout.Tile = 'north';
