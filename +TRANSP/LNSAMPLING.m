@@ -151,8 +151,8 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     % initial size distribution
     x0 = 1e9 * [d_bin(1); repelem(d_bin(2 : end - 1), 2); d_bin(end)];
-    dn0_dlogda = fn0 ./ log(d_bin(2 : end) ./ d_bin(1 : end - 1));
-    y11 = repelem(dn0_dlogda,2);
+    dfn0_dlogda = fn0 ./ log(d_bin(2 : end) ./ d_bin(1 : end - 1));
+    y11 = repelem(dfn0_dlogda,2);
     p11 = plot(x0, y11, 'Color', [0.8500 0.3250 0.0980], 'LineWidth', 2.5);
     hold on
     
@@ -173,8 +173,8 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     tt2 = nexttile;
     
     % final size distribution
-    dn_dlogda = fn ./ log(d_bin(2 : end) ./ d_bin(1 : end - 1));
-    y2 = repelem(dn_dlogda,2);
+    dfn_dlogda = fn ./ log(d_bin(2 : end) ./ d_bin(1 : end - 1));
+    y2 = repelem(dfn_dlogda,2);
     p21 = plot(x0, y2, 'Color', [0 0.4470 0.7410], 'LineWidth', 2.5);
     hold on
     
@@ -189,13 +189,13 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     xlabel(tt, x_lb + ' (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
         'FontSize', 14)
-    ylabel(tt, 'dn / dlog(' + x_lb + ') (nm^-^1)', 'FontName', 'SansSerif',...
+    ylabel(tt, 'df_n / dlog(' + x_lb + ') (nm^-^1)', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 14)
     
     linkaxes([tt1 tt2], 'xy')
     tt1.XLim = 1e9 * [del_d(1), del_d(2)];
-%     ymax = max([y11; y12; y2]);
-%     tt1.YLim = [0, ceil(ymax / 5) * 5];
+    ymax = max([y11; y12; y2]);
+    tt1.YLim = [0, ceil(ymax / 0.1) * 0.1];
     
     lgd = legend([p11, p12, p21], {'Preliminary distribution',...
         'Lognormal target', 'Filtered distribution'},...
