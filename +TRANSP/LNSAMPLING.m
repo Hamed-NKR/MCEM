@@ -114,7 +114,7 @@ for i = 1 : n_bin
     if  n_fit <= n0 % if enough particles exist in bin for random sampling
         iii= randperm(n0,n_fit); % index of particles in bin to be sampled
         
-    else
+    elseif n0 > 0
         c_rep = ceil(n_fit / n0); % data replication factor
         
         % replicate data to compensate for the missing frequency
@@ -126,10 +126,12 @@ for i = 1 : n_bin
     end
     
     % assign the data of selected particles 
-    ind{i} = ind{i}(iii);
-    d{i} = d{i}(iii);
-    
-    fn(i) = length(d{i}) / n_agg0; % get post-sampling frequency
+    if n0 ~= 0
+        ind{i} = ind{i}(iii);
+        d{i} = d{i}(iii);
+        
+        fn(i) = length(d{i}) / n_agg0; % get post-sampling frequency
+    end 
 end
 
 % plot the pre- and post-sampling distributions if requested

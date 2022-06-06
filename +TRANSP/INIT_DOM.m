@@ -62,7 +62,7 @@ pars = struct('pp', [], 'n', [], 'dv', [], 'dg', [], 'dm', [], 'da', [],...
     % kn_kin: Kinetic Knudsen number
     % kn_diff: Diffusive Knudsen number
     % nnl: ~ nearest neighbor list
-    % n_hyb: number of monodispersity regions
+    % n_hyb: number of monodispersity regions (in polydisperse hybrid aggs)
 % NOTE: The rows of each field correspond to characteristics of each...
     % ...independent particle.
 

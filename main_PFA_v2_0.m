@@ -7,18 +7,18 @@ close all
 
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
-n_str = 5; % Number of data storage occurrences
+n_stor = 3; % Number of data storage occurrences
 j_max = 1e4; % Marching index limit
-jj_max = 100; % Iteration limit parameter
+jj_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
 
 dpp_globstd = 1.4; % global geometric std of pp size
 
-pp0 = cell(n_str,1); % Primary particle data storage cell array for initial monodisperse aggregation
+pp0 = cell(n_stor,1); % Primary particle data storage cell array for initial monodisperse aggregation
 
 npp_min = 10; % Aggregate filtering criterion
-pp0_n = cell(n_str,1); % Placeholder for number of primaries withing aggs
+pp0_n = cell(n_stor,1); % Placeholder for number of primaries withing aggs
 
-i_pp0 = cell(n_str,1); % Placeholder for index of primary particles
+i_pp0 = cell(n_stor,1); % Placeholder for index of primary particles
 
 f_dil = 1; % Dilution factor for 2nd stage aggregation
 
@@ -52,9 +52,9 @@ j = 2; % initialize iteration index
 jjj = 1; % pp data storage tracking index
 
 % Iterations to be stored
-r_str = (jj_max / npp_min)^(1 / (n_str - 1));
-jj = zeros(n_str,1);
-for i = 1 : n_str
+r_str = (jj_max / npp_min)^(1 / (n_stor - 1));
+jj = zeros(n_stor,1);
+for i = 1 : n_stor
     jj(i) = round(npp_min * (r_str^(i-1))); 
 end
 
@@ -105,7 +105,7 @@ while (j <= j_max) &&...
 end
 
 % Store the pp info and number of pps and update the indices for the last step 
-if jjj <= n_str
+if jjj <= n_stor
     pp0{jjj} = pars.pp;
     pp0_n{jjj} = cat(1, pars.n);
     i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
@@ -117,10 +117,10 @@ if jjj <= n_str
     end
 end
 
-if jjj < n_str
+if jjj < n_stor
     pp0(jjj + 1 : end) = []; % Remove unused cells
     pp0_n(jjj : end) = [];
-    n_str = jjj - 1; % Update the number of stored datasets
+    n_stor = jjj - 1; % Update the number of stored datasets
 end
 
 pp0 = cat(1, pp0{:}); % Merge pp info from different times
@@ -201,11 +201,12 @@ while (k <= k_max) && (length(cat(1, pars.n)) > round(n_agg0 / kk_max))
     
     % count the number of monodisperse regions within a hybrid...
         %   ...polydisperse aggregates formed by post-flame agglomeration
+    pars = COL.HYBRIDITY(pars.pp, pars.n);
+    % or:
 %     n_hyb = zeros(length(pars.n), 1);
 %     for i = 1 : length(pars.n)
 %         n_hyb(i) = length(unique(pars.pp{i}(:,6)));
 %     end
-    pars = COL.HYBRIDITY(pars.pp, pars.n);
     
     pars = PAR.SIZING(pars); % Update sizes
     

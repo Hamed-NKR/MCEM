@@ -74,7 +74,10 @@ UTILS.TEXTBAR([1, n_itr]); % Iteration 1 already done
 
 % Reinitializing overlapped particles
 while ~ isempty(find(ovrs == 1, 1))
-        
+    if ind_err >= n_itr
+        error('Failed locating particles...')
+    end
+    
     % Updating the location of overlapped particles
     ind_updt = ind_pars(ovrs == 1, :); % Indices of updated particles
     ind_updt = unique(ind_updt(:)); % removing repeating indices
@@ -91,7 +94,7 @@ while ~ isempty(find(ovrs == 1, 1))
     UTILS.TEXTBAR([ind_err, n_itr]); % Update textbar
 end
 
-disp(newline)
+disp(' ')
 
 % Updating the primary particle locations based on their new random...
     % ...center positions
