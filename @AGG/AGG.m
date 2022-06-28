@@ -16,6 +16,7 @@ classdef AGG
         dm = []         % ~ mobility diameter
         da = []         % ~ aerodynamic diameter
         dpp = []        % ~ mean + std of diameter of primaries
+        dpp_g = []      % ~ geometric mean + std of ~
         dmax = []       % ~ maximum extent of diameter
         
         r = []          % ~ center of mass
@@ -31,6 +32,7 @@ classdef AGG
         kn_kin = []     % ~ kinetic Knudsen number
         kn_diff = []    % ~ diffusive Knudsen number
         nnl = []        % ~ nearest neighbor list
+        n_hyb = []      % ~ number of monodispersity regions
         
     end
 % ----------------------------------------------------------------------- %
@@ -191,6 +193,34 @@ classdef AGG
             dpp(1) = mean(pp.d); % Mean size
             dpp(2) = std(pp.d); % Standard deviation
             
+        end
+        
+        % === GEOMEANPP ================================================= %
+        function dpp_g = GEOMEANPP(pp)
+        % "GEOMEANPP" gives the geometric mean and standard deviation...
+        %   ...of primary particles within an aggregate.
+        % --------------------------------------------------------------- %
+        %
+        % pp: Primary particle structure
+        % dpp_G: Primary particles geometric mean diameter + std
+        % --------------------------------------------------------------- %
+            x = pp.d;
+            if any(x(:) < 0)
+                error('All data values must be positive.');
+            end
+            flag = 1;
+            dim = find(size(x) ~= 1, 1);
+            if isempty(dim)
+                dim = 1;
+            end
+            
+            lozwarning = warning('off', 'MATLAB:log:logOfZero');
+            
+            dpp_g(1) = geomean(x); % Mean geometric size
+            dpp_g(2) = exp(std(log(x), flag, dim)); % Geometric standard...
+                % ...deviation
+            
+            warning(lozwarning);            
         end
         
         % === COMPILEPP ================================================= %

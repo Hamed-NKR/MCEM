@@ -28,7 +28,8 @@ timetable.start = clock;
     params_ud.Value(8:10));
 
 % Initializing the primary particle field; Assigning the indices and sizes
-pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n);
+pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3),...
+    (1:size(pp_d))'], pars.n);
 
 % Generating the initial aggregates (if applicable)
 pars.pp = PAR.INIT_MORPH_RAND(pars.pp);
@@ -74,16 +75,22 @@ disp("The computational domain is successfully initialized...")
 % 
 timetable.prerender = clock;
 % figure
-UTILS.RENDER(pars);
+% UTILS.RENDER(pars);
 timetable.postrender = clock;
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e4; % Marching index limit
+k_max = 1e5; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 1e2; % Data recording timeframe
+t_rec = 5e2; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
+n_agg = zeros(k_max,1); % Real-time number of aggregates
+if isa(pars, 'AGG')
+    n_agg(1) = length(pars);
+else
+    n_agg(1) = size(pars.n, 1);
+end
 
 % prompt = 'Do you want the aggregation animation to be saved? Y/N: ';
 % str = input(prompt,'s'); % Animation saving variable (yes/no)
@@ -122,7 +129,7 @@ while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(5) / 10))
         % ...periodic boundary conditions
     
     timetable.pregrowth = [timetable.pregrowth; clock];
-    [pars, timetable] = COL.GROW(pars, timetable); % Checking for...
+    [pars, timetable] = COL.GROW(pars, [], timetable); % Checking for...
         % ...collisions and updating particle structures upon new...
         % ...clusterations
     timetable.postgrowth = [timetable.postgrowth; clock];
@@ -137,10 +144,17 @@ while (k <= k_max) && all(cat(1, pars.n) < (params_ud.Value(5) / 10))
     %             % ...nearest neighbors
     %     end
     
+    % Recording total number of aggregates
+    if isa(pars, 'AGG')
+        n_agg(k) = length(pars);
+    else
+        n_agg(k) = size(pars.n, 1);
+    end
+    
     time(k) = time(k-1) + delt; % Updating time
     
     if mod(k-1, t_rec) == 0
-        parsdata = UTILS.SAVEPARS(pars, time, k, [], parsdata);
+        parsdata = UTILS.SAVEPARS(pars, time, k, params_ud, parsdata);
         % Saving particle data over time
     end
     
@@ -172,8 +186,8 @@ k = k - 1;
 
 % Morphology of the final population
 timetable.prerender = [timetable.prerender; clock];
-figure
-UTILS.RENDER(pars);
+% figure
+% UTILS.RENDER(pars);
 timetable.postrender = [timetable.postrender; clock];
 
 % Obtaining fractal properties
@@ -182,6 +196,14 @@ timetable.postrender = [timetable.postrender; clock];
 % Plotting kinetic properties
 figure
 UTILS.PLOTKINETICS(parsdata);
+
+figure
+opts_kin.visual = 'on';
+if k < k_max
+    n_agg(k + 1 : end) = [];
+    time(k + 1 : end) = [];
+end
+[beta, tau, z] = TRANSP.KINETIC(n_agg, time, opts_kin);
 
 % Finalizing the run-time results
 timetable.end = clock;

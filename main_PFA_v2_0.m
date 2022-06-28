@@ -3,22 +3,24 @@ clear
 clf('reset')
 close all
 
-[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_DLCAParams'); % Read the input file
+%% 1st stage %%
 
-n_str = 5; % Number of data storage occurrences
-j_max = 1e5; % Marching index limit
-jj_max = 200; % Iteration limit parameter
+[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
+
+n_stor = 3; % Number of data storage occurrences
+j_max = 1e4; % Marching index limit
+jj_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
 
 dpp_globstd = 1.4; % global geometric std of pp size
 
-pp0 = cell(n_str,1); % Primary particle data storage cell array for initial monodisperse aggregation
+pp0 = cell(n_stor,1); % Primary particle data storage cell array for initial monodisperse aggregation
 
 npp_min = 10; % Aggregate filtering criterion
-pp0_n = cell(n_str,1); % Placeholder for number of primaries withing aggs
+pp0_n = cell(n_stor,1); % Placeholder for number of primaries withing aggs
 
-i_pp0 = cell(n_str,1); % Placeholder for index of primary particles
+i_pp0 = cell(n_stor,1); % Placeholder for index of primary particles
 
-f_dil = 0.01; % Dilution factor for 2nd stage aggregation
+f_dil = 1; % Dilution factor for 2nd stage aggregation
 
 % Initilize monodisperse pps for classic DLCA
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
@@ -26,7 +28,8 @@ f_dil = 0.01; % Dilution factor for 2nd stage aggregation
 [pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(5), params_ud.Value(6:7),...
     params_ud.Value(8:10)); % Initialize pp sizes
 
-pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3)], pars.n); % Assign pp indices and sizes
+pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3),...
+    (1:size(pp_d))'], pars.n); % Assign pp indices and sizes
 
 if params_ud.Value(6) ~= 0
     pars.pp = PAR.INIT_MORPH_RAND(pars.pp); % Randomly initialize pp locations within aggs
@@ -49,9 +52,9 @@ j = 2; % initialize iteration index
 jjj = 1; % pp data storage tracking index
 
 % Iterations to be stored
-r_str = (jj_max / npp_min)^(1 / (n_str - 1));
-jj = zeros(n_str,1);
-for i = 1 : n_str
+r_str = (jj_max / npp_min)^(1 / (n_stor - 1));
+jj = zeros(n_stor,1);
+for i = 1 : n_stor
     jj(i) = round(npp_min * (r_str^(i-1))); 
 end
 
@@ -69,14 +72,14 @@ while (j <= j_max) &&...
         % Store number of primaries
         pp0_n{jjj} = cat(1, pars.n);
         
-        % Remove small aggregates
-        if jjj == 1
-            pars.pp(pp0_n{jjj} < npp_min) = [];
-            pars.n(pp0_n{jjj} < npp_min) = [];
-            pars.r(pp0_n{jjj} < npp_min, :) = [];
-            pars.v(pp0_n{jjj} < npp_min, :) = [];
-            pp0_n{jjj}(pp0_n{jjj} < npp_min) = [];
-        end
+%         % Remove small aggregates
+%         if jjj == 1
+%             pars.pp(pp0_n{jjj} < npp_min) = [];
+%             pars.n(pp0_n{jjj} < npp_min) = [];
+%             pars.r(pp0_n{jjj} < npp_min, :) = [];
+%             pars.v(pp0_n{jjj} < npp_min, :) = [];
+%             pp0_n{jjj}(pp0_n{jjj} < npp_min) = [];
+%         end
         
         pp0{jjj} = pars.pp; % Store pp info
         
@@ -102,7 +105,7 @@ while (j <= j_max) &&...
 end
 
 % Store the pp info and number of pps and update the indices for the last step 
-if jjj <= n_str
+if jjj <= n_stor
     pp0{jjj} = pars.pp;
     pp0_n{jjj} = cat(1, pars.n);
     i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
@@ -114,10 +117,10 @@ if jjj <= n_str
     end
 end
 
-if jjj < n_str
+if jjj < n_stor
     pp0(jjj + 1 : end) = []; % Remove unused cells
     pp0_n(jjj : end) = [];
-    n_str = jjj - 1; % Update the number of stored datasets
+    n_stor = jjj - 1; % Update the number of stored datasets
 end
 
 pp0 = cat(1, pp0{:}); % Merge pp info from different times
@@ -143,7 +146,7 @@ pp1 = pp0;
 dpp0 = PAR.MEANPP(pp0);
 dpp0 = dpp0(:,1); % Current mean pp size withing aggs
 dpp_emh = ((17.8^(1/0.35)/100) * (pp0_n / 1.1).^(1 / (2 * 1.08))).^(0.35 / (1 - 0.35)); % Desired mean pp size based on external mixing hypothesis
-r_dpp = dpp_emh ./ dpp0; % Size conversion ratio
+r_dpp = 1e-9 * dpp_emh ./ dpp0; % Size conversion ratio
 % Rescale stored aggregates
 for i = 1 : n_agg0
     pp1{i}(:,2:5) = pp1{i}(:,2:5) * r_dpp(i); % Rescale primary particle size
@@ -163,7 +166,9 @@ pars.n = pp1_n; % Assign number distribution of primaries
 disp(newline)
 da1 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected area diameter for monodisperse populations
 dpp1 = PAR.MEANPP(pars.pp);
-dpp1 = dpp1(:,1); % mean primary particle diameter
+dpp1 = dpp1(:,1); % Mean primary particle diameter
+
+%% 2nd stage %%
 
 params_ud.Value(1) = params_ud.Value(1) * f_dil; % Dilute the concentration
 [pars, params_ud] = PAR.INIT_LOC(pars, params_ud); % Assign random locations to aggregates
@@ -174,8 +179,10 @@ pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
-k_max = 1e6; % Iteration limit parameter
-kk_max = 5; % Growth limit parameter
+k_max = 1e4; % Iteration limit parameter
+kk_max = 10; % Growth limit parameter
+
+opts_grow.indupdate = 'off'; 
 
 disp(newline)
 disp('Simulating post-flame mixing...')
@@ -190,7 +197,16 @@ while (k <= k_max) && (length(cat(1, pars.n)) > round(n_agg0 / kk_max))
     
     pars = TRANSP.PBC(params_ud.Value(2:4), pars); % Apply periodic BCs
     
-    pars = COL.GROW(pars); % Cluster the particles
+    pars = COL.GROW(pars, opts_grow); % Cluster the particles
+    
+    % count the number of monodisperse regions within a hybrid...
+        %   ...polydisperse aggregates formed by post-flame agglomeration
+    pars = COL.HYBRIDITY(pars.pp, pars.n);
+    % or:
+%     n_hyb = zeros(length(pars.n), 1);
+%     for i = 1 : length(pars.n)
+%         n_hyb(i) = length(unique(pars.pp{i}(:,6)));
+%     end
     
     pars = PAR.SIZING(pars); % Update sizes
     
@@ -207,35 +223,36 @@ dpp2 = dpp2(:,1);
 
 figure(1)
 h2 = gcf;
-if ~all(h2.Position == [0, 0, 800, 800])
-    h2.Position = [0, 0, 800, 800];
+if ~all(h2.Position == [0, 0, 600, 600])
+    h2.Position = [0, 0, 600, 600];
 end
 set(h2, 'color', 'white');
-
-p21 = scatter(1e9 * dpp1, 1e9 * da1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
-hold on
-
-p22 = scatter(1e9 * dpp2, 1e9 * da2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
 
 dpp_uc = linspace(5, 65, 1000);
 da_uc = 100 * (dpp_uc / 17.8).^(1 / 0.35);
 
-p23 = plot(dpp_uc, da_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
+p21 = plot(da_uc, dpp_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
     'LineWidth', 2.5); % Plot universal correlation
+hold on
 
-axis equal
+p22 = scatter(1e9 * da1, 1e9 * dpp1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
+
+p23 = scatter(1e9 * da2, 1e9 * dpp2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
+
+% axis equal
 box on
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11, 'TickLength', [0.02 0.02])
-legend([p21, p22, p23], {'Monodisperse', 'Hybrid', 'Universal correlation'},...
-    'FontName', 'SansSerif', 'FontSize', 12);
-xlabel({'\fontsize{4} ', '\fontsize{14}d_p (nm)'},'interpreter','tex',...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
+xlabel({'\fontsize{14}d_a (nm)', '\fontsize{4} '},'interpreter','tex',...
     'FontName', 'SansSerif', 'FontWeight', 'bold')
-ylabel({'\fontsize{14}d_a (nm)', '\fontsize{4} '},'interpreter','tex',...
+ylabel({'\fontsize{4} ', '\fontsize{14}d_p (nm)'},'interpreter','tex',...
     'FontName', 'SansSerif', 'FontWeight', 'bold')
+ylim([5, 65])
 set(gca, 'XScale', 'log')
 set(gca, 'YScale', 'log')
+legend([p21, p22, p23], {'Universal correlation', 'Monodisperse', 'Hybrid'},...
+    'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 12);
 title('Primary particle size vs projected area equivalent size',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 18)
+    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
 % figure(2)
 % UTILS.RENDER(pars); % display final aggregates

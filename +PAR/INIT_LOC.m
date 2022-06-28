@@ -1,4 +1,4 @@
-function [pars, params_ud] = INIT_LOC(pars, params_ud)
+function [pars, params_ud] = INIT_LOC(pars, params_ud, n_itr)
 % "INIT_LOC" randomly distributes the particles throughout the...
 %     ...computational domain.
 % ----------------------------------------------------------------------- %
@@ -6,6 +6,7 @@ function [pars, params_ud] = INIT_LOC(pars, params_ud)
 % Inputs/Output:
 %     pars: Particle information structure
 %     params_ud: User defined parameters (including the domain size)
+%     n_itr: maximum number of iterations to locate the particles
 % ----------------------------------------------------------------------- %
 
 % Compiling pp info
@@ -15,20 +16,28 @@ else
     pp = cell2mat(pars.pp);
 end
 
-% Updating the domain size based on the volume fraction 
-if params_ud.Value(1) > 0
-    params_ud.Value(2) = (pi * sum(pp(:,2) .^ 3) / (6 *...
-        params_ud.Value(1)))^(1/3);
-    params_ud.Value(3) = params_ud.Value(2);
-    params_ud.Value(4) = params_ud.Value(2);
+% Initializing number of iterations if not defined
+if ~exist('n_itr', 'var') || isempty(n_itr)
+    n_itr = 1e4;
 end
 
-% Initialization of the location array
 n_par = size(pars.n,1); % Total number of (independent) particles
 pars.r = PAR.COM(pars.pp, pars.n); % Assigning center of mass as initial...
     % ...location of the aggregates
 dmax = PAR.TERRITORY(pars.pp, pars.n); % Maximum distance from the...
     % ...center of each aggregate
+
+% Updating the domain size based on the volume fraction 
+if params_ud.Value(1) > 0
+%     params_ud.Value(2) = (pi * sum(pp(:,2) .^ 3) / (6 *...
+%         params_ud.Value(1)))^(1/3);
+    params_ud.Value(2) = (pi * sum(dmax.^3) /...
+        (6 * params_ud.Value(1)))^(1/3);
+    params_ud.Value(3) = params_ud.Value(2);
+    params_ud.Value(4) = params_ud.Value(2);
+end
+
+% Initialization of the location array
 pars.r = rand(n_par,3) .* (repmat((params_ud.Value(2:4))',n_par,1) -...
      repmat(dmax,1,3))+ (repmat(dmax,1,3) ./ 2);
 
@@ -58,14 +67,20 @@ ovrs = COL.OVR(r_pars, d_pars); % Checking initial overlapping...
 % ...between the particles
 ind_err = 0; % Initializing error generation index
 
+fprintf('Initializing particle locations based on maximum extents...')
+disp(' ')
+UTILS.TEXTBAR([0, n_itr]); % Initialize textbar
+UTILS.TEXTBAR([1, n_itr]); % Iteration 1 already done
+
 % Reinitializing overlapped particles
 while ~ isempty(find(ovrs == 1, 1))
-    
-    ind_err = ind_err + 1; % Updating error index
+    if ind_err >= n_itr
+        error('Failed locating particles...')
+    end
     
     % Updating the location of overlapped particles
-    ind_updt = ind_pars(ovrs == 1, 1); % Indices of updated particles
-    ind_updt = unique(ind_updt); % removing repeating indices
+    ind_updt = ind_pars(ovrs == 1, :); % Indices of updated particles
+    ind_updt = unique(ind_updt(:)); % removing repeating indices
     pars.r(ind_updt, 1:3) = rand(size(ind_updt,1),3) .*...
         (repmat((params_ud.Value(2:4))', size(ind_updt,1),1) -...
         repmat(dmax(ind_updt),1,3)) +...
@@ -74,11 +89,12 @@ while ~ isempty(find(ovrs == 1, 1))
     r_pars(rmv,:) = [];
     ovrs = COL.OVR(r_pars, d_pars); % Rechecking the overlapping
     
-    if ind_err > 10^5
-        error('Error assigning random initial locations!\n')
-    end
+    ind_err = ind_err + 1; % Updating error index
     
+    UTILS.TEXTBAR([ind_err, n_itr]); % Update textbar
 end
+
+disp(' ')
 
 % Updating the primary particle locations based on their new random...
     % ...center positions

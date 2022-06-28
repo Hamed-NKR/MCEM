@@ -64,6 +64,7 @@ for i = 1 : n_par
                 % ...(yaw, pitch, and roll)
             pp(i) = PAR.ROTATE(pp(i), n_pp(i), angs);
             
+            pp{i}(:,6) = i; % Updating aggregate indices
         end
         
     end

@@ -40,7 +40,8 @@ for i = 1 : n_agg
         aggs(i).dmax = pars.dmax(i);       % Maximum extent diameter
     end
     aggs(i).dg = pars.dg(i);               % Gyration diameter
-    aggs(i).dpp = pars.dpp(i,:);           % Maximum extent diameter
+    aggs(i).dpp = pars.dpp(i,:);           % Primary particle mean diameter
+    aggs(i).dpp_g = pars.dpp_g(i,:);       % ~ geometric mean diameter
 %     aggs(i).dm = pars.dm(i);               % Mobility diameter
 %     aggs(i).da = pars.da(i);               % Aerodynamic diameter
     
@@ -60,9 +61,12 @@ for i = 1 : n_agg
     aggs(i).lambda = pars.lambda(i);       % Diffusive mean free path
     aggs(i).kn_kin = pars.kn_kin(i,:);     % Kinetic Knudsen number
     aggs(i).kn_diff = pars.kn_diff(i,:);   % Diffusive Knudsen number
+    
     if ~isempty(pars.nnl)
         aggs(i).nnl = pars.nnl{i};         % Nearest neighbor list
     end
+    
+    aggs(i).n_hyb = pars.n_hyb(i,:);   % Number of monodispersity regions    
 end
 
 end
