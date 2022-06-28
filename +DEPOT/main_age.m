@@ -1,3 +1,5 @@
+% a script to plot hybrid particles over age
+
 figure(1)
 h = gcf;
 if ~all(h.Position == [0, 0, 600, 600])

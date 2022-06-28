@@ -5,25 +5,49 @@ close all
 
 %% Initializations %%
 
+[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
+
+% Stage 1:
 n_stor = 3; % Number of data storage occurrences
 n_try = 3; % Number of DLCA trials
 
-dpp_globstd = 1.4; % Global geometric std of pp size
+mu_dpp_glob = []; % Global geometric mean of pp size 
+std_dpp_glob = 1.4; % Global geometric std of pp size
 
 npp_min = 10; % Aggregate filtering criterion
 npp_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
 
 j_max = 1e4; % Stage 1 marching index limit
 
-f_dil = 1; % Dilution factor for 2nd stage aggregation
+opts.visual = 'on'; % flage for display of lognormal sampling process
+opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 
-k_max = 1e4; % Stage 2 iteration limit parameter
-kk_max = 5; % Stage 2 growth limit parameter
+% Stage 2
+f_dil = 1; % Dilution factor for post-flame agglomeration
 
+k_max = 1e5; % Iteration limit parameter
+
+n_kk = 3; % Number of saving timespots
+
+opts2.plotlabel = 'on'; % flag to display lablels of gstd on dp vs da plots
+opts2.ploteb = 'on'; % error bar display flag
+
+opts2.savelast = 'on'; % flag to whether save the last piece of data
+
+opts2.datastore = 'number'; % flag to decide on criterion for data saving...
+    % ...('number' for number of hybridity regions, 'gstd' for geometric...
+    % ...standard deviaion of size)
+
+% Growth limit extremes
+if strcmp(opts2.datastore, 'gstd')
+    kk_min = params_ud.Value(9);
+    kk_max = 1.4;
+else
+    kk_min = 1;
+    kk_max = 10;
+end
 
 %% 1st stage %%
-
-[params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 pp0 = cell(n_stor, n_try); % Primary particle data storage cell array for initial monodisperse aggregation
 
@@ -43,6 +67,7 @@ disp(newline)
 
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
 
+% Generate a library of monodisperse aggregates with classic DLCA
 for i = 1 : n_try
     fprintf('trial %d:', i)
     disp(' ')
@@ -78,7 +103,7 @@ for i = 1 : n_try
     % 1st stage DLCA iterations
     while (j <= j_max) &&...
             (sum(cat(1, pars.n) >= npp_max) < round(0.95 * length(cat(1, pars.n))))
-        [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solve for transport
+        pars = TRANSP.MARCH(pars, fl, params_const); % Solve for transport
         
         pars = TRANSP.PBC(params_ud.Value(2:4), pars); % Apply periodic BCs
         
@@ -106,7 +131,7 @@ for i = 1 : n_try
                 i_pp0{jjj}{j4} = [pars.pp{j4}(:,1), pars.pp{j4}(:,6)];
                 if (i > 1) || (jjj > 1)
                     pp0{jjj,i}{j4}(:,1) = pp0{jjj,i}{j4}(:,1) +...
-                        ((i - 1) * n_stor + jjj) * params_ud.Value(5);
+                        ((i - 1) * n_stor + jjj - 1) * params_ud.Value(5);
                 end
             end
             
@@ -131,23 +156,38 @@ for i = 1 : n_try
             i_pp0{jjj}{j4} = [pars.pp{j4}(:,1), pars.pp{j4}(:,6)];
             if (i > 1) || (jjj > 1)
                 pp0{jjj,i}{j4}(:,1) = pp0{jjj,i}{j4}(:,1) +...
-                    ((i - 1) * n_stor + jjj) * params_ud.Value(5);
+                    ((i - 1) * n_stor + jjj - 1) * params_ud.Value(5);
             end
         end
     end
     
     % Remove similar aggs
-    i_pp0 = cat(1, i_pp0{:}); % Compile indices
-    ij = nchoosek(1 : length(cell2mat(pp0_n(:,i))), 2);
-    ind_rmv = [];
-    for ii = 1 : length(ij)
-        if isequal(i_pp0{ij(ii,1)}, i_pp0{ij(ii,2)})
-            ind_rmv = [ind_rmv; ij(ii,2)];
+    if jjj > 1
+        i_pp0 = cat(1, i_pp0{:}); % Compile indices
+        ij = nchoosek(1 : length(cell2mat(pp0_n(:,i))), 2);
+        ind_rmv = [];
+        for ii = 1 : length(ij)
+            if isequal(i_pp0{ij(ii,1)}, i_pp0{ij(ii,2)})
+                ind_rmv = [ind_rmv; ij(ii,2)];
+            end
+        end
+        
+        if ~isempty(ind_rmv)
+            ind_rmv = unique(ind_rmv);
+            agg0_n = cell2mat(cellfun(@size, pp0(:,i), 'UniformOutput', false));
+            agg0_n(:,2) = [];
+            agg0_n_c = [0; cumsum(agg0_n)];
+            n_rmv = length(ind_rmv);
+            ind_rmv1 = zeros(n_rmv,1);
+            ind_rmv2 = zeros(n_rmv,1);
+            for iii = 1 : n_rmv 
+                ind_rmv1(iii) = find(ind_rmv(iii) <= agg0_n_c, 1) - 1;
+                ind_rmv2(iii) = ind_rmv(iii) - agg0_n_c(ind_rmv1(iii));
+            end
+            pp0{ind_rmv1,i}(ind_rmv2) = [];
+            pp0_n{ind_rmv1,i}(ind_rmv2) = [];
         end
     end
-    ind_rmv = unique(ind_rmv);
-    pp0(ind_rmv) = [];
-    pp0_n(ind_rmv) = [];
     
     disp(newline)
 end
@@ -180,28 +220,49 @@ pars = structfun(@(x) [], pars, 'UniformOutput', false); % Clear pars struct fie
 pars.pp = pp00; % Assign pp info for projected area calculations
 pars.n = pp0_n;
 
-disp(' ')
 da0 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected area diameter for monodisperse populations
 
 dpp00 = PAR.MEANPP(pars.pp);
 dpp00 = dpp00(:,1); % Mean primary particle diameter
 
 % Filter particles for a lognormal target area distribution
-opts.visual = 'on';
-opts.randvar = 'area';
-[da1, ind1] = TRANSP.LNSAMPLING(da0, [], [], 10, opts);
+[da1, ind1] = TRANSP.LNSAMPLING(da0, mu_dpp_glob, std_dpp_glob, [], 10,...
+    opts);
+
+da1 = da1(~cellfun('isempty', da1));
 da1 = cat(1, da1{:});
+
+ind1 = ind1(~cellfun('isempty', ind1));
 ind1 = cat(1, ind1{:});
-dpp1 = dpp0(ind1);
+
+dpp1 = dpp00(ind1);
 pp1 = pp00(ind1);
-pp1_n = pp1_n(ind1);
+pp1_n = pp0_n(ind1);
+
+n_agg1 = size(pp1, 1);
+
+% Update the indices of particles due to existence of duplicates
+i_pp1 = zeros(n_agg1,1);
+for i = 1 : n_agg1
+    i_pp1(i) = max(pp1{i}(:,1));
+end
+[~, i_pp11] = sort(i_pp1);
+dpp1 = dpp1(i_pp11);
+pp1 = pp1(i_pp11);
+pp1_n = pp1_n(i_pp11);
+da1 = da1(i_pp11);
+pp1_temp = cell2mat(pp1);
+pp1_temp(:,1) = pp1_temp(:,1) +...
+    repelem(params_ud.Value(5) * (0 : n_agg1 - 1)', pp1_n) +...
+    n_stor * n_try * params_ud.Value(5);
+pp1 = mat2cell(pp1_temp, pp1_n);
 
 % Randomize order of aggregates
-n_agg1 = size(pp1, 1);
 i_rnd = randperm(n_agg1);
 dpp1 = dpp1(i_rnd);
 pp1 = pp1(i_rnd);
 pp1_n = pp1_n(i_rnd);
+da1 = da1(i_rnd);
 
 pars.pp = pp1; % Assign pp info for stage 2
 pars.n = pp1_n; % Assign number distribution of primaries
@@ -218,69 +279,183 @@ pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
-opts_grow.indupdate = 'off'; 
+opts2.indupdate = 'off'; % flag to update aggregate ids upon each collision
+    % ...(disabled to track hybridty)
 
-disp(newline)
-disp('Simulating post-flame mixing...')
+k = 2; % Initialize iteration index
+
+time = zeros(k_max,1); % Initialize time storage array
+
+if n_kk > 11
+    n_kk = 11; % Set a limit for data storage
+end
+
+% Generate data saving timespots
+kk = kk_min : (kk_max - kk_min) / (n_kk) : kk_max;
+kk = kk(2 : end);
+if strcmp(opts2.datastore, 'number')
+    kk = unique(round(kk)); % Round the values generated for number of regions
+    n_kk = length(kk);
+end
+
+kkk = 1; % Index for data saving timespots
+
+% Initialize the property to use as a criterion for data saving and...
+    % ...define the saving extreme points
+if strcmp(opts2.datastore, 'number')
+    saveprop = 1; % Aggregates are initially non-hybrid
+else
+    saveprop = params_ud.Value(9); % Aggregates are initially monodisperse
+end
+    
+pars_hyb = struct('dpp', cell(n_kk,1), 'dpp_g', cell(n_kk,1),...
+    'da', cell(n_kk,1)); % Placeholder for hybrid aggregates data
+
+disp(' ')
+disp('Simulating post-flame agglomeration...')
 UTILS.TEXTBAR([0, k_max]); % Initialize textbar
 UTILS.TEXTBAR([1, k_max]); % Iteration 1 already done
 
-k = 2; % initialize iteration index
-
-% Stage 2 DLCA
-while (k <= k_max) && (length(cat(1, pars.n)) > round(n_agg0 / kk_max))
+% Produce hybridized particles with post-flame agglomeration
+while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
+    if nnz(saveprop >= kk(kkk)) / length(saveprop) >= 0.9
+        % save primary particle and projected area size
+        pars_hyb(kkk).dpp = pars.dpp;
+        pars_hyb(kkk).dpp_g = pars.dpp_g;
+        pars_hyb(kkk).da = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected area size
+        
+        kkk = kkk + 1; % Go to next saving spot
+    end
+    
     [pars, delt] = TRANSP.MARCH(pars, fl, params_const); % Solve for transport
     
     pars = TRANSP.PBC(params_ud.Value(2:4), pars); % Apply periodic BCs
     
-    pars = COL.GROW(pars, opts_grow); % Cluster the particles
+    pars = COL.GROW(pars, opts2); % Cluster the particles
     
-    % count the number of monodisperse regions within a hybrid...
-        %   ...polydisperse aggregates formed by post-flame agglomeration
-    pars.n_hyb = COL.HYBRIDITY(pars.pp, pars.n);
+    pars.n_hyb = COL.HYBRIDITY(pars.pp, pars.n); % Count the number of...
+        % ...monodisperse regions within a hybrid polydisperse...
+        % ...aggregates formed by post-flame agglomeration
     
     pars = PAR.SIZING(pars); % Update sizes
     
     pars = TRANSP.MOBIL(pars, fl, params_const); % Update mobility properties
+    
+    % Update the data saving propety
+    if strcmp(opts2.datastore, 'number')
+        saveprop = pars.n_hyb;
+    else
+        saveprop = pars.dpp_g(:,2);
+    end
+    
+    time(k) = time(k-1) + delt; % Update time    
     
     UTILS.TEXTBAR([k, k_max]); % Update textbar
     
     k = k + 1; % Update iteration ind.
 end
 
-da2 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Projected area dimater for polydisperse aggs
-dpp2 = PAR.MEANPP(pars.pp);
-dpp2 = dpp2(:,1);
+% Save last set of pp size data if requested
+if (kkk <= n_kk) && (strcmp(opts2.savelast, 'on'))
+    pars_hyb(kkk).dpp = pars.dpp;
+    pars_hyb(kkk).dpp_g = pars.dpp_g;
+    pars_hyb(kkk).da = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi);
+    
+    kkk = kkk + 1;
+end
 
+% Remobe the unused cells and update the dataset number
+if kkk <= n_kk
+    pars_hyb(kkk : end).dpp = [];
+    pars_hyb(kkk : end).dpp_g = [];
+    pars_hyb(kkk : end).da = [];
+    
+    n_kk = kkk - 1;
+end
+
+% Initialize dp vs da figure
 figure(2)
 h2 = gcf;
 if ~all(h2.Position == [0, 0, 600, 600])
     h2.Position = [0, 0, 600, 600];
 end
-set(h2, 'color', 'white');
+set(h2, 'color', 'white')
 
 dpp_uc = linspace(5, 65, 1000);
 da_uc = 100 * (dpp_uc / 17.8).^(1 / 0.35);
 
-p21 = plot(da_uc, dpp_uc, 'Color', [0.4660 0.6740 0.1880], 'LineStyle', '-.',...
-    'LineWidth', 2.5); % Plot universal correlation
+p2_1 = plot(da_uc, dpp_uc, 'Color', [0.5 0.5 0.5],...
+    'LineStyle', '-.', 'LineWidth', 2.5); % Plot universal correlation
 hold on
 
-p22 = scatter(1e9 * da1, 1e9 * dpp1, 25, [0.8500 0.3250 0.0980], 'filled'); % Plot monodisperse aggs
+p2_2 = scatter(1e9 * da1, 1e9 * dpp1, 25, [0.4940 0.1840 0.5560], 'o'); % Plot monodisperse aggs
 
-p23 = scatter(1e9 * da2, 1e9 * dpp2, 25, [0 0.4470 0.7410], 'filled'); % Plot hybrid aggs
+p2_3 = cell(n_kk,1); % Initialize plot variable for lifetime of hybrids
+lgd2_3 = cell(n_kk,1); % Legend text placeholder
+
+ms = [25, 30, 25, 25, 25, 25, 25, 25, 25, 25, 25]; % Marker sizes
+
+mc = colormap(jet); % Marker colormap for visualization of hybrids over aging
+ii = round(1 + (length(mc) - 1) .* (0.05 : 0.9 / (n_kk - 1) : 0.95)'); % Descritize the map based on number of life stages
+mc = mc(ii,:); % Get the descretized colormap
+mc = flip(mc,1); % Reverse the map direction
+
+mt = {'^', 's', 'd', 'v', '*', '+', '<', 'h', 'x', '>', 'p'}; % Marker type depot
+
+for i = 1 : n_kk
+    p2_3{i} = scatter(1e9 * pars_hyb(i).da, 1e9 * pars_hyb(i).dpp_g(:,1),...
+        ms(i), mc(i,:), 'filled', mt{i}); % Plot hybrid aggs
+    
+    if strcmp(opts2.plotlabel, 'on')
+        lbl = num2str(pars_hyb(i).dpp_g(:,2), '%.2f');
+        text(1e9 * pars_hyb(i).da, 1e9 * pars_hyb(i).dpp_g(:,1),...
+            lbl, 'VerticalAlignment', 'baseline',...
+            'HorizontalAlignment', 'left', 'FontSize', 8)
+    end
+    
+    if strcmp(opts2.ploteb, 'on')
+        e_p = pars_hyb(i).dpp_g(:,1) .* abs(pars_hyb(i).dpp_g(:,2) - 1);
+        e_n = pars_hyb(i).dpp_g(:,1) .* abs(1 - 1 ./ pars_hyb(i).dpp_g(:,2));
+        eb = errorbar(1e9 * pars_hyb(i).da, 1e9 * pars_hyb(i).dpp_g(:,1),...
+            1e9 * e_n, 1e9 * e_p, '.');
+        eb.Color = mc(i,:);
+    end
+    
+    if strcmp(opts2.datastore, 'number')
+        if i == 1
+%             lgd2_3{i} = strcat('Hybrid - \tau = ', num2str(i, '%.1e'),...
+%                 ' (s) - n^9^0^p = ', num2str(kk(i)));
+            lgd2_3{i} = strcat('Hybrid, n^9^0^p =', {' '}, num2str(kk(i), '%d'));
+        else
+%             lgd2_3{i} = strcat('~ - \tau = ', num2str(i, '%.1e'),...
+%                 ' (s) - n^9^0^p = ', num2str(kk(i)));
+            lgd2_3{i} = strcat('~, n^9^0^p =', {' '}, num2str(kk(i), '%d'));
+        end
+    else
+        if i == 1
+%             lgd2_3{i} = strcat('$Hybrid, t =', {' '}, num2str(i, '%.1e'),...
+%                 ' {\tau}, {\sigma}_{g,d__{pp}}^{90p} =', {' '}, num2str(kk(i)), '$');
+            lgd2_3{i} = strcat('Hybrid, sigma_g_,_d__p__p^9^0^p =', {' '}, num2str(kk(i), '%.2f'));
+        else
+%             lgd2_3{i} = strcat('$~, t =', {' '}, num2str(i, '%.1e'),...
+%                 ' {\tau}, {\sigma}_{g,d__{pp}}^{90p} =', {' '}, num2str(kk(i)), '$');
+            lgd2_3{i} = strcat('~, sigma_g_,_d__p__p^9^0^p =', {' '}, num2str(kk(i), '%.2f'));
+        end
+    end
+end
 
 % axis equal
 box on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
-xlabel({'\fontsize{14}d_a (nm)', '\fontsize{4} '},'interpreter','tex',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold')
-ylabel({'\fontsize{4} ', '\fontsize{14}d_p (nm)'},'interpreter','tex',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold')
+xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
+    'FontSize', 14)
+ylabel('d_p_p (nm)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
+    'FontSize', 14)
 ylim([5, 65])
 set(gca, 'XScale', 'log')
 set(gca, 'YScale', 'log')
-legend([p21, p22, p23], {'Universal correlation', 'Monodisperse', 'Hybrid'},...
+legend([p2_1, p2_2, cat(1, p2_3{:})'], cat(2,{'Universal correlation',...
+    'Monodisperse'}, lgd2_3{:}),...
     'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 12);
 title('Primary particle size vs projected area equivalent size',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)

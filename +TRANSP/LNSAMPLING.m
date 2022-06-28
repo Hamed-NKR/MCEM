@@ -1,4 +1,5 @@
-function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_bin, opts)
+function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_agg,...
+    n_bin, opts)
     
 % "LNSAMPLING" samples a lognormal size distribution from a population...
     % ...of aggregates of different sizes.
@@ -9,6 +10,7 @@ function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_bin, opts)
 %   mu_d: The desired mean size after sampling
 %   sigma_d: The desired sampling standard deviation
 %   n_bin: Number of bins for discretization
+%   n_agg: Number of target particles to be selected
 %   opts: Function options
 % ----------------------------------------------------------------------- %
 % 
@@ -34,8 +36,12 @@ d_c = zeros(n_bin,1); % bin centers
 
 pl = zeros(n_agg0,1); % initialize particle bin label set (range: 1-n_bin)
 
-% initialize size mean, std, number of bins, and visualization options...
-    % ...if not given
+% initialize number of output particles, size mean, std, number of bins,...
+    % ...and visualization options if not given
+if (~exist('n_agg', 'var')) || isempty(n_agg)
+    n_agg = n_agg0;
+end
+
 if (~exist('mu_d', 'var')) || isempty(mu_d) || (~isnumeric(mu_d))
 %     mu_d = exp(median(log(sort(d0)))); % default to be...
 %         % ...logarithmic median
@@ -105,11 +111,11 @@ for i = 1 : n_bin
     fn_fit(i) = (normcdf(log(d_bin(i+1)), log(mu_d), log(sigma_d)) -...
         normcdf(log(d_bin(i)), log(mu_d), log(sigma_d))); % the lognormal fit to the...
             % ...frequency data
-    n_fit = round(fn_fit(i) * n_agg0); % number of particles to be...
+    n_fit = ceil(fn_fit(i) * n_agg0); % number of particles to be...
         % ...selected in each bin
     
-    ind{i} = find(pl(ii) == i); % initialize i'th bin post-sampling indices
-    d{i} = d0(pl(ii) == i); % ~ diameters
+    ind{i} = find(pl == i); % initialize i'th bin post-sampling indices
+    d{i} = d0(pl == i); % ~ diameters
     
     if  n_fit <= n0 % if enough particles exist in bin for random sampling
         iii= randperm(n0,n_fit); % index of particles in bin to be sampled

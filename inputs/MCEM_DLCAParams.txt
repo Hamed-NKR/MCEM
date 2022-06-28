@@ -1,6 +1,6 @@
 Name            Value           Unit            Description
 -------------------------------------------------------------------------------------------------------------------------------------------
-volf			1e-2		[-]		Particle volume fraction (give zero or negative if you prefer to manually adjust the domain size)
+volf			1e-3		[-]		Particle volume fraction (give zero or negative if you prefer to manually adjust the domain size)
 dom_size(1)	5e-6		[m]		Computational domain length (this and the next two parameters will be automatically calculated if volf is set to a positive value)
 dom_size(2)	5e-6		[m]		Computational domain width
 dom_size(3)	5e-6		[m]		Computational domain height
