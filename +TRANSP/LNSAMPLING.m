@@ -111,7 +111,7 @@ for i = 1 : n_bin
     fn_fit(i) = (normcdf(log(d_bin(i+1)), log(mu_d), log(sigma_d)) -...
         normcdf(log(d_bin(i)), log(mu_d), log(sigma_d))); % the lognormal fit to the...
             % ...frequency data
-    n_fit = ceil(fn_fit(i) * n_agg0); % number of particles to be...
+    n_fit = ceil(fn_fit(i) * n_agg); % number of particles to be...
         % ...selected in each bin
     
     ind{i} = find(pl == i); % initialize i'th bin post-sampling indices
@@ -136,7 +136,7 @@ for i = 1 : n_bin
         ind{i} = ind{i}(iii);
         d{i} = d{i}(iii);
         
-        fn(i) = length(d{i}) / n_agg0; % get post-sampling frequency
+        fn(i) = length(d{i}) / n_agg; % get post-sampling frequency
     end 
 end
 

@@ -29,8 +29,10 @@ end
 ninv =  1./n - 1/n(1); % Data to be fitted for characteristic time and...
     % ...kinetic exponent
 
+n_dat0 = round(length(t) / 20); % timespot to start with for fitting 
+
 % Fit a linear regression model to n inverse time series
-fit1 = fitlm(table(log(t), log(ninv)), 'linear');
+fit1 = fitlm(table(log(t(n_dat0 : end)), log(ninv(n_dat0 : end))), 'linear');
 z = fit1.Coefficients.Estimate(2);
 tau = exp(-fit1.Coefficients.Estimate(1) / z);
 
@@ -53,7 +55,7 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     % time history of agg numbers
     tt1 = nexttile;
-    p11 = plot(t, n, 'Color', [0.1 0.1 0.1], 'LineWidth', 1);
+    p11 = plot(t, ninv, 'Color', [0.1 0.1 0.1], 'LineWidth', 1);
     hold on
     
     % The fit line based on LRM results
@@ -64,12 +66,13 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     box on
     set(gca, 'XScale', 'log')
+    set(gca, 'YScale', 'log')
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
     xlabel('t (s)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
         'FontSize', 14)
-    ylabel('n (-)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
+    ylabel('1/n - 1/n_0 (-)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
     legend([p11, p12], {'Real-time', 'Linear regression fit'},...
-        'Location', 'northeast', 'FontName', 'SansSerif', 'FontSize', 12);
+        'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 12);
     title(tt1, 'Charactertic kinetic time and exponent', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 16)
     
@@ -83,7 +86,7 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
     xlabel('t (s)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
         'FontSize', 14)
-    ylabel('beta (-)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
+    ylabel('beta (s^-^1)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
     title(tt2, 'Collision kernel', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 16)    
 end

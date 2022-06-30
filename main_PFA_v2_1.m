@@ -8,16 +8,16 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 3; % Number of data storage occurrences
-n_try = 3; % Number of DLCA trials
+n_stor = 5; % Number of data storage occurrences
+n_try = 5; % Number of DLCA trials
 
 mu_dpp_glob = []; % Global geometric mean of pp size 
 std_dpp_glob = 1.4; % Global geometric std of pp size
 
 npp_min = 10; % Aggregate filtering criterion
-npp_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
+npp_max = 500; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e4; % Stage 1 marching index limit
+j_max = 1e5; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in logmormal sampling
@@ -25,9 +25,9 @@ opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 % Stage 2
 f_dil = 1; % Dilution factor for post-flame agglomeration
 
-k_max = 1e5; % Iteration limit parameter
+k_max = 1e6; % Iteration limit parameter
 
-n_kk = 3; % Number of saving timespots
+n_kk = 5; % Number of saving timespots
 
 opts2.plotlabel = 'on'; % flag to display lablels of gstd on dp vs da plots
 opts2.ploteb = 'on'; % error bar display flag
@@ -41,11 +41,13 @@ opts2.datastore = 'number'; % flag to decide on criterion for data saving...
 % Growth limit extremes
 if strcmp(opts2.datastore, 'gstd')
     kk_min = params_ud.Value(9);
-    kk_max = 1.4;
+    kk_max = std_dpp_glob;
 else
     kk_min = 1;
     kk_max = 10;
 end
+
+opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
 
 %% 1st stage %%
 
@@ -285,6 +287,8 @@ opts2.indupdate = 'off'; % flag to update aggregate ids upon each collision
 k = 2; % Initialize iteration index
 
 time = zeros(k_max,1); % Initialize time storage array
+n_agg2 = zeros(k_max,1); % Real time array of aggregate counts during post-flame agglomeration
+n_agg2(1) = length(pars.n);
 
 if n_kk > 11
     n_kk = 11; % Set a limit for data storage
@@ -348,7 +352,8 @@ while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
         saveprop = pars.dpp_g(:,2);
     end
     
-    time(k) = time(k-1) + delt; % Update time    
+    time(k) = time(k-1) + delt; % Update time  
+    n_agg2(k) = length(pars.n); % Record number of aggs
     
     UTILS.TEXTBAR([k, k_max]); % Update textbar
     
@@ -460,6 +465,14 @@ legend([p2_1, p2_2, cat(1, p2_3{:})'], cat(2,{'Universal correlation',...
 title('Primary particle size vs projected area equivalent size',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
-% figure(3)
+figure(3)
+% Remove empty cells from number/time data
+if k - 1 < k_max
+    n_agg(k : end) = [];
+    time(k : end) = [];
+end
+[beta, tau, z] = TRANSP.KINETIC(n_agg2, time, opts2_kin); % Compute the kinetic properties of aggregation
+
+% figure(4)
 % UTILS.RENDER(pars); % display final aggregates
 
