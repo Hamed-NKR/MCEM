@@ -8,16 +8,16 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 5; % Number of data storage occurrences
-n_try = 5; % Number of DLCA trials
+n_stor = 3; % Number of data storage occurrences
+n_try = 3; % Number of DLCA trials
 
 mu_dpp_glob = []; % Global geometric mean of pp size 
-std_dpp_glob = 1.4; % Global geometric std of pp size
+std_dpp_glob = 1.6; % Global geometric std of pp size
 
 npp_min = 10; % Aggregate filtering criterion
-npp_max = 500; % Iteration limit parameter in terms of number of primaries within the aggregate
+npp_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e5; % Stage 1 marching index limit
+j_max = 1e4; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in logmormal sampling
@@ -25,7 +25,7 @@ opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 % Stage 2
 f_dil = 1; % Dilution factor for post-flame agglomeration
 
-k_max = 1e6; % Iteration limit parameter
+k_max = 2e5; % Iteration limit parameter
 
 n_kk = 5; % Number of saving timespots
 
@@ -34,17 +34,17 @@ opts2.ploteb = 'on'; % error bar display flag
 
 opts2.savelast = 'on'; % flag to whether save the last piece of data
 
-opts2.datastore = 'number'; % flag to decide on criterion for data saving...
-    % ...('number' for number of hybridity regions, 'gstd' for geometric...
-    % ...standard deviaion of size)
+opts2.datastore = 'n_agg'; % flag to decide on criterion for data saving...
+    % ...('n_hyb' for number of hybridity regions, 'n_agg' for total...
+    % ...number of aggs within the domain)
 
 % Growth limit extremes
-if strcmp(opts2.datastore, 'gstd')
-    kk_min = params_ud.Value(9);
-    kk_max = std_dpp_glob;
-else
-    kk_min = 1;
+if strcmp(opts2.datastore, 'n_hyb')
+    kk_min = 2;
     kk_max = 10;
+else
+    kk_min = 0.5;
+    kk_max = 0.05;
 end
 
 opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
@@ -130,7 +130,7 @@ for i = 1 : n_try
             % Update pp indices
             i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
             for j4 = 1 : length(cat(1, pars.n))
-                i_pp0{jjj}{j4} = [pars.pp{j4}(:,1), pars.pp{j4}(:,6)];
+                i_pp0{jjj}{j4} = pars.pp{j4}(:,1);
                 if (i > 1) || (jjj > 1)
                     pp0{jjj,i}{j4}(:,1) = pp0{jjj,i}{j4}(:,1) +...
                         ((i - 1) * n_stor + jjj - 1) * params_ud.Value(5);
@@ -155,7 +155,7 @@ for i = 1 : n_try
         pp0_n{jjj,i} = cat(1, pars.n);
         i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
         for j4 = 1 : length(cat(1, pars.n))
-            i_pp0{jjj}{j4} = [pars.pp{j4}(:,1), pars.pp{j4}(:,6)];
+            i_pp0{jjj}{j4} = pars.pp{j4}(:,1);
             if (i > 1) || (jjj > 1)
                 pp0{jjj,i}{j4}(:,1) = pp0{jjj,i}{j4}(:,1) +...
                     ((i - 1) * n_stor + jjj - 1) * params_ud.Value(5);
@@ -165,29 +165,38 @@ for i = 1 : n_try
     
     % Remove similar aggs
     if jjj > 1
-        i_pp0 = cat(1, i_pp0{:}); % Compile indices
+        i_pp00 = cat(1, i_pp0{:}); % Compile indices
         ij = nchoosek(1 : length(cell2mat(pp0_n(:,i))), 2);
         ind_rmv = [];
         for ii = 1 : length(ij)
-            if isequal(i_pp0{ij(ii,1)}, i_pp0{ij(ii,2)})
+            if isequal(mod(i_pp00{ij(ii,1)}(:,1), params_ud.Value(5)),...
+                    mod(i_pp00{ij(ii,2)}(:,1), params_ud.Value(5)))
                 ind_rmv = [ind_rmv; ij(ii,2)];
             end
         end
         
         if ~isempty(ind_rmv)
             ind_rmv = unique(ind_rmv);
+            n_rmv = length(ind_rmv);
+            
             agg0_n = cell2mat(cellfun(@size, pp0(:,i), 'UniformOutput', false));
             agg0_n(:,2) = [];
             agg0_n_c = [0; cumsum(agg0_n)];
-            n_rmv = length(ind_rmv);
+            
             ind_rmv1 = zeros(n_rmv,1);
             ind_rmv2 = zeros(n_rmv,1);
-            for iii = 1 : n_rmv 
+            for iii = 1 : n_rmv
                 ind_rmv1(iii) = find(ind_rmv(iii) <= agg0_n_c, 1) - 1;
                 ind_rmv2(iii) = ind_rmv(iii) - agg0_n_c(ind_rmv1(iii));
             end
-            pp0{ind_rmv1,i}(ind_rmv2) = [];
-            pp0_n{ind_rmv1,i}(ind_rmv2) = [];
+            
+            ind_rmv11 = unique(ind_rmv1);
+            n_rmv1 = length(ind_rmv11);
+            for iii = 1 : n_rmv1
+                i4 = find(ind_rmv1 == ind_rmv11(iii));
+                pp0{ind_rmv11(iii),i}(ind_rmv2(i4)) = [];
+                pp0_n{ind_rmv11(iii),i}(ind_rmv2(i4)) = [];
+            end
         end
     end
     
@@ -295,23 +304,21 @@ if n_kk > 11
 end
 
 % Generate data saving timespots
-kk = kk_min : (kk_max - kk_min) / (n_kk) : kk_max;
-kk = kk(2 : end);
-if strcmp(opts2.datastore, 'number')
+% kk = kk_min : (kk_max - kk_min) / (n_kk - 1) : kk_max;
+r_kk = (kk_max / kk_min)^(1 / (n_kk - 1));
+kk = kk_min * ones(n_kk,1);
+for i = 2 : n_kk
+    kk(i) = kk(i) * r_kk^(i-1);
+end
+if (strcmp(opts2.datastore, 'n_hyb'))
     kk = unique(round(kk)); % Round the values generated for number of regions
     n_kk = length(kk);
 end
 
 kkk = 1; % Index for data saving timespots
 
-% Initialize the property to use as a criterion for data saving and...
-    % ...define the saving extreme points
-if strcmp(opts2.datastore, 'number')
-    saveprop = 1; % Aggregates are initially non-hybrid
-else
-    saveprop = params_ud.Value(9); % Aggregates are initially monodisperse
-end
-    
+pars.n_hyb = ones(n_agg1,1); % All aggs are initially near-monodisperse
+
 pars_hyb = struct('dpp', cell(n_kk,1), 'dpp_g', cell(n_kk,1),...
     'da', cell(n_kk,1)); % Placeholder for hybrid aggregates data
 
@@ -322,7 +329,10 @@ UTILS.TEXTBAR([1, k_max]); % Iteration 1 already done
 
 % Produce hybridized particles with post-flame agglomeration
 while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
-    if nnz(saveprop >= kk(kkk)) / length(saveprop) >= 0.9
+    if (strcmp(opts2.datastore, 'n_hyb') &&...
+            (nnz(pars.n_hyb >= kk(kkk)) / n_agg2(k-1) >= 0.9)) ||...
+            (strcmp(opts2.datastore, 'n_agg') &&...
+            (n_agg2(k-1) <= kk(kkk) * n_agg2(1)))
         % save primary particle and projected area size
         pars_hyb(kkk).dpp = pars.dpp;
         pars_hyb(kkk).dpp_g = pars.dpp_g;
@@ -345,14 +355,7 @@ while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
     
     pars = TRANSP.MOBIL(pars, fl, params_const); % Update mobility properties
     
-    % Update the data saving propety
-    if strcmp(opts2.datastore, 'number')
-        saveprop = pars.n_hyb;
-    else
-        saveprop = pars.dpp_g(:,2);
-    end
-    
-    time(k) = time(k-1) + delt; % Update time  
+    time(k) = time(k-1) + delt; % Update time
     n_agg2(k) = length(pars.n); % Record number of aggs
     
     UTILS.TEXTBAR([k, k_max]); % Update textbar
@@ -426,25 +429,25 @@ for i = 1 : n_kk
         eb.Color = mc(i,:);
     end
     
-    if strcmp(opts2.datastore, 'number')
+    if strcmp(opts2.datastore, 'n_hyb')
         if i == 1
 %             lgd2_3{i} = strcat('Hybrid - \tau = ', num2str(i, '%.1e'),...
 %                 ' (s) - n^9^0^p = ', num2str(kk(i)));
-            lgd2_3{i} = strcat('Hybrid, n^9^0^p =', {' '}, num2str(kk(i), '%d'));
+            lgd2_3{i} = strcat('Hybrid, n_h_y_b^9^0^p =', {' '}, num2str(kk(i), '%d'));
         else
 %             lgd2_3{i} = strcat('~ - \tau = ', num2str(i, '%.1e'),...
 %                 ' (s) - n^9^0^p = ', num2str(kk(i)));
-            lgd2_3{i} = strcat('~, n^9^0^p =', {' '}, num2str(kk(i), '%d'));
+            lgd2_3{i} = strcat('~, n_h_y_b^9^0^p =', {' '}, num2str(kk(i), '%d'));
         end
     else
         if i == 1
 %             lgd2_3{i} = strcat('$Hybrid, t =', {' '}, num2str(i, '%.1e'),...
 %                 ' {\tau}, {\sigma}_{g,d__{pp}}^{90p} =', {' '}, num2str(kk(i)), '$');
-            lgd2_3{i} = strcat('Hybrid, sigma_g_,_d__p__p^9^0^p =', {' '}, num2str(kk(i), '%.2f'));
+            lgd2_3{i} = strcat('Hybrid, n_a_g_g / n_a_g_g__0 =', {' '}, num2str(kk(i), '%.2f'));
         else
 %             lgd2_3{i} = strcat('$~, t =', {' '}, num2str(i, '%.1e'),...
 %                 ' {\tau}, {\sigma}_{g,d__{pp}}^{90p} =', {' '}, num2str(kk(i)), '$');
-            lgd2_3{i} = strcat('~, sigma_g_,_d__p__p^9^0^p =', {' '}, num2str(kk(i), '%.2f'));
+            lgd2_3{i} = strcat('~, n_a_g_g / n_a_g_g__0 =', {' '}, num2str(kk(i), '%.2f'));
         end
     end
 end
