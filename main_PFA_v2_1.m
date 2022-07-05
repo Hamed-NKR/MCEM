@@ -17,7 +17,7 @@ std_dpp_glob = 1.6; % Global geometric std of pp size
 npp_min = 10; % Aggregate filtering criterion
 npp_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e4; % Stage 1 marching index limit
+j_max = 1e5; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in logmormal sampling
@@ -25,7 +25,7 @@ opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 % Stage 2
 f_dil = 1; % Dilution factor for post-flame agglomeration
 
-k_max = 2e5; % Iteration limit parameter
+k_max = 1e6; % Iteration limit parameter
 
 n_kk = 5; % Number of saving timespots
 
@@ -299,8 +299,8 @@ time = zeros(k_max,1); % Initialize time storage array
 n_agg2 = zeros(k_max,1); % Real time array of aggregate counts during post-flame agglomeration
 n_agg2(1) = length(pars.n);
 
-if n_kk > 11
-    n_kk = 11; % Set a limit for data storage
+if n_kk > 10
+    n_kk = 10; % Set a limit for data storage
 end
 
 % Generate data saving timespots
@@ -396,19 +396,19 @@ p2_1 = plot(da_uc, dpp_uc, 'Color', [0.5 0.5 0.5],...
     'LineStyle', '-.', 'LineWidth', 2.5); % Plot universal correlation
 hold on
 
-p2_2 = scatter(1e9 * da1, 1e9 * dpp1, 25, [0.4940 0.1840 0.5560], 'o'); % Plot monodisperse aggs
+p2_2 = scatter(1e9 * da1, 1e9 * dpp1, 25, [0.5 0.5 0.5], 'o'); % Plot monodisperse aggs
 
 p2_3 = cell(n_kk,1); % Initialize plot variable for lifetime of hybrids
 lgd2_3 = cell(n_kk,1); % Legend text placeholder
 
-ms = [25, 30, 25, 25, 25, 25, 25, 25, 25, 25, 25]; % Marker sizes
+ms = [25, 35, 30, 25, 35, 25, 25, 25, 25, 25]; % Marker sizes
 
 mc = colormap(jet); % Marker colormap for visualization of hybrids over aging
 ii = round(1 + (length(mc) - 1) .* (0.05 : 0.9 / (n_kk - 1) : 0.95)'); % Descritize the map based on number of life stages
 mc = mc(ii,:); % Get the descretized colormap
 mc = flip(mc,1); % Reverse the map direction
 
-mt = {'^', 's', 'd', 'v', '*', '+', '<', 'h', 'x', '>', 'p'}; % Marker type depot
+mt = {'^', 's', 'd', 'v', 'p', '+', '<', 'h', 'x', '>'}; % Marker type depot
 
 for i = 1 : n_kk
     p2_3{i} = scatter(1e9 * pars_hyb(i).da, 1e9 * pars_hyb(i).dpp_g(:,1),...
@@ -417,8 +417,8 @@ for i = 1 : n_kk
     if strcmp(opts2.plotlabel, 'on')
         lbl = num2str(pars_hyb(i).dpp_g(:,2), '%.2f');
         text(1e9 * pars_hyb(i).da, 1e9 * pars_hyb(i).dpp_g(:,1),...
-            lbl, 'VerticalAlignment', 'baseline',...
-            'HorizontalAlignment', 'left', 'FontSize', 8)
+            lbl, 'VerticalAlignment', 'top',...
+            'HorizontalAlignment', 'left', 'FontSize', 10)
     end
     
     if strcmp(opts2.ploteb, 'on')
@@ -433,21 +433,21 @@ for i = 1 : n_kk
         if i == 1
 %             lgd2_3{i} = strcat('Hybrid - \tau = ', num2str(i, '%.1e'),...
 %                 ' (s) - n^9^0^p = ', num2str(kk(i)));
-            lgd2_3{i} = strcat('Hybrid, n_h_y_b^9^0^p =', {' '}, num2str(kk(i), '%d'));
+            lgd2_3{i} = strcat('Hybrid, n_{hyb}^{90p} =', {' '}, num2str(kk(i), '%d'));
         else
 %             lgd2_3{i} = strcat('~ - \tau = ', num2str(i, '%.1e'),...
 %                 ' (s) - n^9^0^p = ', num2str(kk(i)));
-            lgd2_3{i} = strcat('~, n_h_y_b^9^0^p =', {' '}, num2str(kk(i), '%d'));
+            lgd2_3{i} = strcat('~, n_{hyb}^{90p} =', {' '}, num2str(kk(i), '%d'));
         end
     else
         if i == 1
 %             lgd2_3{i} = strcat('$Hybrid, t =', {' '}, num2str(i, '%.1e'),...
 %                 ' {\tau}, {\sigma}_{g,d__{pp}}^{90p} =', {' '}, num2str(kk(i)), '$');
-            lgd2_3{i} = strcat('Hybrid, n_a_g_g / n_a_g_g__0 =', {' '}, num2str(kk(i), '%.2f'));
+            lgd2_3{i} = strcat('Hybrid, n_{agg} / n_{agg_0} =', {' '}, num2str(kk(i), '%.2f'));
         else
 %             lgd2_3{i} = strcat('$~, t =', {' '}, num2str(i, '%.1e'),...
 %                 ' {\tau}, {\sigma}_{g,d__{pp}}^{90p} =', {' '}, num2str(kk(i)), '$');
-            lgd2_3{i} = strcat('~, n_a_g_g / n_a_g_g__0 =', {' '}, num2str(kk(i), '%.2f'));
+            lgd2_3{i} = strcat('~, n_{agg} / n_{agg_0} =', {' '}, num2str(kk(i), '%.2f'));
         end
     end
 end
@@ -468,10 +468,9 @@ legend([p2_1, p2_2, cat(1, p2_3{:})'], cat(2,{'Universal correlation',...
 title('Primary particle size vs projected area equivalent size',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
-figure(3)
 % Remove empty cells from number/time data
 if k - 1 < k_max
-    n_agg(k : end) = [];
+    n_agg2(k : end) = [];
     time(k : end) = [];
 end
 [beta, tau, z] = TRANSP.KINETIC(n_agg2, time, opts2_kin); % Compute the kinetic properties of aggregation
