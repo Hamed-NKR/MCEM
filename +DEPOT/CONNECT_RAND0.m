@@ -1,4 +1,4 @@
-function [pp1, pp2, colstat] = CONNECT_RAND(pp1, pp2)
+function [pp1, pp2, colstat] = CONNECT_RAND0(pp1, pp2)
 % "CONNECT_RAND" sticks two approaching aggregates to each other in a...
 %     ...random manner.
 % ----------------------------------------------------------------------- %

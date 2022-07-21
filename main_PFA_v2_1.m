@@ -8,24 +8,27 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 3; % Number of data storage occurrences
-n_try = 3; % Number of DLCA trials
+n_stor = 10; % Number of data storage occurrences
+n_try = 5; % Number of DLCA trials
 
-mu_dpp_glob = []; % Global geometric mean of pp size 
-std_dpp_glob = 1.6; % Global geometric std of pp size
+gstd_dppi_ens = 1.5; % Geometric standard deviation of ensemble average primary particle size
 
-npp_min = 10; % Aggregate filtering criterion
-npp_max = 100; % Iteration limit parameter in terms of number of primaries within the aggregate
+% The desired distribution parameters for aggregates after lognormal sampling
+mu_da_glob = 1.5e-7;
+std_da_glob = 1.5;
 
-j_max = 1e5; % Stage 1 marching index limit
+npp_min = 5; % Aggregate filtering criterion
+npp_max = 500; % Iteration limit parameter in terms of number of primaries within the aggregate
+
+j_max = 1e6; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 
 % Stage 2
-f_dil = 1; % Dilution factor for post-flame agglomeration
+f_dil = 0.1; % Dilution factor for post-flame agglomeration
 
-k_max = 1e6; % Iteration limit parameter
+k_max = 1e7; % Iteration limit parameter
 
 n_kk = 5; % Number of saving timespots
 
@@ -69,6 +72,9 @@ disp(newline)
 
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
 
+% Make an initial lognormal distibution of ensemble average size of primaries for classic dlca trials
+dppi = lognrnd(log(params_ud.Value(8)), log(gstd_dppi_ens), [n_try,1]);
+
 % Generate a library of monodisperse aggregates with classic DLCA
 for i = 1 : n_try
     fprintf('trial %d:', i)
@@ -76,7 +82,7 @@ for i = 1 : n_try
     
     % Initilize monodisperse pps for classic DLCA
     [pp_d, pars.n] = PAR.INIT_DIAM(params_ud.Value(5), params_ud.Value(6:7),...
-        params_ud.Value(8:10)); % Initialize pp sizes
+        [dppi(i); params_ud.Value(9:10)]); % Initialize pp sizes
 
     pars.pp = mat2cell([(1:size(pp_d))', pp_d, zeros(size(pp_d,1),3),...
         (1:size(pp_d))'], pars.n); % Assign pp indices and sizes
@@ -237,11 +243,11 @@ dpp00 = PAR.MEANPP(pars.pp);
 dpp00 = dpp00(:,1); % Mean primary particle diameter
 
 % Filter particles for a lognormal target area distribution
-[da1, ind1] = TRANSP.LNSAMPLING(da0, mu_dpp_glob, std_dpp_glob, [], 10,...
-    opts);
+[da1, ind1] = TRANSP.LNSAMPLING(da0, mu_da_glob, std_da_glob, [], 20,...
+    [1e-8, 1e-6], opts);
 
-da1 = da1(~cellfun('isempty', da1));
-da1 = cat(1, da1{:});
+da1 = da1(~cellfun('isempty', da1)); % Remove empty bins
+da1 = cat(1, da1{:}); % Compile the data
 
 ind1 = ind1(~cellfun('isempty', ind1));
 ind1 = cat(1, ind1{:});
@@ -251,6 +257,8 @@ pp1 = pp00(ind1);
 pp1_n = pp0_n(ind1);
 
 n_agg1 = size(pp1, 1);
+pp11 = cat(1, pp1{:});
+gstd_dpp1_ens = UTILS.GEOSTD(pp11(:,2)); % ensemble average pp standard deviation after lognormal sampling
 
 % Update the indices of particles due to existence of duplicates
 i_pp1 = zeros(n_agg1,1);
@@ -280,7 +288,10 @@ pars.n = pp1_n; % Assign number distribution of primaries
 
 %% 2nd stage %%
 
-params_ud.Value(1) = params_ud.Value(1) * f_dil; % Dilute the concentration
+d1max = PAR.TERRITORY(pp1, pp1_n);
+pp11 = cat(1, pp1{:});
+r_vfadj = sum(d1max .^ 3) / sum(pp11(:,2) .^ 3); % Adjust for real vs. max. extent volume fraction
+params_ud.Value(1) = params_ud.Value(1) * f_dil * r_vfadj; % Dilute the concentration
 
 [pars, params_ud] = PAR.INIT_LOC(pars, params_ud); % Assign random locations to aggregates
 
@@ -408,7 +419,7 @@ ii = round(1 + (length(mc) - 1) .* (0.05 : 0.9 / (n_kk - 1) : 0.95)'); % Descrit
 mc = mc(ii,:); % Get the descretized colormap
 mc = flip(mc,1); % Reverse the map direction
 
-mt = {'^', 's', 'd', 'v', 'p', '+', '<', 'h', 'x', '>'}; % Marker type depot
+mt = {'^', 's', 'd', 'v', 'h', '+', '<', 'p', 'x', '>'}; % Marker type depot
 
 for i = 1 : n_kk
     p2_3{i} = scatter(1e9 * pars_hyb(i).da, 1e9 * pars_hyb(i).dpp_g(:,1),...
