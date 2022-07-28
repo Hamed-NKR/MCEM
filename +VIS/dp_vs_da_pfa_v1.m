@@ -62,7 +62,7 @@ for j = 1 : 3
     nexttile
     
     for i = 1 : 6
-        p{2*i-1,j} = scatter(1e9 * parsdata{j}.da{i}, 1e9 * parsdata{j}.dpp_g{i}(:,1),...
+        p{2*i-1,j} = scatter(1e9 * parsdata{j}(i).da, 1e9 * parsdata{j}(i).dpp_g(:,1),...
             ms(i), mc(i,:), mt{i}, 'LineWidth', 0.1); % plot temporal dp vs. da
         hold on
         
@@ -77,7 +77,7 @@ for j = 1 : 3
             end
         end
         
-        fit_pol = fitlm(table(log(parsdata{j}.da{i}), log(parsdata{j}.dpp_g{i}(:,1))), 'linear'); % find a fit by linear regression
+        fit_pol = fitlm(table(log(parsdata{j}(i).da), log(parsdata{j}(i).dpp_g(:,1))), 'linear'); % find a fit by linear regression
         D_pol(i,j) = fit_pol.Coefficients.Estimate(2); % get polydispersity exponent from the fit
         dpp_fit = 1e9 * exp(D_pol(i,j) * log(1e-9 * da_fit) + fit_pol.Coefficients.Estimate(1)); % generate the fit data
         p{2*i,j} = plot(da_fit, dpp_fit, 'Color', mc(i,:),...
