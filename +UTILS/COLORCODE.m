@@ -23,7 +23,7 @@ if ~exist('dom_size', 'var'); dom_size = []; end
 
 % Setting default colormap as "summer"
 if ~exist('cm', 'var'); cm = []; end
-if isempty(cm); cm = summer; end
+if isempty(cm); cm = autumn; end
 
 % Setting default quality to 60 points in the sphere.
 if ~exist('q', 'var'); q = []; end
@@ -73,12 +73,17 @@ for i = 1 : n_par
             h_rend = surf(X .* pars(i).pp.d(j) ./ 2 + pars(i).pp.r(j,1),...
                 Y .* pars(i).pp.d(j) ./ 2 + pars(i).pp.r(j,2),...
                 Z .* pars(i).pp.d(j) ./ 2 + pars(i).pp.r(j,3));
-            h_rend.FaceColor = cl(pp_d == pars(i).pp.d(j),:);
+            i_cl = round((find(pp_d == pars(i).pp.d(j),1) /...
+                 numel(pp_d)) * length(cl));
+            h_rend.FaceColor = cl(i_cl,:);
         else
             h_rend = surf(X .* pars.pp{i}(j,2) ./ 2 + pars.pp{i}(j,3),...
                 Y .* pars.pp{i}(j,2) ./ 2 + pars.pp{i}(j,4),...
                 Z .* pars.pp{i}(j,2) ./ 2 + pars.pp{i}(j,5));
-            h_rend.FaceColor = cl(pp_d == pars.pp{i}(j,2));
+            i_cl = find(pp_d == pars.pp{i}(j,2));
+            i_cl = round(i_cl(randperm(numel(i_cl),1)) / numel(pp_d)) *...
+                length(cl);
+            h_rend.FaceColor = cl(i_cl,:);
         end
         
         lightangle(-45,30)

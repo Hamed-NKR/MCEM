@@ -1,6 +1,6 @@
 function [du_dlogd, d_discrete] = DISTRIBUTION(u, d, n)
-% "DISTRIBUTION" gives the distribution of a...
-%   ...a variable with respect to another variable.
+% "DISTRIBUTION" gives the distribution of a variable with respect to...
+%   ...another variable.
 % ----------------------------------------------------------------------- %
 %
 % Inputs:
