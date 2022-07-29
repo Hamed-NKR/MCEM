@@ -18,6 +18,15 @@ function [h, D_pol] = dp_vs_da_pfa_v1(parsdata, params, opts)
 %   h: output figure handle
 % ----------------------------------------------------------------------- %
 
+% set data fitting option
+if (~exist('opts', 'var')) || (~isfield(opts, 'fit'))
+    opts.fit = [];
+end
+opts_fit = opts.fit;
+if isempty(opts_fit)
+    opts_fit = 'off'; % default not to plot the polydispersity exponent
+end
+
 % initialize figure 
 figure;
 h = gcf;
@@ -77,16 +86,20 @@ for j = 1 : 3
             end
         end
         
-        fit_pol = fitlm(table(log(parsdata{j}(i).da), log(parsdata{j}(i).dpp_g(:,1))), 'linear'); % find a fit by linear regression
-        D_pol(i,j) = fit_pol.Coefficients.Estimate(2); % get polydispersity exponent from the fit
-        dpp_fit = 1e9 * exp(D_pol(i,j) * log(1e-9 * da_fit) + fit_pol.Coefficients.Estimate(1)); % generate the fit data
-        p{2*i,j} = plot(da_fit, dpp_fit, 'Color', mc(i,:),...
-            'LineStyle', '--', 'LineWidth', 1); % plot the fit
-        
-        legtxt{i,j} = strcat('D_{pol} =', {' '}, num2str(D_pol(i,j), '%.2f')); % fit legends
+        if ismember(opts_fit, {'ON', 'On', 'on'})
+            fit_pol = fitlm(table(log(parsdata{j}(i).da), log(parsdata{j}(i).dpp_g(:,1))), 'linear'); % find a fit by linear regression
+            D_pol(i,j) = fit_pol.Coefficients.Estimate(2); % get polydispersity exponent from the fit
+            dpp_fit = 1e9 * exp(D_pol(i,j) * log(1e-9 * da_fit) + fit_pol.Coefficients.Estimate(1)); % generate the fit data
+            p{2*i,j} = plot(da_fit, dpp_fit, 'Color', mc(i,:),...
+                'LineStyle', '--', 'LineWidth', 1); % plot the fit
+
+            legtxt{i,j} = strcat('D_{pol} =', {' '}, num2str(D_pol(i,j), '%.2f')); % fit legends
+        end
     end
     
-    legtxt{7,j} = 'D_{pol_{uc}} = 0.35'; % legend of universal correlation
+    if ismember(opts_fit, {'ON', 'On', 'on'})
+        legtxt{7,j} = 'D_{pol_{uc}} = 0.35'; % legend of universal correlation
+    end
     
     p{13,j} = plot(da_uc, dpp_uc, 'Color', [0.5 0.5 0.5],...
         'LineStyle', '-.', 'LineWidth', 2.5); % plot universal correlation
@@ -107,15 +120,19 @@ for j = 1 : 3
     title(ttltxt, 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
     
     if j == 3
-        p_dummy = plot(da_uc, dpp_uc, 'Color', [0.5 0.5 0.5],...
-            'LineStyle', '-.', 'LineWidth', 2.5);
+        if ismember(opts_fit, {'ON', 'On', 'on'})
+            p_dummy = plot(da_uc, dpp_uc, 'Color', [0.5 0.5 0.5],...
+                'LineStyle', '-.', 'LineWidth', 2.5);
+        end
         legend(cat(1, p{1:2:13,3})', cat(2, legtxt{:,4}),...
             'FontName', 'SansSerif', 'FontSize', 12,...
             'Location', 'eastoutside');
-        ax = axes('position', get(gca,'position'), 'visible', 'off');
-        legend(ax, [cat(1, p{2:2:12,j})', p_dummy], cat(2, legtxt{:,j}),...
-            'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 10);        
-    else
+        if ismember(opts_fit, {'ON', 'On', 'on'})
+            ax = axes('position', get(gca,'position'), 'visible', 'off');
+            legend(ax, [cat(1, p{2:2:12,j})', p_dummy], cat(2, legtxt{:,j}),...
+                'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 10);
+        end
+    elseif ismember(opts_fit, {'ON', 'On', 'on'})
         legend([cat(1, p{2:2:12,j})', p{13,j}], cat(2, legtxt{:,j}),...
             'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 10);
     end    
