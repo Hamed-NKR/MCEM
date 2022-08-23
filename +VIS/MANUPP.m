@@ -1,10 +1,11 @@
-function pp = IMPORT_MANUPP(fname, da, opts)
+function pp = MANUPP(fname, da, opts)
 % "KINETIC" calculates the properties related to kinetics of aggrgeation.
 % ----------------------------------------------------------------------- %
 %
 % Inputs:
 %   fname: A cell array of name of the files to be imported
 %   da: Projected area diameter of aggs
+%   n_hyb: Number of hybridity regions
 %   opts: Data import options
 % ----------------------------------------------------------------------- %
 %
@@ -36,9 +37,34 @@ if isempty(opts_visual)
     opts_visual = 'off'; % Default not to plot the outputs
 end
 
+if ~isfield(opts, 'lbl')
+    opts.lbl = cell(1, n_agg);
+end
+
+% if ~isfield(opts, 'nhyb')
+%     opts.nhyb = []; % number of hybridity regions
+% end
+
+% % set colormap
+% if ~isempty(nhyb)
+%     mc = colormap(turbo);
+%     ii = round(1 + (length(mc) - 1) .*...
+%         (0.05 : 0.9 / (length(unique(n_hyb)) - 1) : 0.95)');
+%     mc = mc(ii,:);
+%     mc = flip(mc,1);
+%     
+%     [nhyb_s, I_s] = sort(nhyb);
+%     nhyb_us = unique(nhyb);
+%     
+% end
+% 
+% % adjust coloring order based on number of hybridity regions
+
+pp.fname = fname; % store file names
+
 % Import the data and calculate properties
 for i = 1 : n_agg
-    f_ad = strcat('inputs\', fname{i}, '.csv'); % Making file address
+    f_ad = strcat('inputs\manual\', fname{i}, '.csv'); % Making file address
     ppdat = readmatrix(f_ad); % Scanning data
     
     pp.n(i) = size(ppdat, 1) - 2; % Removing the header and the scale detector 
@@ -62,12 +88,15 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     % Plot universal correlation
     dpp_uc = linspace(5, 65, 1000);
     da_uc = 100 * (dpp_uc / 17.8).^(1 / 0.35);
-    p1 = plot(da_uc, dpp_uc, 'Color', [0 0.4470 0.7410],...
+    p1 = plot(da_uc, dpp_uc, 'Color', [0.5 0.5 0.5],...
         'LineStyle', '-.', 'LineWidth', 2.5);
     hold on
     
     % Plot manually sized aggs
-    p2 = scatter(da, pp.mu_d(:,2), 25, [0.8500 0.3250 0.0980], '^');
+%     if ~isempty(nhyb)
+%         iii = find(nhyb == nhyb_us(i));
+%     else
+        p2 = scatter(da, pp.mu_d(:,2), 25, [0.8500 0.3250 0.0980], '^');
     
     if (~isfield(opts, 'eb')) || isempty(opts.eb)
         opts.eb = 'on'; % default to plot errorbars
@@ -89,6 +118,8 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
         text(da, pp.mu_d(:,2), num2str(pp.std_d(:,2), '%.2f'),...
             'VerticalAlignment', 'top', 'HorizontalAlignment', 'left',...
             'FontSize', 8)
+        text(da, pp.mu_d(:,2), opts.lbl, 'VerticalAlignment', 'bottom',...
+            'HorizontalAlignment', 'right', 'FontSize', 8)        
     end        
 
     box on
