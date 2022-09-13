@@ -28,6 +28,8 @@ opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
 
+D_TEM = 0.35; % polydispersity exponent
+
 k_max = 1e7; % Iteration limit parameter
 
 n_kk = 5; % Number of saving timespots
@@ -226,7 +228,8 @@ n_agg0 = size(pp0, 1); % % total number of aggregates before rescaling
 dpp0_g = PAR.GEOMEANPP(pp0);
 dpp0_g = dpp0_g(:,1); % Current mean pp size withing aggs
 pp00 = pp0;
-dpp_emh = ((17.8^(1/0.35)/100) * (pp0_n / 1.1).^(1 / (2 * 1.08))).^(0.35 / (1 - 0.35)); % Desired mean pp size based on external mixing hypothesis
+dpp_emh = ((17.8^(1 / D_TEM) / 100) * (pp0_n / 1.1).^...
+    (1 / (2 * 1.08))).^(D_TEM / (1 - D_TEM)); % Desired mean pp size based on external mixing hypothesis
 r_dpp = 1e-9 * dpp_emh ./ dpp0_g; % Size conversion ratio
 % Rescale stored aggregates
 for i = 1 : n_agg0
