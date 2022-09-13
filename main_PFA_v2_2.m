@@ -8,8 +8,8 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 10; % Number of data storage occurrences
-n_try = 10; % Number of DLCA trials
+n_stor = 5; % Number of data storage occurrences
+n_try = 1; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
@@ -237,8 +237,8 @@ pars = structfun(@(x) [], pars, 'UniformOutput', false); % Clear pars struct fie
 pars.pp = pp00; % Assign pp info for projected area calculations
 pars.n = pp0_n;
 
-da0 = 2 * sqrt(PAR.PROJECTION(pars, [], max(1e4, 20 * max(pars.n)), 20)...
-    / pi); % Get projected area diameter for monodisperse populations
+da0 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % Get projected...
+    % ...area diameter for monodisperse populations
 
 dpp00_g = PAR.GEOMEANPP(pars.pp);
 dpp00_g = dpp00_g(:,1); % Mean primary particle diameter
@@ -333,11 +333,9 @@ kkk = 1; % Index for data saving timespots
 
 pars.n_hyb = ones(n_agg1,1); % All aggs are initially near-monodisperse
 
-tempars = cell(n_kk, 1); % Placholder to store pars structures over time
-
 parsdata = struct('dpp', cell(n_kk + 1, 1), 'dpp_g', cell(n_kk + 1, 1),...
-    'da', cell(n_kk + 1, 1), 'dg', cell(n_kk + 1, 1), 'npp', cell(n_kk + 1, 1)); 
-        % Placeholder for hybrid aggregates data
+    'da', cell(n_kk + 1, 1), 'dg', cell(n_kk + 1, 1), 'npp', cell(n_kk + 1, 1),...
+    'n_hyb', cell(n_kk + 1, 1), 'pp', cell(n_kk + 1, 1)); % Placeholder for hybrid aggregates data
 
 % Assign values to the dataset from the already available monodipserse population
 parsdata(1).da = da1;
@@ -357,18 +355,20 @@ while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
             (nnz(pars.n_hyb >= kk(kkk)) / n_agg2(k-1) >= 0.9)) ||...
             (strcmp(opts2.datastore, 'n_agg') &&...
             (n_agg2(k-1) <= kk(kkk) * n_agg2(1)))
-        % save primary particle and projected area size
+        
+        % save aggregate data over time
         parsdata(kkk + 1).dpp = pars.dpp;
         parsdata(kkk + 1).dpp_g = pars.dpp_g;
         parsdata(kkk + 1).dg = pars.dg;
         parsdata(kkk + 1).npp = pars.n;
-        disp(newline)
+        parsdata(kkk + 1).n_hyb = pars.n_hyb;
+        parsdata(kkk + 1).pp = pars.pp;
+        
+        disp(' ')
         parsdata(kkk + 1).da = 2 * sqrt(PAR.PROJECTION(pars, [],...
-            max(1e4, 20 * max(pars.n)), 20) / pi); % Get projected area size
-        disp(newline)
-        
-        tempars{kkk} = pars;
-        
+            min(3e4, max(1e4, 10 * max(pars.n))), 20) / pi); % Get projected area size
+        disp(' ')
+                
         kkk = kkk + 1; % Go to next saving spot
     end
     
@@ -401,7 +401,7 @@ if (kkk <= n_kk) && (strcmp(opts2.savelast, 'on'))
     parsdata(kkk + 1).dg = pars.dg;
     parsdata(kkk + 1).npp = pars.n;
     parsdata(kkk + 1).da = 2 * sqrt(PAR.PROJECTION(pars, [],...
-        max(1e4, 20 * max(pars.n)), 20) / pi);
+        min(3e4, max(1e4, 10 * max(pars.n))), 20) / pi);
     
     kkk = kkk + 1;
 end

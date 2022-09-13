@@ -9,8 +9,9 @@ function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_agg,...
 %   d0: Pre-sampling diameter set of a given aggregate population
 %   mu_d: The desired mean size after sampling
 %   sigma_d: The desired sampling standard deviation
-%   n_bin: Number of bins for discretization
 %   n_agg: Number of target particles to be selected
+%   n_bin: Number of bins for discretization
+%   del_d: Range of sampling
 %   opts: Function options
 % ----------------------------------------------------------------------- %
 % 
@@ -78,7 +79,7 @@ end
 
 % set aggregate size type
 if ~isfield(opts, 'randvar')
-    opts.var = [];
+    opts.randvar = [];
 end
 opts_randvar = opts.randvar;
 
