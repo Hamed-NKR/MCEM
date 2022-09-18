@@ -14,7 +14,7 @@ n_try = 1; % Number of DLCA trials
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
 % The desired distribution parameters for aggregates after lognormal sampling
-mu_da_glob = 1.2e-7;
+mu_da_glob = 1.25e-7;
 std_da_glob = 1.4;
 
 npp_min = 20; % Aggregate filtering criterion
@@ -29,6 +29,9 @@ opts.randvar = 'area'; % flag for type of size used in logmormal sampling
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
 
 D_TEM = 0.35; % polydispersity exponent
+
+c_proj = 3; % the coefficient to improve the resolution of projected area...
+    % ...calculation in the second stage
 
 k_max = 1e7; % Iteration limit parameter
 
@@ -369,7 +372,7 @@ while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
         
         disp(' ')
         parsdata(kkk + 1).da = 2 * sqrt(PAR.PROJECTION(pars, [],...
-            min(3e4, max(1e4, 10 * max(pars.n))), 20) / pi); % Get projected area size
+            min(3e4, max(c_proj * 1e4, 10 * max(pars.n))), 20) / pi); % Get projected area size
         disp(' ')
                 
         kkk = kkk + 1; % Go to next saving spot
@@ -404,7 +407,7 @@ if (kkk <= n_kk) && (strcmp(opts2.savelast, 'on'))
     parsdata(kkk + 1).dg = pars.dg;
     parsdata(kkk + 1).npp = pars.n;
     parsdata(kkk + 1).da = 2 * sqrt(PAR.PROJECTION(pars, [],...
-        min(3e4, max(1e4, 10 * max(pars.n))), 20) / pi);
+        min(3e4, max(c_proj * 1e4, 10 * max(pars.n))), 20) / pi);
     
     kkk = kkk + 1;
 end
