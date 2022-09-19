@@ -8,8 +8,8 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 5; % Number of data storage occurrences
-n_try = 1; % Number of DLCA trials
+n_stor = 10; % Number of data storage occurrences
+n_try = 10; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
