@@ -1,4 +1,4 @@
-function h = NPP_VS_DGDPP(parsdata, opts)
+function h = NPP_VS_DGDPP_v2(parsdata, opts)
 % "PA_VS_NPP" plots the number of primaries vs. gyration diameter over...
 %   ...primary particle diameter for two sets of hybrid and non-hybrid...
 %   ...aggregates and compares them with benchmark values.
@@ -71,8 +71,8 @@ end
 t_id = [1; t_id]; % time identifier of data to be plotted 
 
 if ismember(opts_fit, {'ON', 'On', 'on'})
-    p = cell(n_dat + 2,1); % initialize the plot cell array
-    legtxt = cell(n_dat + 2,1); % placeholder for legends
+    p = cell(n_dat + 3,1); % initialize the plot cell array
+    legtxt = cell(n_dat + 3,1); % placeholder for legends
 else
     p = cell(n_dat + 1,1);
     legtxt = cell(n_dat + 1,1);
@@ -116,25 +116,29 @@ for i = 1 : n_dat
             df = fit.Coefficients.Estimate(2); % fractal dimension
             kf = exp(fit.Coefficients.Estimate(1)); % prefactor            
             
-            legtxt{end} = strcat(' \itd_{f_{', num2str(t_id(i), '%.2f'),...
+            legtxt{end - 2} = strcat(' \itd_{f_{', num2str(t_id(i), '%.2f'),...
                 '}}\rm =', {' '}, num2str(df, '%.2f'), ' & \itk_{f_{',...
                 num2str(t_id(i), '%.2f'), '}}\rm =', {' '}, num2str(kf, '%.2f'));
             
             pltvar = ~pltvar; % update plotting status
             
-        elseif ~pltvar && (opts_dat == 0)
+        elseif ~pltvar && (opts_dat <= 0)
+            
+            % concatinate the data
             dpp_ens = cat(1, parsdata.dpp_g);
             dpp_ens = dpp_ens(:,1);
             dgg_dpp_ens = cat(1, parsdata.dg) ./ dpp_ens;
             npp_ens = cat(1, parsdata.npp);
             da_ens = cat(1, parsdata.da);
-            
-            ind = 1 : length(npp_ens); % initialize sampling index set
-            
+                        
             % uniform randam sampling of ensemble data
             if ismember(opts_type, {'UNIFORM', 'Uniform', 'uniform'})
                 if isempty(opts_nagg); opts_nagg = length(npp_ens); end 
                 ind = randperm(length(npp_ens), opts_nagg); % index of particles selected
+                
+                % random aggregate sampling
+                dgg_dpp_fit = dgg_dpp_ens(ind);
+                npp_ens_fit = npp_ens(ind);
                 
             % lognormal sampling
             elseif ismember(opts_type, {'LOGNORMAL', 'Lognormal', 'lognormal'})
@@ -144,28 +148,94 @@ for i = 1 : n_dat
                 
                 ind = ind(~cellfun('isempty', ind));
                 ind = cat(1, ind{:});
+                
+                % filter aggregates
+                dgg_dpp_fit = dgg_dpp_ens(ind);
+                npp_ens_fit = npp_ens(ind);
+                
+            % pass a fit from the middle of data
+            elseif ismember(opts_type, {'MEDIAN', 'Median', 'median'})
+                n_bin = 2^7; % default number of bins
+                
+                % set the bin locations
+                dd = [min(dgg_dpp_ens), max(dgg_dpp_ens)];
+                rr = (dd(2) / dd(1))^(1 / n_bin);
+                d_bin = dd(1) * ones(n_bin + 1, 1);
+                dd_c = zeros(n_bin,1); % bin centers
+                npp_c = zeros(n_bin,1); % fit array
+                
+                for ii = 1 : n_bin
+                    d_bin(ii+1) = d_bin(ii+1) * rr^(ii); % bin upper side 
+                    dd_c(ii) = sqrt(d_bin(ii) * d_bin(ii+1)); % bin center
+                    iii = (dgg_dpp_ens >= d_bin(ii)) &...
+                        (dgg_dpp_ens < d_bin(ii+1)); % particles that fall in the bin
+                    npp_c(ii) = median(npp_ens(iii)); % center of dependent variable in current bin
+                end
+                
+                % assign the medians
+                dgg_dpp_fit = dd_c;
+                npp_ens_fit = npp_c;
+                
+            else
+                % fit type selected as 'none':
+                dgg_dpp_fit = dgg_dpp_ens;
+                npp_ens_fit = npp_ens;
             end
             
-            % filter aggregates
-            dgg_dpp_ens = dgg_dpp_ens(ind);
-            npp_ens = npp_ens(ind);
-            
-            fit = fitlm(table(log(dgg_dpp_ens), log(npp_ens)), 'linear'); % fit a linear regression
-            
-            df = fit.Coefficients.Estimate(2); % fractal dimension
-            kf = exp(fit.Coefficients.Estimate(1)); % prefactor            
-            
-            legtxt{end - 1} = strcat(' \itd_{f_{ens}}\rm =', {' '}, num2str(df, '%.2f'),...
-                ' & \itk_{f_{ens}}\rm =', {' '}, num2str(kf, '%.2f'));
+            if ~ismember(opts_type, {'WEIGHTED', 'Weighted', 'weighted'})
+                
+                fit = fitlm(table(log(dgg_dpp_fit), log(npp_ens_fit)), 'linear'); % fit a linear regression
+
+                df = fit.Coefficients.Estimate(2); % ensemble fractal dimension
+                kf = exp(fit.Coefficients.Estimate(1)); % ~ prefactor
+
+                legtxt{end - 2} = strcat(' \itd_{f_{ens}}\rm =', {' '}, num2str(df, '%.2f'),...
+                    ' & \itk_{f_{ens}}\rm =', {' '}, num2str(kf, '%.2f')); % legend for ensemble fit
+                
+                ci = coefCI(fit); % 95% confidence intervals for fractal properties
+                ci_df = ci(2,:);
+                ci_kf = exp(ci(1,:));
+
+                legtxt{end - 1} = strcat(' CI_{\itd_f}\rm = (', num2str(ci_df(1), '%.2f'),...
+                    {','}, num2str(ci_df(2), '%.2f'), ') & CI_{\itk_f}\rm = (',...
+                    num2str(ci_kf(1), '%.2f'), {','}, num2str(ci_kf(2), '%.2f'), {')'}); % legend for CI of fit            
+
+            else
+                [fr_w, std_w] = lscov([ones(length(dgg_dpp_ens), 1), log(dgg_dpp_ens)],...
+                    log(npp_ens), sqrt(npp_ens)); % weighted fitting outputs
+                
+                % extract fractal properties
+                df = fr_w(2);
+                kf = exp(fr_w(1));
+                
+                legtxt{end - 2} = strcat(' \itd_{f_{ens}}\rm =', {' '}, num2str(df, '%.2f'),...
+                    ' & \itk_{f_{ens}}\rm =', {' '}, num2str(kf, '%.2f'));                
+                
+                % convert std to CI
+                dci_df = 1.96 * std_w(2) / sqrt(length(dgg_dpp_ens));
+                dci_kf = exp(1.96 * std_w(1) / sqrt(length(dgg_dpp_ens)));
+                
+                legtxt{end - 1} = strcat(' CI_{\itd_f}\rm = ±', {' '}, num2str(dci_df, '%.2e'),...
+                    ' & CI_{g,\itk_f}\rm = ±', {' '}, num2str(dci_kf, '%.4f')); % CI legend for weighted fit
+                
+                ci_df = [df - dci_df, df + dci_df];
+                ci_kf = [kf / dci_kf, kf * dci_kf];
+                
+            end
             
             pltvar = ~pltvar; % skip plotting for next iterations
         end
                 
-        % prepare and plot the fit
         if pltvar
+            % generate the fit data
             npp = kf * rd0.^df;
-            p{end - 1} = plot(rd0, npp, 'Color', [0.75, 0.75, 0.75],...
-                'LineStyle', ':', 'LineWidth', 2);
+            ci_npp = [ci_kf(1) * rd0.^ci_df(1); ci_kf(2) * rd0.^ci_df(2)];
+            
+            % plot the main fit and CI bounds
+            p{end - 2} = plot(rd0, npp, 'Color', [0.6, 0.6, 0.6],...
+                'LineStyle', '-', 'LineWidth', 2);
+            p{end - 1} = plot(rd0, ci_npp(1,:), rd0, ci_npp(2,:),...
+                'Color', [0.6, 0.6, 0.6], 'LineStyle', ':', 'LineWidth', 1.5);
         end
     end
 end
@@ -179,8 +249,8 @@ xlim([2,3e2])
 ylabel('{\itn_{pp}} [-]', 'FontName', 'Calibri', 'FontSize', 16)
 ylim([1,2e4])
 set(gca, 'YScale', 'log')
-legend(cat(2, p{:})', cat(2, legtxt{:}), 'FontName', 'Calibri Light', 'FontSize', 12,...
-    'Location', 'southeast')
+legend(cat(2, [p{1 : end - 2}, p{end - 1}(1), p{end}])', cat(2, legtxt{:}),...
+    'FontName', 'Calibri Light', 'FontSize', 12, 'Location', 'southeast')
 
 end
 
