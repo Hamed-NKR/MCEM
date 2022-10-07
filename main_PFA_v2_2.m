@@ -23,7 +23,7 @@ npp_max = 200; % Iteration limit parameter in terms of number of primaries withi
 j_max = 1e6; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
-opts.randvar = 'area'; % flag for type of size used in logmormal sampling
+opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -453,20 +453,20 @@ mc = flip(mc,1); % Reverse the map direction
 mt = {'^', 's', 'd', 'v', 'h', '+', '<', 'p', 'x', '>'}; % Marker type depot
 
 for i = 1 : n_kk
-    p2_3{i} = scatter(1e9 * parsdata(i).da, 1e9 * parsdata(i).dpp_g(:,1),...
+    p2_3{i} = scatter(1e9 * parsdata(i+1).da, 1e9 * parsdata(i+1).dpp_g(:,1),...
         ms(i), mc(i,:), 'filled', mt{i}); % Plot hybrid aggs
     
     if strcmp(opts2.plotlabel, 'on')
-        lbl = num2str(parsdata(i).dpp_g(:,2), '%.2f');
-        text(1e9 * parsdata(i).da, 1e9 * parsdata(i).dpp_g(:,1),...
+        lbl = num2str(parsdata(i+1).dpp_g(:,2), '%.2f');
+        text(1e9 * parsdata(i+1).da, 1e9 * parsdata(i+1).dpp_g(:,1),...
             lbl, 'VerticalAlignment', 'top',...
             'HorizontalAlignment', 'left', 'FontSize', 10)
     end
     
     if strcmp(opts2.ploteb, 'on')
-        e_p = parsdata(i).dpp_g(:,1) .* abs(parsdata(i).dpp_g(:,2) - 1);
-        e_n = parsdata(i).dpp_g(:,1) .* abs(1 - 1 ./ parsdata(i).dpp_g(:,2));
-        eb = errorbar(1e9 * parsdata(i).da, 1e9 * parsdata(i).dpp_g(:,1),...
+        e_p = parsdata(i+1).dpp_g(:,1) .* abs(parsdata(i+1).dpp_g(:,2) - 1);
+        e_n = parsdata(i+1).dpp_g(:,1) .* abs(1 - 1 ./ parsdata(i+1).dpp_g(:,2));
+        eb = errorbar(1e9 * parsdata(i+1).da, 1e9 * parsdata(i+1).dpp_g(:,1),...
             1e9 * e_n, 1e9 * e_p, '.');
         eb.Color = mc(i,:);
     end
