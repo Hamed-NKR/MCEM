@@ -1,9 +1,9 @@
-function h = SIGMAPP_VS_SIGMAGG(parsdata, params, opts)
+function h = SIGMAPP_VS_SIGMAGG_v1(parsdata, params, opts)
 % "SIGMAPP_VS_SIGMAGG" plots boxcharts from temproal evolution of...
 %   ...standard deviation of primary particle size within vs. bewteen...
 %   ...the aggregates.
 % ----------------------------------------------------------------------- %
-% 
+%
 % Inputs:
 %   pardata: a cell array of structures each containing dp, da and stds of
 %       ...aggs over time staring from the monodispersity moment.
