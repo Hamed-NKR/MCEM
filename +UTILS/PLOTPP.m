@@ -31,16 +31,26 @@ n_pp = numel(x_pp); % Number of primary particles
 
 for i = 1 : n_pp
     h_pp = surf(X .* d_pp(i) ./ 2 + x_pp(i),...
-        Y .* d_pp(i) ./ 2 + y_pp(i), Z .* d_pp(i) ./ 2 + z_pp(i));
+        Y .* d_pp(i) ./ 2 + y_pp(i), Z .* d_pp(i) ./ 2 + z_pp(i)); % plot primaries
+    
+    % set graphics
     h_pp.EdgeColor = 'none';
     h_pp.FaceColor = fc;
     h_pp.FaceAlpha = ft;
-
+    h_pp.FaceLighting = 'gouraud';
+    h_pp.AmbientStrength = 0.8;
+    h_pp.DiffuseStrength = 0.2;
+    h_pp.SpecularStrength = 0.05;
+    h_pp.SpecularExponent = 2;
+    h_pp.BackFaceLighting = 'lit';
+    
     hold on
 end
 
 axis equal
 grid off
+axis off
+camlight('right');
 
 if nargout == 0
     clear h_pp;

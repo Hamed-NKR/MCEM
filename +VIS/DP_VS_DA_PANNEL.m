@@ -47,11 +47,11 @@ titex = opts.ttl;
 if isempty(titex)
     titex = cell(6,1);
     titex{1} = '(a) Reference';
-    titex{2} = '(b) $\overline{d}_{g,agg}$ = 250 nm';
+    titex{2} = '(b) $\overline{d}_{g,agg}$ = 75 nm';
     titex{3} = '(c) $\sigma_{g,agg}$ = 1.6';
     titex{4} = '(d) $\sigma_{g,pp,ens}$ = 1.3';
     titex{5} = '(e) $D_{TEM}$ = 0.5';
-    titex{6} = '(f) $VF = \mathrm{1e^{-5}}$';
+    titex{6} = '(f) $VF$ = 10 ppm';
 end
 
 % make the colormap and initialize the maker properties
@@ -76,7 +76,7 @@ for j = 1 : 6
         legtxt_tem = '$\overline{d}_{pp} = \overline{d}_{pp,100}(d_a/100)^{0.5}$';
         da_tem = 100 * (dpp_uc / 17.8).^(1 / 0.5);
         p_tem = plot(da_tem, dpp_uc, 'Color', mc(1,:), 'LineStyle', ':',...
-            'LineWidth', 2);
+            'LineWidth', 2.5);
     end    
     
     for i = 1 : 6
@@ -95,12 +95,11 @@ for j = 1 : 6
         end
     end
     
-    title(titex{j}, 'FontSize', 24, 'interpreter','latex')
-        
     box on
+    title(titex{j}, 'FontSize', 24, 'interpreter','latex')        
     xlim([5, 5000])
     ylim([5, 100])
-    set(gca, 'FontSize', 18, 'TickLength', [0.02 0.02], 'XScale', 'log',...
+    set(gca, 'FontSize', 18, 'TickLength', [0.03 0.03], 'XScale', 'log',...
         'YScale', 'log', 'TickLabelInterpreter','latex')
     if ismember(j, [2,3,5,6])
         set(gca, 'yticklabel',[])
