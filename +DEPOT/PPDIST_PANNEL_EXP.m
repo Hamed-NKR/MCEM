@@ -1,4 +1,4 @@
-function h = PPDIST_PANNEL_EXP(ppdat0, Aggs_im, ind_im, fd0)
+function h = PPDIST_PANNEL_EXP(ppdat0, Aggs, inds, fd0)
 % "PPDIST_PANNEL_EXP" plots a pannel of primary particle size...
 %   ...distributions for experimental hybrid and non-hybrid aggregates...
 %   ...along with their TEM images.
@@ -6,8 +6,8 @@ function h = PPDIST_PANNEL_EXP(ppdat0, Aggs_im, ind_im, fd0)
 % 
 % Inputs:
 %   ppdat0: File names of primary particle datasheets
-%   Aggs_im: Structure containing aggregate data from TEM images (by ATEMS)
-%   ind_im: Data indices to be analyzed in Aggs_im (in order of ppdat0)
+%   Aggs: Structure containing aggregate data from TEM images (by ATEMS)
+%   inds: Data indices to be analyzed in Aggs_im (in order of ppdat0)
 %   fd0: Folder address for the primary particle data
 % ----------------------------------------------------------------------- %
 %
@@ -90,7 +90,7 @@ for i = 1 : 2
     
     nexttile(i) % rendered structure
     
-    imshow(Aggs_im(ind_im(i)).image)
+    imshow(Aggs(inds(i)).image)
     axis('on', 'image')
     set(gca, 'xtick',[], 'xticklabel', [], 'ytick',[], 'yticklabel',[])
 
