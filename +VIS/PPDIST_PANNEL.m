@@ -20,7 +20,7 @@ function h = PPDIST_PANNEL(pp_sim, ppdat0, Aggs, inds, fd0, opts)
 % initialize figure 
 figure;
 h = gcf;
-h.Position = [0, 0, 1400, 750];
+h.Position = [0, 0, 1500, 750];
 set(h, 'color', 'white');
 
 % initialize layout
@@ -31,6 +31,7 @@ tt.Padding = 'compact';
 dist = cell(4,1); % placeholder for the aggregates' pp size distribution data
 
 p = cell(2,4); % placeholder for subplots
+ymax = zeros(4,1); % y axis extent
 
 % titles for subplots
 subtitex = {'Uniform', 'Hybrid'};
@@ -67,8 +68,9 @@ for i = 1 : 4
     nexttile(i) % graphical structure demonstrations
     
     if i <= 2
-        UTILS.PLOTPP(pp_sim{i}(:,3), pp_sim{i}(:,4), pp_sim{i}(:,5), pp_sim{i}(:,2),...
-            [255, 210, 10] / 255)
+        opts_render.cc = 'on';
+        UTILS.PLOTPP(pp_sim{i}(:,3), pp_sim{i}(:,4), pp_sim{i}(:,5),...
+            pp_sim{i}(:,2), pp_sim{i}(:,6), opts_render)
         title(strcat(string(newline), subtitex{i}), 'FontSize', 20, 'interpreter','latex')
         
     else
@@ -115,12 +117,14 @@ for i = 1 : 4
     set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
         'TickLength', [0.02 0.02], 'XScale', 'log')
     xlim([min(xhist), max(xhist)])
-    ylim([0, ceil(max(yhist) / 100) * 100 + 50])
+%     ylim([0, ceil(max(yhist) / 100) * 100 + 50])
+    if max(ylim) == max(yhist); ylim([-inf, max(yhist) + 50]); end
+    
     if i == 1
         ylabel('d$n_{pp}$/dlog($d_{pp}$) [-]', 'interpreter', 'latex',...
             'FontSize', 20)
-    else
-        set(gca, 'yticklabel',[])
+%     else
+%         set(gca, 'yticklabel',[])
     end
     
 end

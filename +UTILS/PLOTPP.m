@@ -1,4 +1,4 @@
-function h_pp = PLOTPP(x_pp, y_pp, z_pp, d_pp, fc, ft)
+function h_pp = PLOTPP(x_pp, y_pp, z_pp, d_pp, id_agg, opts)
 % "PLOTPP" displays the 3d schematic of primary particles in 3d space.
 % ----------------------------------------------------------------------- %
 % 
@@ -7,24 +7,47 @@ function h_pp = PLOTPP(x_pp, y_pp, z_pp, d_pp, fc, ft)
 %     y_pp: y ~
 %     z_pp: z ~
 %     d_pp: Dimater of primaries
-%     fc: Particles color
-%     ft: ~ transparency
+%     id_agg: ids of primaries (which aggregate they belong to)
+%     opts: plotting options
 % ----------------------------------------------------------------------- %
 % 
 % Output:
 %     h_pp: The output figure handle
 % ----------------------------------------------------------------------- %
 
-% Setting default colormap as "summer"
-if ~exist('fc', 'var'); fc = []; end
-if isempty(fc); fc = summer; end
-
-
-% Setting default marker transparency as 1 (fully opaque)
-if ~exist('ft', 'var'); ft = []; end
-if isempty(ft); ft = 1; end
-
 n_pp = numel(x_pp); % Number of primary particles
+
+% Set variable for plot properties
+if ~exist('opts', 'var') 
+    opts = struct();
+end
+
+% Setting default particle colormap
+if ~isfield(opts, 'cm'); opts.cm = []; end
+if isempty(opts.cm); opts.cm = gray; end
+
+% Setting default particle transparency as 1 (fully opaque)
+if ~isfield(opts, 'ft'); opts.ft = []; end
+if isempty(opts.ft); opts.ft = 1; end
+
+% Setting defaults on whether colorcode the aggs
+if ~isfield(opts, 'cc'); opts.cc = 'off'; end
+if ismember(opts.cc, {'OFF', 'Off', 'off'}) || ~exist('id_agg', 'var') ||...
+        isempty(id_agg)
+    id_agg = ones(n_pp,1);
+end
+
+ids = unique(id_agg); % unique agg ids existing in the population
+n_agg = length(ids); % number of aggs existing
+
+% make colormap
+if n_agg > 1
+    ii = round(1 + (length(opts.cm) - 1) .* (0.25 : 0.5 / (n_agg - 1) : 0.75)');
+    cm = opts.cm(ii,:);
+    cm = flip(cm,1);
+else
+    cm = opts.cm(end - round(0.25 * length(opts.cm)),:);
+end
 
 % Plotting aggregates
 [X,Y,Z] = sphere(60);
@@ -35,8 +58,12 @@ for i = 1 : n_pp
     
     % set graphics
     h_pp.EdgeColor = 'none';
-    h_pp.FaceColor = fc;
-    h_pp.FaceAlpha = ft;
+    if n_agg > 1
+        h_pp.FaceColor = cm(ids == id_agg(i),:);
+    else
+        h_pp.FaceColor = cm;
+    end
+    h_pp.FaceAlpha = opts.ft;
     h_pp.FaceLighting = 'gouraud';
     h_pp.AmbientStrength = 0.8;
     h_pp.DiffuseStrength = 0.2;
