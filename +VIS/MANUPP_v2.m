@@ -36,7 +36,7 @@ if ~isfield(opts, 'visual')
 end
 opts_visual = opts.visual;
 if isempty(opts_visual)
-    opts_visual = 'off'; % default not to plot the outputs
+    opts_visual = 'on'; % default not to plot the outputs
 end
 
 if ~isfield(opts, 'lbl')
