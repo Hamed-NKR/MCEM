@@ -1,5 +1,5 @@
 function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_agg,...
-    n_bin, opts)
+    n_bin, del_d, opts)
     
 % "LNSAMPLING" samples a lognormal size distribution from a population...
     % ...of aggregates of different sizes.
@@ -9,8 +9,9 @@ function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_agg,...
 %   d0: Pre-sampling diameter set of a given aggregate population
 %   mu_d: The desired mean size after sampling
 %   sigma_d: The desired sampling standard deviation
-%   n_bin: Number of bins for discretization
 %   n_agg: Number of target particles to be selected
+%   n_bin: Number of bins for discretization
+%   del_d: Range of sampling
 %   opts: Function options
 % ----------------------------------------------------------------------- %
 % 
@@ -25,8 +26,14 @@ function [d, ind, fn, fn0, h] = LNSAMPLING(d0, mu_d, sigma_d, n_agg,...
 
 n_agg0 = length(d0); % initial number of aggregates
 
+% get the size range
+if isempty(del_d)
+    [del_d(1), del_d(2)] = bounds(d0);
+else
+    del_d = sort(del_d(1:2));
+end
+
 % set size bins
-[del_d(1), del_d(2)] = bounds(d0);
 r_d = (del_d(2) / del_d(1))^(1 / n_bin);
 d_bin = del_d(1) * ones(n_bin + 1, 1);
 for i = 1 : n_bin
@@ -38,8 +45,8 @@ pl = zeros(n_agg0,1); % initialize particle bin label set (range: 1-n_bin)
 
 % initialize number of output particles, size mean, std, number of bins,...
     % ...and visualization options if not given
-if (~exist('n_agg', 'var')) || isempty(n_agg)
-    n_agg = n_agg0;
+if (~exist('n_agg', 'var'))
+    n_agg = [];
 end
 
 if (~exist('mu_d', 'var')) || isempty(mu_d) || (~isnumeric(mu_d))
@@ -61,6 +68,7 @@ if ~exist('opts', 'var')
     opts = struct();
 end
 
+% set visualization option
 if ~isfield(opts, 'visual')
     opts.visual = [];
 end
@@ -69,10 +77,20 @@ if isempty(opts_visual)
     opts_visual = 'off'; % default not to plot the outputs
 end
 
+% set aggregate size type
 if ~isfield(opts, 'randvar')
-    opts.var = [];
+    opts.randvar = [];
 end
 opts_randvar = opts.randvar;
+
+% set the data fitting type
+if ~isfield(opts, 'nfit')
+    opts.nfit = [];
+end
+opts_nfit = opts.nfit;
+if isempty(opts_nfit)
+    opts_nfit = 'off'; % default to fit based on the total number of aggs (not the lognormal peak)
+end
 
 % assign the xlabel for the output graphs
 if ismember(opts_visual, {'ON', 'On', 'on'})
@@ -105,19 +123,34 @@ for i = 1 : n_bin
     
     d_c(i) = sqrt(d_bin(i) * d_bin(i+1));
     pl(ii) = i; % assign bin labels to the aggregates
-    n0 = nnz(ii); % number of pre-sampling particles in each bin
-    fn0(i) = n0 / n_agg0; % size frequency of pre-sampling population   
+    fn0(i) = nnz(ii) / n_agg0; % size frequency of pre-sampling population   
     
     fn_fit(i) = (normcdf(log(d_bin(i+1)), log(mu_d), log(sigma_d)) -...
         normcdf(log(d_bin(i)), log(mu_d), log(sigma_d))); % the lognormal fit to the...
             % ...frequency data
-    n_fit = ceil(fn_fit(i) * n_agg0); % number of particles to be...
-        % ...selected in each bin
     
     ind{i} = find(pl == i); % initialize i'th bin post-sampling indices
     d{i} = d0(pl == i); % ~ diameters
+end
+
+% find the number of output aggregates
+if ismember(opts_nfit, {'ON', 'On', 'on'})
+    jmax = find(d_bin > mu_d, 1) - 1;
+    n_agg = ceil(fn0(jmax) * n_agg0 / fn_fit(jmax));
+    if ~isempty(n_agg)
+        warning('Number of aggregates adjusted for lognormal sampling...')
+    end
+elseif isempty(n_agg)
+    n_agg = n_agg0;
+end
+
+% randomly select from the bins
+for i = 1 : n_bin
+    n_fit = ceil(fn_fit(i) * n_agg); % number of particles to be...
+        % ...selected in each bin
+    n0 = round(fn0(i) * n_agg0); % number of pre-sampling particles in each bin
     
-    if  n_fit <= n0 % if enough particles exist in bin for random sampling
+    if n_fit <= n0 % if enough particles exist in bin for random sampling
         iii= randperm(n0,n_fit); % index of particles in bin to be sampled
         
     elseif n0 > 0
@@ -136,7 +169,7 @@ for i = 1 : n_bin
         ind{i} = ind{i}(iii);
         d{i} = d{i}(iii);
         
-        fn(i) = length(d{i}) / n_agg0; % get post-sampling frequency
+        fn(i) = length(d{i}) / n_agg; % get post-sampling frequency
     end 
 end
 

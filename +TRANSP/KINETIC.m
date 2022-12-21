@@ -29,8 +29,10 @@ end
 ninv =  1./n - 1/n(1); % Data to be fitted for characteristic time and...
     % ...kinetic exponent
 
+n_dat0 = find(n ~= n(1), 1); % timespot to start with for fitting 
+
 % Fit a linear regression model to n inverse time series
-fit1 = fitlm(table(log(t), log(ninv)), 'linear');
+fit1 = fitlm(table(log(t(n_dat0 : end)), log(ninv(n_dat0 : end))), 'linear');
 z = fit1.Coefficients.Estimate(2);
 tau = exp(-fit1.Coefficients.Estimate(1) / z);
 
@@ -53,23 +55,33 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     % time history of agg numbers
     tt1 = nexttile;
-    p11 = plot(t, n, 'Color', [0.1 0.1 0.1], 'LineWidth', 1);
+    p11 = plot(t, ninv, 'Color', [0.1 0.1 0.1], 'LineWidth', 1);
     hold on
     
     % The fit line based on LRM results
-    t_fit = (min(t) : range(t) / (10 * (numel(t) - 1)) : max(t))';
+%     t_fit = (t(n_dat0) : (t(end) - t(n_dat0)) / (10 * (numel(t) - 1)) : t(end))';
+    t_fit = log(logspace(t(n_dat0), t(end), 10 * (length(n) - n_dat0)));
     ninv_fit = (t_fit / tau) .^ z;    
     p12 = plot(t_fit, ninv_fit, 'Color', [0.4660 0.6740 0.1880],...
         'LineWidth', 2, 'LineStyle', '-.');
     
+    xa = [0.32 0.27];
+    ya = [0.27 0.42];
+    anotxt = strcat('\tau =', {' '}, num2str(tau, '%.2f'),...
+        ' (s), z =', {' '}, num2str(z, '%.2f'), ' (-)');
+    annotation('textarrow', xa, ya, 'String', anotxt, 'Interpreter', 'tex',...
+    'FontName', 'SansSerif', 'FontSize', 12)
+    
     box on
     set(gca, 'XScale', 'log')
+    set(gca, 'YScale', 'log')
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
     xlabel('t (s)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
         'FontSize', 14)
-    ylabel('n (-)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
+    ylabel('1/n - 1/n_0 (-)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
+    xlim([t(n_dat0) t(end)])
     legend([p11, p12], {'Real-time', 'Linear regression fit'},...
-        'Location', 'northeast', 'FontName', 'SansSerif', 'FontSize', 12);
+        'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 12);
     title(tt1, 'Charactertic kinetic time and exponent', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 16)
     
@@ -80,10 +92,11 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     box on
     set(gca, 'XScale', 'log')
+    set(gca, 'YScale', 'log')
     set(gca, 'FontName', 'SansSerif', 'FontSize', 12, 'TickLength', [0.02 0.02])
     xlabel('t (s)', 'FontName', 'SansSerif', 'FontWeight', 'bold',...
         'FontSize', 14)
-    ylabel('beta (-)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
+    ylabel('beta (s^-^1)', 'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 14)
     title(tt2, 'Collision kernel', 'FontName', 'SansSerif',...
         'FontWeight', 'bold', 'FontSize', 16)    
 end
