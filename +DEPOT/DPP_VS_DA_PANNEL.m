@@ -1,5 +1,5 @@
-function h = DP_VS_DA_PANNEL(parsdata, opts)
-% DP_VS_DA_PANNEL makes a pannel of primary particle size with the
+function h = DPP_VS_DA_PANNEL(parsdata, opts)
+% DPP_VS_DA_PANNEL makes a pannel of primary particle size with the...
 %   ...aggregate size data.
 % ----------------------------------------------------------------------- %
 % 

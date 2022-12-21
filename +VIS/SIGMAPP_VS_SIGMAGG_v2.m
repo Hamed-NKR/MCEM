@@ -124,7 +124,7 @@ plot([1.5,1.5], [0.95,1.7], [2.5,2.5], [0.95,1.7], [3.5,3.5], [0.95,1.7],...
     'Color', 'k', 'LineWidth', 0.75)
 
 box on
-set(gca, 'TickLabelInterpreter','latex', 'FontSize', 18, 'TickLength', [0.0050.005])
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18, 'TickLength', [0.005 0.005])
 xlabel('$\sigma_{g,pp,ens}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylabel('$\sigma_{g,pp,agg}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylim([0.98, (ceil(max(ylim) / 0.1)) * 0.1 - 0.05])

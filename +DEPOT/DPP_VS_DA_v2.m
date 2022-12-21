@@ -1,6 +1,6 @@
-function h = DP_VS_DA_v2(parsdata)
-% DP_VS_DA_PANNEL makes a pannel of primary particle size with the
-%   ...aggregate size data.
+function h = DPP_VS_DA_v2(parsdata)
+% DPP_VS_DA_v2 makes a temporal scatter graph of primary particle size vs...
+%   ...aggregate size variation data.
 % ----------------------------------------------------------------------- %
 % 
 % Inputs:
@@ -62,8 +62,8 @@ for i = 1 : 6
 end
 
 box on
-xlim([15, 2500])
-ylim([9, 50])
+xlim([35, 2000])
+ylim([10, 40])
 ax = gca;
 set(ax, 'FontSize', 18, 'TickLength', [0.02 0.02], 'XScale', 'log',...
     'YScale', 'log', 'TickLabelInterpreter','latex')

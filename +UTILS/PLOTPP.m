@@ -42,7 +42,7 @@ n_agg = length(ids); % number of aggs existing
 
 % make colormap
 if n_agg > 1
-    ii = round(1 + (length(opts.cm) - 1) .* (0.25 : 0.5 / (n_agg - 1) : 0.75)');
+    ii = round(1 + (length(opts.cm) - 1) .* (0.15 : 0.7 / (n_agg - 1) : 0.85)');
     cm = opts.cm(ii,:);
     cm = flip(cm,1);
 else
