@@ -15,7 +15,7 @@ function f1 = DPP_VS_DA_v5(parsdata, opts)
 
 % initialize temporal figure 
 f1 = figure(1);
-f1.Position = [0, 0, 700, 650];
+f1.Position = [0, 0, 700, 700];
 set(f1, 'color', 'white')
 
 % initialize plot & legend placholders
@@ -82,7 +82,7 @@ legend(cat(1, p1{:})', cat(2,legtxt1(:)), 'Location', 'southeast',...
 
 % initialize figure 
 f2 = figure(2);
-f2.Position = [0, 0, 950, 650];
+f2.Position = [0, 0, 1000, 650];
 set(f2, 'color', 'white')
 
 % define plotting variables
@@ -127,8 +127,8 @@ hold on
 % initial ensemble average pp mean diameter
 pp1_ens = cell2mat(parsdata(1).pp);
 dpp1_ens = geomean(pp1_ens(:,2));
-p2{9,1} = plot(da_uc, 1e9 * repelem(dpp1_ens, length(da_uc)), 'Color', [0.6 0.6 0.6],...
-    'LineStyle', '--', 'LineWidth', 2);
+p2{9,1} = plot(da_uc, 1e9 * repelem(dpp1_ens, length(da_uc)),...
+    'Color', [0.5, 0.5, 0.5], 'LineStyle', '--', 'LineWidth', 2);
 legtxt2{9} = '$\overline{d}_{pp} = \overline{d}_{{pp,ens|}_0}$';
 % legtxt2(9) = strcat('$\overline{d}_{{pp,ens|}_0}$ =', {' '},...
 %     num2str(1e9 * dpp1_ens,'%.1f'), ' nm');
@@ -163,7 +163,6 @@ set(ax2, 'FontSize', 18, 'TickLength', [0.02 0.02], 'XScale', 'log',...
     'YScale', 'log', 'TickLabelInterpreter','latex')
 ax2.XTick = [100, 1000];
 ax2.YTick = [10, 20, 30, 40, 50];
-set(gca, 'yticklabel',[])
 
 xlabel('$\overline{d}_a$ [nm]', 'FontSize', 20, 'interpreter','latex')
 ylabel('$\overline{d}_{pp}$ [nm]', 'FontSize', 20, 'interpreter', 'latex')
@@ -183,13 +182,14 @@ if ismember(opts_render, {'ON', 'On', 'on'})
         da1 = sort(da_flt(iii{1}));
         da3 = sort(da_flt(iii{3}));
         da5 = sort(da_flt(iii{5}));
-        da7 = sort(da_flt(iii{7}));
+        da8 = sort(da_flt(iii{8}));
         
-        opts.id = [find(da_flt == da1(ceil(end/6)));...
-            find(da_flt == da1(ceil(5*end/6)));...
-            find(da_flt == da3(ceil(end/3)));...
-            find(da_flt == da5(ceil(end/2)));...
-            find(da_flt == da7(ceil(2*end/3)))];
+        opts.id = [find(da_flt == da1(ceil(end/12)),1);...
+            find(da_flt == da1(ceil(end/2)),1);...
+            find(da_flt == da1(ceil(11*end/12)),1);...
+            find(da_flt == da3(ceil(end/3)),1);...
+            find(da_flt == da5(ceil(end/2)),1);...
+            find(da_flt == da8(ceil(2*end/3)),1)];
     end
     opts_id = opts.id;
     
@@ -202,7 +202,8 @@ if ismember(opts_render, {'ON', 'On', 'on'})
 %         'FontSize', 16, 'FontWeight', 'bold')
     lgd2.String(11) = [];
 
-    exportgraphics(f1, 'outputs\dpp-vs-da.emf','ContentType','vector')
+    exportgraphics(f2, 'outputs\dpp-vs-da.emf', 'BackgroundColor','none',...
+        'ContentType','vector')
     
     % render and save selected aggregates
     opts2.cc = 'on';
@@ -212,31 +213,37 @@ if ismember(opts_render, {'ON', 'On', 'on'})
     UTILS.PLOTPP(pp_flt{opts_id(1)}(:,3), pp_flt{opts_id(1)}(:,4),...
         pp_flt{opts_id(1)}(:,5), pp_flt{opts_id(1)}(:,2),...
         pp_flt{opts_id(1)}(:,6), opts2)
-    exportgraphics(f3, 'outputs\render1.png', 'Resolution', 600)
+    exportgraphics(f3, 'outputs\render1-1.png', 'Resolution', 1200)
 
     f4 = figure(4);
     UTILS.PLOTPP(pp_flt{opts_id(2)}(:,3), pp_flt{opts_id(2)}(:,4),...
         pp_flt{opts_id(2)}(:,5), pp_flt{opts_id(2)}(:,2),...
         pp_flt{opts_id(2)}(:,6), opts2)
-    exportgraphics(f4, 'outputs\render2.png', 'Resolution', 300)
+    exportgraphics(f4, 'outputs\render1-2.png', 'Resolution', 1200)
 
     f5 = figure(5);
     UTILS.PLOTPP(pp_flt{opts_id(3)}(:,3), pp_flt{opts_id(3)}(:,4),...
         pp_flt{opts_id(3)}(:,5), pp_flt{opts_id(3)}(:,2),...
         pp_flt{opts_id(3)}(:,6), opts2)
-    exportgraphics(f5, 'outputs\render3.png', 'Resolution', 300)
+    exportgraphics(f5, 'outputs\render1-3.png', 'Resolution', 1200)
 
     f6 = figure(6);
     UTILS.PLOTPP(pp_flt{opts_id(4)}(:,3), pp_flt{opts_id(4)}(:,4),...
         pp_flt{opts_id(4)}(:,5), pp_flt{opts_id(4)}(:,2),...
         pp_flt{opts_id(4)}(:,6), opts2)
-    exportgraphics(f6, 'outputs\render4.png', 'Resolution', 300)
+    exportgraphics(f6, 'outputs\render3.png', 'Resolution', 1200)
 
     f7 = figure(7);
     UTILS.PLOTPP(pp_flt{opts_id(5)}(:,3), pp_flt{opts_id(5)}(:,4),...
         pp_flt{opts_id(5)}(:,5), pp_flt{opts_id(5)}(:,2),...
         pp_flt{opts_id(5)}(:,6), opts2)
-    exportgraphics(f7, 'outputs\render5.png', 'Resolution', 300)
+    exportgraphics(f7, 'outputs\render5.png', 'Resolution', 1200)
+
+    f8 = figure(8);
+    UTILS.PLOTPP(pp_flt{opts_id(6)}(:,3), pp_flt{opts_id(6)}(:,4),...
+        pp_flt{opts_id(6)}(:,5), pp_flt{opts_id(6)}(:,2),...
+        pp_flt{opts_id(6)}(:,6), opts2)
+    exportgraphics(f8, 'outputs\render15.png', 'Resolution', 1200)
 end
 
 end

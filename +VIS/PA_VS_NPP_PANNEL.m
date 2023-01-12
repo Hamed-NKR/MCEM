@@ -48,6 +48,7 @@ mc = colormap(hot);
 ii = round(1 + (length(mc) - 1) .* (0.05 : 0.7 / (n_dat - 1) : 0.75)');
 mc = mc(ii,:);
 % mc = flip(mc,1);
+mc(6,:) = [236,230,61] / 255;
 
 ms = [25, 25, 25, 45, 27.5, 55]; % Marker sizes
 mt = {'o', '^', 'v', 's', 'd', 'p'}; % Marker types
@@ -74,7 +75,7 @@ for j = 1 : 2
         'LineStyle', '-.', 'LineWidth', 4);
     hold on
 
-    p{end, j} = plot(n0, cor2(:,j) ./ n0, 'Color', [1 0 1],...
+    p{end, j} = plot(n0, cor2(:,j) ./ n0, 'Color', [0.5 0.5 0.5],...
         'LineStyle', '--', 'LineWidth', 2.5);
     
     if j == 1
@@ -86,7 +87,7 @@ for j = 1 : 2
     for i = 1 : n_dat
         p{i,j} = scatter(parsdata{j}(i).npp, ((parsdata{j}(i).da ./...
             parsdata{j}(i).dpp_g(:,1)).^2 * pi / 4) ./ parsdata{j}(i).npp,...
-            ms(i), mc(i,:), mt{i}, 'LineWidth', 0.1);
+            ms(i), mc(i,:), mt{i}, 'LineWidth', 1);
 
         if j == 1
             if i == 1
@@ -114,7 +115,7 @@ end
 xlabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylabel(tt, '$\hat{A}_{prj,agg}/n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 lgd = legend(cat(2, p{:,1})', cat(2, legtxt{:})', 'interpreter', 'latex',...
-    'FontSize', 18, 'Orientation', 'horizontal', 'NumColumns', 4);
+    'FontSize', 16, 'Orientation', 'horizontal', 'NumColumns', 4);
 lgd.Layout.Tile = 'north';    
 
 end

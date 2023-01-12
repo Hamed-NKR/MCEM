@@ -101,8 +101,13 @@ x_bc = categorical(round(tbl(:,2),2)); % generate the plot x axis
 % make the boxplot
 bc = boxchart(x_bc, tbl(:,3), 'GroupByColor', tbl(:,1));
 for i = 1 : 6
-    bc(i).BoxFaceColor = mc(i,:);
-    bc(i).MarkerColor = mc(i,:);
+    if i < 6
+        bc(i).BoxFaceColor = mc(i,:);
+        bc(i).MarkerColor = mc(i,:);
+    else
+        bc(i).BoxFaceColor = [236,230,61] / 255;
+        bc(i).MarkerColor = [236,230,61] / 255;        
+    end
     bc(i).MarkerSize = 5;
 end
 hold on
@@ -126,11 +131,11 @@ plot([1.5,1.5], [0.95,1.7], [2.5,2.5], [0.95,1.7], [3.5,3.5], [0.95,1.7],...
 box on
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18, 'TickLength', [0.005 0.005])
 xlabel('$\sigma_{g,pp,ens}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
-ylabel('$\sigma_{g,pp,agg}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+ylabel('$\overline{\sigma}_{g,pp,agg}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylim([0.98, (ceil(max(ylim) / 0.1)) * 0.1 - 0.05])
 text([0.6,1.6,2.6,3.6], repmat(1.61,4,1), titex, 'interpreter', 'latex', 'FontSize', 18)
-legend(bc, cat(2, legtxt{:}), 'interpreter', 'latex', 'FontSize', 18,...
-    'Orientation', 'horizontal', 'Location', 'northoutside', 'NumColumns', 3)
+legend(bc, cat(2, legtxt{:}), 'interpreter', 'latex', 'FontSize', 16,...
+    'Location', 'southoutside', 'Orientation', 'horizontal', 'NumColumns', 3)
 
 end
 

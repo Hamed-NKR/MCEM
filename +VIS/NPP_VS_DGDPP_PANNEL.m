@@ -64,6 +64,7 @@ mc = colormap(hot);
 ii = round(1 + (length(mc) - 1) .* (0.05 : 0.7 / (n_dat - 1) : 0.75)');
 mc = mc(ii,:);
 % mc = flip(mc,1);
+mc(6,:) = [236,230,61] / 255;
 
 ms = [25, 25, 25, 55, 35, 60]; % Marker sizes
 mt = {'o', '^', 'v', 's', 'd', 'p'}; % Marker types
@@ -85,7 +86,7 @@ for j = 1 : 2
     
     for i = 1 : n_dat
         p{i,j} = scatter(parsdata{j}(i).dg ./ parsdata{j}(i).dpp_g(:,1),...
-            parsdata{j}(i).npp, ms(i), mc(i,:), mt{i}, 'LineWidth', 0.1); % plot temporal...
+            parsdata{j}(i).npp, ms(i), mc(i,:), mt{i}, 'LineWidth', 1); % plot temporal...
                 % ...variations of primary number vs gyration-over-primary
                 % ...diameter
         
@@ -128,10 +129,10 @@ for j = 1 : 2
             ci_npp = [ci_kf(1) * rd0.^ci_df(1); ci_kf(2) * rd0.^ci_df(2)];
             
             % plot the main fit and CI bounds
-            p{end - 2, j} = plot(rd0, npp, 'Color', [1, 0, 1],...
+            p{end - 2, j} = plot(rd0, npp, 'Color', [0.5, 0.5, 0.5],...
                 'LineStyle', '--', 'LineWidth', 2.5);
             p{end - 1, j} = plot(rd0, ci_npp(1,:), rd0, ci_npp(2,:),...
-                'Color', [1, 0, 1], 'LineStyle', ':', 'LineWidth', 2);
+                'Color', [0.5, 0.5, 0.5], 'LineStyle', ':', 'LineWidth', 2);
         end
     end
     
@@ -159,19 +160,19 @@ for j = 1 : 2
             {' '}, '$\pm$', {' '}, num2str(dci_df, '%.2f'), {','},...
             string(newline), '  $k_{f_{ens}}$ =', {' '}, num2str(kf, '%.2f'),...
             {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_kf, dcin_kf), '%.2f')),...
-            'interpreter', 'latex', 'FontSize', 18, 'Color', [1, 0, 1],...
-            'EdgeColor', [1, 0, 1])
-        annotation('arrow', [0.125,0.175], [0.26,0.26], 'Color', [1, 0, 1])
-        annotation('line', [0.115,0.125], [0.27,0.26], 'Color', [1, 0, 1])
+            'interpreter', 'latex', 'FontSize', 18, 'Color', [0.5, 0.5, 0.5],...
+            'EdgeColor', [0.5, 0.5, 0.5])
+        annotation('arrow', [0.125,0.175], [0.26,0.26], 'Color', [0.5, 0.5, 0.5])
+        annotation('line', [0.115,0.125], [0.27,0.26], 'Color', [0.5, 0.5, 0.5])
     else
         text(8.7, 6, strcat('$d_{f_{ens}}$ =', {' '}, num2str(df, '%.2f'),...
             {' '}, '$\pm$', {' '}, num2str(dci_df, '%.2f'), {','},...
             string(newline), '  $k_{f_{ens}}$ =', {' '}, num2str(kf, '%.2f'),...
             {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_kf, dcin_kf), '%.2f')),...
-            'interpreter', 'latex', 'FontSize', 18, 'Color', [1, 0, 1],...
-            'EdgeColor', [1, 0, 1])
-        annotation('arrow', [0.605,0.655], [0.26,0.26], 'Color', [1, 0, 1])
-        annotation('line', [0.595,0.605], [0.27,0.26], 'Color', [1, 0, 1])
+            'interpreter', 'latex', 'FontSize', 18, 'Color', [0.5, 0.5, 0.5],...
+            'EdgeColor', [0.5, 0.5, 0.5])
+        annotation('arrow', [0.605,0.655], [0.26,0.26], 'Color', [0.5, 0.5, 0.5])
+        annotation('line', [0.595,0.605], [0.27,0.26], 'Color', [0.5, 0.5, 0.5])
     end
     
 %     text(7, 6, strcat('$d_{f_{ens}}$ =', {' '}, num2str(df, '%.2f'),...
@@ -182,20 +183,21 @@ for j = 1 : 2
 %         'Color', [1, 0, 1])
 end
 
-% set general plot's properties
-xlabel(tt, '$d_g/d_{g,pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
-ylabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 if ismember(opts_fit, {'ON', 'On', 'on'})
     lgd = legend(cat(2, [p{1 : n_dat, 1}, p{n_dat + 1, 1}, p{n_dat + 3, 1}])',...
         cat(2, [legtxt{1 : n_dat}, legtxt{n_dat + 1}, legtxt{n_dat + 2}])',...
-        'interpreter', 'latex', 'FontSize', 18, 'Orientation', 'horizontal',...
+        'interpreter', 'latex', 'FontSize', 16, 'Orientation', 'horizontal',...
         'NumColumns', 4);
 else
     lgd = legend(cat(2, p{1 : n_dat + 1, 1})', cat(2, legtxt{1 : n_dat + 1})',...
-        'interpreter', 'latex', 'FontSize', 18, 'Orientation', 'horizontal',...
+        'interpreter', 'latex', 'FontSize', 16, 'Orientation', 'horizontal',...
         'NumColumns', 4);
 end
 lgd.Layout.Tile = 'north';
+
+% set general plot's properties
+xlabel(tt, '$d_g/d_{g,pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+ylabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 
 end
 
