@@ -154,9 +154,33 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     pnot{3} = scatter(danot(3), dppnot(3), 40, [0.1 0.1 0.1], '^');
     pnot{4} = scatter(danot(4), dppnot(4), 50, [0.1 0.1 0.1], '^', 'filled');
 %     pnot{6} = scatter(danot(6), dppnot(6), 60, [0.1 0.1 0.1], 's');
+
+    if (~isfield(opts, 'select')) || isempty(opts.select)
+        opts.select = 'off'; % default not to select points
+    end
+    opts_select = opts.select;
+    if ismember(opts_select, {'ON', 'On', 'on'})
+        if (~isfield(opts, 'tem')) || isempty(opts.tem)
+            opts.tem = {'D1_062_1_S', 'D3_044', 'D3_072', 'D8_026',...
+                'D8_052_1_S_H', 'D8_051'};
+        end
+        opts_tem = opts.tem;
+        
+        jj = zeros(length(opts_tem),1);
+        for j = 1 : length(opts_tem)
+            for i = 1 : n_agg
+                if contains(fname_pp{i}, opts_tem{j})
+                    jj(j) = i;
+                end
+            end
+        end
+        
+        scatter(da(jj), pp.mu_d(jj,2), 150, [0.1 0.1 0.1], 'o',...
+            'LineWidth', 1);
+    end    
     
     if (~isfield(opts, 'label')) || isempty(opts.label)
-        opts.label = 'off'; % default to plot std labels
+        opts.label = 'off'; % default not to plot std labels
     end
     opts_label = opts.label;
     if ismember(opts_label, {'ON', 'On', 'on'})
