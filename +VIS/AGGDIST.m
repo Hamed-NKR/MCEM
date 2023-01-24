@@ -35,7 +35,7 @@ pp0 = pp0(:); % Convert the pp data into a 1d cell array if not already
 
 pp0 = pp0(~cellfun('isempty', pp0)); % Remove unused cells if any
 
-pp0 = cat(1, pp0{:}); % Merge pp info from different times
+pp0 = cat(1, pp0(:)); % Merge pp info from different times
 
 % get number of primaries within aggregates
 nagg0 = numel(pp0);
@@ -155,11 +155,11 @@ hold on
 
 % plot before scaling population
 p12 = scatter(1e9 * da0, 1e9 * dpp0, 10, [0.6, 0.6, 0.6], 'o',...
-    'LineWidth', 0.1);
+    'LineWidth', 1);
 
 % plot after scaling population
 p13 = scatter(1e9 * da1, 1e9 * dpp1, 10, [0.1, 0.1, 0.1], '^',...
-    'LineWidth', 0.1);
+    'LineWidth', 1);
 
 box on
 set(gca, 'FontSize', 18, 'TickLength', [0.02 0.02], 'XScale', 'log',...

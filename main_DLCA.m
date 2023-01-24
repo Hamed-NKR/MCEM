@@ -80,9 +80,9 @@ disp("The computational domain is successfully initialized...")
 
 %% Part 2: Simulating the particle aggregations
 
-k_max = 1e5; % Marching index limit
+k_max = 1e4; % Marching index limit
 time = zeros(k_max,1);
-t_rec = 5e2; % Data recording timeframe
+t_rec = 1e3; % Data recording timeframe
 % t_plt = 10; % Particle movements plotting ~
 % t_nns = 10; % Nearest neighbor search ~
 n_agg = zeros(k_max,1); % Real-time number of aggregates
