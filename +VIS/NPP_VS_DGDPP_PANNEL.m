@@ -196,7 +196,7 @@ end
 lgd.Layout.Tile = 'north';
 
 % set general plot's properties
-xlabel(tt, '$d_g/d_{g,pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+xlabel(tt, '$d_g/\overline{d}_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 
 end

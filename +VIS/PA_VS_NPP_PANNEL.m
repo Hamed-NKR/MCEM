@@ -113,7 +113,7 @@ end
 
 % set general plot's properties
 xlabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
-ylabel(tt, '$\hat{A}_{prj,agg}/n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+ylabel(tt, '$\hat{\overline{A}}_{agg}/n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 lgd = legend(cat(2, p{:,1})', cat(2, legtxt{:})', 'interpreter', 'latex',...
     'FontSize', 16, 'Orientation', 'horizontal', 'NumColumns', 4);
 lgd.Layout.Tile = 'north';    

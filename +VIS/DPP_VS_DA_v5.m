@@ -42,6 +42,7 @@ ii1 = round(1 + (length(mc1) - 1) .* (0.05 : 0.7 / 5 : 0.75)');
 mc1 = mc1(ii1,:);
 ms = [20, 20, 20, 30, 25, 35];
 mt = {'o', '^', 'v', 's', 'd', 'p'};
+mc1(6,:) = [236,230,61] / 255;
 
 % generate universal correlation data
 dpp_uc = logspace(0, 4, 1000);
