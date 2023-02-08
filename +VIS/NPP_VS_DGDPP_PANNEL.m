@@ -69,8 +69,8 @@ mc(6,:) = [236,230,61] / 255;
 ms = [25, 25, 25, 55, 35, 60]; % Marker sizes
 mt = {'o', '^', 'v', 's', 'd', 'p'}; % Marker types
 
-titex = {'(a) $\sigma_{g,pp,ens}$ = 1.0',...
-    '(b) $\sigma_{g,pp,ens}$ = 1.3'}; % titles for subplots
+titex = {'(a) $\sigma_{g,pp,ens|_i}$ = 1.0',...
+    '(b) $\sigma_{g,pp,ens|_i}$ = 1.3'}; % titles for subplots
 
 % plot Sorensen's (2011) recommended benchmark
 rd0 = log10(logspace(0, 1e3, 1e4));

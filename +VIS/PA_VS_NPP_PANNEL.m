@@ -53,8 +53,8 @@ mc(6,:) = [236,230,61] / 255;
 ms = [25, 25, 25, 45, 27.5, 55]; % Marker sizes
 mt = {'o', '^', 'v', 's', 'd', 'p'}; % Marker types
 
-titex = {strcat('(a) $\sigma_{g,pp,ens}$ =', {' '}, num2str(sigmapp_g(1), '%.1f')),...
-    strcat('(b) $\sigma_{g,pp,ens}$ =', {' '}, num2str(sigmapp_g(2), '%.1f'))}; % titles for subplots
+titex = {strcat('(a) $\sigma_{g,pp,ens|_i}$ =', {' '}, num2str(sigmapp_g(1), '%.1f')),...
+    strcat('(b) $\sigma_{g,pp,ens|_i}$ =', {' '}, num2str(sigmapp_g(2), '%.1f'))}; % titles for subplots
 
 % reproduce the literature benchmark correlations
 % n0 = logspace(0, 10, 1e4);
