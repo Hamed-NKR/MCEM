@@ -29,12 +29,12 @@ end
 t_id = [1; t_id];
 
 % setting properties for guidelines of mass-mobility exponent
-dm_gl = [1.75, 1.9, 2.05, 2.2, 2.35];
-km_gl = [800, 700, 650, 600, 550];
+dm_gl = [1.75, 1.9, 2.1, 2.3];
+km_gl = [800, 700, 650, 550];
 n_gl = length(dm_gl); % number of guidelines for effective density
-x_gl = [1.25, 1.25, 1.25, 1.25, 1.25]; % x location of guideline label
-y_gl = [275000, 120000, 57000, 27000, 12500]; % y location ~
-theta_gl = [42, 39, 35, 31, 26]; % orientation of ~
+x_gl = [45, 23.5, 17, 12]; % x location of guideline label
+y_gl = [2600, 2850, 2700, 2050]; % y location ~
+theta_gl = [52, 47, 43, 34]; % orientation of ~
 
 p = cell(n_dat + n_gl + 1, 1); % initialize the plot cell array
 legtxt = cell(n_dat + n_gl + 1, 1); % placeholder for legends
@@ -66,9 +66,9 @@ hold on
 
 % label unversal correlation
 legtxt{end - 5} = 'Olfert and Rogak (2019)';
-t0 = text(1.5, 2500, strcat('\boldmath$d_m =$', {' \bf'}, num2str(2.48)),...
+t0 = text(13, 1100, strcat('\boldmath$d_m =$', {' \bf'}, num2str(2.48)),...
     'interpreter', 'latex', 'FontSize', 14, 'Color', [0.4940 0.1840 0.5560]);
-set(t0, 'Rotation', -19);
+set(t0, 'Rotation', -27);
 
 % plot guidelines and label them
 for ii = 1 : n_gl
@@ -93,7 +93,13 @@ for i = 1 : n_dat
         rho_eff_i(k) = 1860 * sum(parsdata(i).pp{k}(:,2).^3) ./ dm_i(k).^3;
     end
     
-    p{i} = scatter(1e9 * dm_i, rho_eff_i, ms(i), mc(i,:), mt{i}, 'LineWidth', 1);
+    if (i ~= 2) && (i ~= 5)
+        if i == 4
+            p{i} = scatter(1e9 * dm_i, rho_eff_i, ms(i), mc(5,:), mt{i}, 'LineWidth', 1);
+        else
+            p{i} = scatter(1e9 * dm_i, rho_eff_i, ms(i), mc(i,:), mt{i}, 'LineWidth', 1);
+        end
+    end
     
     if i == 1
         legtxt{i} = strcat('$n_{agg}/n_{agg_0}$ =',...
@@ -108,14 +114,14 @@ end
 box on
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-% xlim([10, 1e4])
-% ylim([1, 1e3])
+xlim([10, 3e3])
+ylim([10, 3e3])
 
 % set general plot's properties
 xlabel('$d_m$ [nm]', 'interpreter', 'latex', 'FontSize', 20)
 ylabel('$\rho_{eff} [kg/m^{3}]$', 'interpreter', 'latex', 'FontSize', 20)
-legend(cat(2, p{1 : end - 5})', cat(2, legtxt{1 : end - 5})', 'interpreter', 'latex',...
-    'FontSize', 16, 'location', 'northeast')
+legend(cat(2, p{[1, 3, 4, 6 : end - 5]})', cat(2, legtxt{[1, 3, 4, 6 : end - 5]})',...
+    'interpreter', 'latex', 'FontSize', 16, 'location', 'southwest')
 
 end
 

@@ -1,4 +1,4 @@
-function h = PA_VS_NPP_PANNEL(parsdata, sigmapp_g)
+function h = PA_VS_NPP_PANNEL_v2(parsdata, sigmapp_g)
 % "PA_VS_NPP" plots the projected area over number of promaries vs. ...
 %   ...number of primaries for two sets of hybrid and non-hybrid...
 %   ...aggregates and compares them with benchmark values.
@@ -43,12 +43,12 @@ t_id = [1; t_id];
 p = cell(n_dat + 2, 2); % initialize the plot cell array
 legtxt = cell(n_dat + 2, 1); % placeholder for legends
 
-% set colormap
-mc = colormap(hot);
-ii = round(1 + (length(mc) - 1) .* (0.05 : 0.7 / (n_dat - 1) : 0.75)');
-mc = mc(ii,:);
-% mc = flip(mc,1);
-mc(6,:) = [236,230,61] / 255;
+% % set colormap
+% mc = colormap(hot);
+% ii = round(1 + (length(mc) - 1) .* (0.05 : 0.7 / (n_dat - 1) : 0.75)');
+% mc = mc(ii,:);
+% % mc = flip(mc,1);
+% mc(6,:) = [236,230,61] / 255;
 
 ms = [25, 25, 25, 45, 27.5, 55]; % Marker sizes
 mt = {'o', '^', 'v', 's', 'd', 'p'}; % Marker types
@@ -65,7 +65,14 @@ for i = 2 : 1e4
 end
 cor1 = 0.3757 * n0 + 0.4098 * n0.^0.7689;
 
-cor2 = ((0.94 + 0.03 * sigmapp_g.^4.8) .* (n0.^0.46)).^2; % correlation by Dastanpour & Rogak (2016)
+% set guideline properties
+sigma_gl = 1 : 0.1 : 1.3;
+n_gl = length(sigma_gl);
+cor2 = ((0.94 + 0.03 * sigma_gl.^4.8) .* (n0.^0.46)).^2; % guidlines from...
+    % ...correlation by Dastanpour & Rogak (2016)
+x_gl = [3, 9.25, 13.5, 25]; % x location of guideline labels
+y_gl = [0.8225, 0.8375, 0.855, 0.87]; % y location ~
+theta_gl = 43; % orientation of ~
 
 for j = 1 : 2
     nexttile
@@ -74,9 +81,24 @@ for j = 1 : 2
     p{end - 1, j} = plot(n0, cor1 ./ n0, 'Color', [0.4940 0.1840 0.5560],...
         'LineStyle', '-.', 'LineWidth', 4);
     hold on
-
-    p{end, j} = plot(n0, cor2(:,j) ./ n0, 'Color', [0.5 0.5 0.5],...
-        'LineStyle', '--', 'LineWidth', 2.5);
+    
+    for ii = 1 : n_gl
+        if ii == 1
+            p{end, j} = plot(n0, cor2(:,ii) ./ n0, 'Color', [0.5 0.5 0.5],...
+                'LineStyle', '--', 'LineWidth', 2.5);
+            t_gl = text(x_gl(ii), y_gl(ii), strcat('$\sigma_{g,pp} =$', {' '},...
+                 num2str(sigma_gl(ii), '%.1f'), ', from', string(newline), ' Sorensen (2011)'),...
+                 'interpreter', 'latex', 'FontSize', 12, 'Color', [0.1 0.1 0.1]);
+            set(t_gl, 'Rotation', -theta_gl);
+        else
+            plot(n0, cor2(:,ii) ./ n0, 'Color', [0.5 0.5 0.5],...
+                'LineStyle', '--', 'LineWidth', 2.5);
+            t_gl = text(x_gl(ii), y_gl(ii), strcat('$\sigma_{g,pp} =$', {' '},...
+                 num2str(sigma_gl(ii), '%.1f')),'interpreter', 'latex',...
+                 'FontSize', 12, 'Color', [0.1 0.1 0.1]);
+            set(t_gl, 'Rotation', -theta_gl);
+        end
+    end
     
     if j == 1
         legtxt{end - 1} = 'Meakin et al. (1989)';
@@ -93,7 +115,7 @@ for j = 1 : 2
                 
         p{i,j} = scatter(parsdata{j}(i).npp, ((parsdata{j}(i).da ./...
             dpp0).^2 * pi / 4) ./ parsdata{j}(i).npp,...
-            ms(i), mc(i,:), mt{i}, 'LineWidth', 1);
+            ms(i), parsdata{j}(i).dpp_g(:,2), mt{i}, 'LineWidth', 1);
         
         if j == 1
             if i == 1
@@ -117,10 +139,34 @@ for j = 1 : 2
     title(titex{j}, 'FontSize', 22, 'interpreter','latex')
 end
 
+cb = colorbar;
+colormap turbo
+cb.Label.String = '$\sigma_{g,pp,agg}$ [-]';
+cb.Label.Interpreter  = 'latex';
+cb.Label.Rotation = 360;
+cb.TickLabelInterpreter  = 'latex';
+cb.FontSize = 16;
+cb.Label.FontSize = 20;
+cb.Limits = [1.0 1.7];
+cb.Ticks = 1.0:0.1:1.7;
+cb.TickLength = 0.02;
+cb.Layout.Tile = 'east';
+cbpos = get(cb, 'Position');
+cb.Label.Position = [cbpos(1) - 0.75 , cbpos(2) + 1.705];
+
+
+% dummy plots for the legend appearance purposes
+pnot = cell(n_dat,1);
+nppnot = 1e-3 * (1 : n_dat);
+Abarnot = 1e-3 * (1 : n_dat);
+for i = 1 : n_dat
+    pnot{i} = scatter(nppnot(i), Abarnot(i), ms(i), [0.1 0.1 0.1], mt{i});
+end
+
 % set general plot's properties
 xlabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylabel(tt, '$\hat{\overline{A}}_{agg}/n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
-lgd = legend(cat(2, p{:,1})', cat(2, legtxt{:})', 'interpreter', 'latex',...
+lgd = legend(cat(2, [pnot{:}, p{n_dat + 1:end,1}])', cat(2, legtxt{:})', 'interpreter', 'latex',...
     'FontSize', 16, 'Orientation', 'horizontal', 'NumColumns', 4);
 lgd.Layout.Tile = 'north';    
 
