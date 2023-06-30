@@ -20,7 +20,7 @@ function h = PPDIST_PANNEL(pp_sim, ppdat0, Aggs, inds, fd0, opts)
 % initialize figure 
 figure;
 h = gcf;
-h.Position = [0, 0, 1500, 750];
+h.Position = [0, 0, 1500, 800];
 set(h, 'color', 'white');
 
 % initialize layout
@@ -71,14 +71,14 @@ for i = 1 : 4
         opts_render.cc = 'on';
         UTILS.PLOTPP(pp_sim{i}(:,3), pp_sim{i}(:,4), pp_sim{i}(:,5),...
             pp_sim{i}(:,2), pp_sim{i}(:,6), opts_render)
-        title(strcat(string(newline), subtitex{i}), 'FontSize', 20, 'interpreter','latex')
+        title(strcat(string(newline), subtitex{i}), 'FontSize', 28, 'interpreter','latex')
         
     else
         imshow(Aggs(inds(i-2)).image)
         axis('on', 'image')
         set(gca, 'xtick',[], 'xticklabel', [], 'ytick',[], 'yticklabel',[])
 
-        title(strcat(string(newline), subtitex{i - 2}), 'FontSize', 20, 'interpreter','latex')        
+        title(strcat(string(newline), subtitex{i - 2}), 'FontSize', 28, 'interpreter','latex')        
     end
     
     nexttile(i + 4) % size distribution plots
@@ -114,24 +114,25 @@ for i = 1 : 4
     
     % set subplot axes
     box on
-    set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
+    set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 24,...
         'TickLength', [0.02 0.02], 'XScale', 'log')
     xlim([min(xhist), max(xhist)])
 %     ylim([0, ceil(max(yhist) / 100) * 100 + 50])
-    if max(ylim) == max(yhist); ylim([-inf, max(yhist) + 50]); end
-    
+%     if max(ylim) == max(yhist); ylim([-inf, max(yhist) + 50]); end
+    ylim([-inf, 1000])
+
     if i == 1
         ylabel('d$n_{pp}$/dlog($d_{pp}$) [-]', 'interpreter', 'latex',...
-            'FontSize', 20)
-%     else
-%         set(gca, 'yticklabel',[])
+            'FontSize', 28)
+    else
+        set(gca, 'yticklabel',[])
     end
     
 end
 
-xlabel(tt, '$d_{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 20)
+xlabel(tt, '$d_{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 28)
 title(tt, '$\ \ $Simulated$\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $Experimental',...
-    'FontSize', 24, 'interpreter','latex')
+    'FontSize', 32, 'interpreter','latex')
 
 end
 

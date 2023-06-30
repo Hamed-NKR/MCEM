@@ -114,8 +114,8 @@ end
 box on
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([10, 3e3])
-ylim([10, 3e3])
+xlim([20, 3e3])
+ylim([10, 1050])
 
 % set general plot's properties
 xlabel('$d_m$ [nm]', 'interpreter', 'latex', 'FontSize', 20)
