@@ -110,16 +110,16 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     hold on
     
     % plot manual dpp vs da data
-    p{1} = scatter(da(ii{1,1}), pp.mu_d(ii{1,1},2), 60, [0.1 0.1 0.1], 's');
+    p{1} = scatter(da(ii{1,1}), pp.mu_d(ii{1,1},2), 30, [0.1 0.1 0.1], 's');
     legtxt{1} = 'Argonaut - Semi-uniform';
     
-    p{2} = scatter(da(ii{1,2}), pp.mu_d(ii{1,2},2), 80, [0.1 0.1 0.1], 's', 'filled');
+    p{2} = scatter(da(ii{1,2}), pp.mu_d(ii{1,2},2), 40, [0.1 0.1 0.1], 's', 'filled');
     legtxt{2} = 'Argonaut - Hybrid';
     
-    p{3} = scatter(da(ii{2,1}), pp.mu_d(ii{2,1},2), 40, [0.1 0.1 0.1], '^');
+    p{3} = scatter(da(ii{2,1}), pp.mu_d(ii{2,1},2), 20, [0.1 0.1 0.1], '^');
     legtxt{3} = 'Flare - Semi-uniform';
     
-    p{4} = scatter(da(ii{2,2}), pp.mu_d(ii{2,2},2), 50, [0.1 0.1 0.1], '^', 'filled');
+    p{4} = scatter(da(ii{2,2}), pp.mu_d(ii{2,2},2), 25, [0.1 0.1 0.1], '^', 'filled');
     legtxt{4} = 'Flare - Hybrid';
     
     if (~isfield(opts, 'select')) || isempty(opts.select)

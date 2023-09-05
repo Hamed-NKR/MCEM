@@ -53,8 +53,8 @@ mc(6,:) = [236,230,61] / 255;
 ms = [25, 25, 25, 45, 27.5, 55]; % Marker sizes
 mt = {'o', '^', 'v', 's', 'd', 'p'}; % Marker types
 
-titex = {strcat('(a) $\sigma_{g,pp,ens|_i}$ =', {' '}, num2str(sigmapp_g(1), '%.1f')),...
-    strcat('(b) $\sigma_{g,pp,ens|_i}$ =', {' '}, num2str(sigmapp_g(2), '%.1f'))}; % titles for subplots
+titex = {strcat('(a) $\sigma_\mathrm{g,pp,ens|_i}$ =', {' '}, num2str(sigmapp_g(1), '%.1f')),...
+    strcat('(b) $\sigma_\mathrm{g,pp,ens|_i}$ =', {' '}, num2str(sigmapp_g(2), '%.1f'))}; % titles for subplots
 
 % reproduce the literature benchmark correlations
 % n0 = logspace(0, 10, 1e4);
@@ -63,7 +63,7 @@ n0 = 1e0 * ones(1e4,1);
 for i = 2 : 1e4
     n0(i) = n0(i) * r_dat0^(i-1);
 end
-cor1 = 0.3757 * n0 + 0.4098 * n0.^0.7689;
+cor1 = 4/pi * (0.3757 * n0 + 0.4098 * n0.^0.7689);
 
 cor2 = ((0.94 + 0.03 * sigmapp_g.^4.8) .* (n0.^0.46)).^2; % correlation by Dastanpour & Rogak (2016)
 
@@ -92,15 +92,15 @@ for j = 1 : 2
         end
                 
         p{i,j} = scatter(parsdata{j}(i).npp, ((parsdata{j}(i).da ./...
-            dpp0).^2 * pi / 4) ./ parsdata{j}(i).npp,...
+            dpp0).^2) ./ parsdata{j}(i).npp,...
             ms(i), mc(i,:), mt{i}, 'LineWidth', 1);
         
         if j == 1
             if i == 1
-                legtxt{i} = strcat('$n_{agg}/n_{agg_0}$ =',...
+                legtxt{i} = strcat('$n_\mathrm{agg}/n_\mathrm{agg_0}$ =',...
                     {' '}, num2str(t_id(i), '%.0f'));
             else
-                legtxt{i} = strcat('$n_{agg}/n_{agg_0}$ =',...
+                legtxt{i} = strcat('$n_\mathrm{agg}/n_\mathrm{agg_0}$ =',...
                     {' '}, num2str(t_id(i), '%.2f'));
             end
         end
@@ -111,15 +111,15 @@ for j = 1 : 2
     set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
         'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
     if j == 2; set(gca, 'yticklabel',[]); end
-    xlim([2, 2e4])
-    ylim([0.4, 0.9])
+    xlim([4, 1e4])
+    ylim([0.54, 0.92])
     
     title(titex{j}, 'FontSize', 22, 'interpreter','latex')
 end
 
 % set general plot's properties
-xlabel(tt, '$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
-ylabel(tt, '$\hat{\overline{A}}_{agg}/n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+xlabel(tt, '$n_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+ylabel(tt, '$\hat{\overline{A}}_\mathrm{agg}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 lgd = legend(cat(2, p{:,1})', cat(2, legtxt{:})', 'interpreter', 'latex',...
     'FontSize', 16, 'Orientation', 'horizontal', 'NumColumns', 4);
 lgd.Layout.Tile = 'north';    

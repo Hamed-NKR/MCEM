@@ -43,16 +43,16 @@ n0 = 1e0 * ones(1e4,1);
 for i = 2 : 1e4
     n0(i) = n0(i) * r_dat0^(i-1);
 end
-cor1 = 0.3757 * n0 + 0.4098 * n0.^0.7689;
+cor1 = 4/pi * (0.3757 * n0 + 0.4098 * n0.^0.7689);
 
 % set guideline properties
 sigma_gl = 1 : 0.1 : 1.3;
 n_gl = length(sigma_gl);
 cor2 = ((0.94 + 0.03 * sigma_gl.^4.8) .* (n0.^0.46)).^2; % guidlines from...
     % ...correlation by Dastanpour & Rogak (2016)
-x_gl = [35.5, 67, 147, 400]; % x location of guideline labels
-y_gl = [0.72, 0.71, 0.7, 0.69]; % y location ~
-theta_gl = [51, 52, 52, 52]; % orientation of ~
+x_gl = [5, 5.5, 5.8, 12]; % x location of guideline labels
+y_gl = [0.8, 0.87, 0.91, 0.915]; % y location ~
+theta_gl = [52, 52, 52, 52]; % orientation of ~
 t_gl = cell(n_gl,1); % placeholder for Dastanpour & Rogak's correlation labels
 
 % plot correlations
@@ -65,7 +65,7 @@ for ii = 1 : n_gl
         p{8} = plot(n0, cor2(:,ii) ./ n0, 'Color', [0.5 0.5 0.5],...
             'LineStyle', '--', 'LineWidth', 2.5);
         t_gl{ii} = text(x_gl(ii), y_gl(ii), strcat('$\sigma_{g,pp,ens} =$', {' '},...
-             num2str(sigma_gl(ii), '%.1f'), ', from', ' Sorensen (2011)'),...
+             num2str(sigma_gl(ii), '%.1f'), ',', string(newline), 'from Sorensen (2011)'),...
              'interpreter', 'latex', 'FontSize', 12, 'Color', [0.1 0.1 0.1]);
         set(t_gl{ii}, 'Rotation', -theta_gl(ii));
     else
@@ -119,7 +119,8 @@ for i = 1 : length(ij)
         ind_flt(ij(i,2)) = 1;
     end
 end
-ind_flt = logical(ind_flt);
+% % ind_flt = zeros(nagg_ens,1);
+% % ind_flt = logical(ind_flt);
 % dpp_flt = dpp_ens(~ind_flt,1);
 sigmapp_flt = dpp_ens(~ind_flt,2);
 da_flt = da_ens(~ind_flt);
@@ -139,8 +140,8 @@ iii = cell(6,1); % index sorting placeholder based on number of internal cluster
 for i = 1 : 6
     iii{i} = (nhyb_flt >= kk(i)) & (nhyb_flt < kk(i+1));
     
-    p{i} = scatter(npp_flt(iii{i}), ((da_flt(iii{i}) ./ dpp0(iii{i})).^2 ...
-        * pi / 4) ./ npp_flt(iii{i}), ms(i), sigmapp_flt(iii{i}), mt{i},...
+    p{i} = scatter(npp_flt(iii{i}), ((da_flt(iii{i}) ./ dpp0(iii{i})).^2)...
+        ./ npp_flt(iii{i}), ms(i), sigmapp_flt(iii{i}), mt{i},...
         'LineWidth', 1);
 
     % make legends for pannel 2
@@ -157,12 +158,15 @@ for i = 1 : 6
     end
 end
 
+% dummy point to adjust colorbar
+scatter(1e4, 0.9, 10, 1.6,'*')
+
 % set subplots' properties
 box on
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
 xlim([4, 1e4])
-ylim([0.425, 0.725])
+ylim([0.54, 0.92])
 
 cb = colorbar;
 colormap turbo
@@ -172,8 +176,8 @@ cb.Label.Interpreter  = 'latex';
 cb.TickLabelInterpreter  = 'latex';
 cb.FontSize = 16;
 cb.Label.FontSize = 20;
-cb.Limits = [1.0 1.7];
-cb.Ticks = 1.0:0.1:1.7;
+cb.Limits = [1.0 1.6];
+cb.Ticks = 1.0:0.1:1.6;
 cb.TickLength = 0.02;
 cb.Location = 'northoutside';
 % cbpos = get(cb, 'Position');
@@ -192,6 +196,6 @@ xlabel('$n_{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 ylabel('$\hat{\overline{A}}_{agg}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
 lgd = legend(cat(2, [pnot{:}, p{7:8,1}])', cat(2, legtxt{:})',...
     'interpreter', 'latex', 'FontSize', 16);
-lgd.Location = 'northeastoutside';    
+lgd.Location = 'northeastoutside';
 
 end
