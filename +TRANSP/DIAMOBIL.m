@@ -1,4 +1,4 @@
-function dm = DIAMOBIL_TEST(dg, da)
+function dm = DIAMOBIL(dg, da)
 % "DIAMOBIL" calculates the mobility diameter by interpolation between...
 %   ...free molecular and continuum limit approximations.
 % ----------------------------------------------------------------------- %

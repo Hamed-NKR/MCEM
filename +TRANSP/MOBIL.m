@@ -1,4 +1,4 @@
-function pars = MOBIL(pars, fl, params_const)
+function pars = MOBIL(pars, fl, params_const, opts)
 % "MOBIL" calculates the transport properties of aggregates.
 % ----------------------------------------------------------------------- %
 % 
@@ -6,8 +6,17 @@ function pars = MOBIL(pars, fl, params_const)
 %     pars: Aggregates information structure containting their...
 %         ...geometrical and diffusive properties
 %     fl: Fluid info structure
-%     params_const: Problem's table of constant physical properties    
+%     params_const: Problem's table of constant physical properties
+%     opts: Mobility calculation options 
 % ----------------------------------------------------------------------- %
+
+% initialize calculation method variable
+if ~exist('opts', 'var') 
+    opts = struct();
+end
+if (~isfield(opts, 'mtd')) || isempty(opts.mtd)
+    opts.mtd = 'continuum'; % use continuum regime approximation
+end
 
 % Total number of (independent) particles
 if isa(pars, 'AGG')
@@ -16,15 +25,23 @@ else
     n_par = size(pars.n, 1);
 end
 
-% Compiling/copying properties locally
-dm = 0.75 * cat(1, pars.dg); % Mobility size
+% Calculating mobility properties
 
+% Mobility size
+if strcmp(opts.mtd, 'continuum')
+    dm = 0.75 * cat(1, pars.dg);
+elseif strcmp(opts.mtd, 'interp')
+    da = 2 * sqrt(PAR.PROJECTION(pars, [], 2e2, 10) / pi);
+    dm = TRANSP.DIAMOBIL(pars.dg, da);
+end
+
+% Cunningham correction factor (-)
 kn_kin = (2 * fl.lambda) ./ dm; % Kinetic (momentum) Knudsen number (-)
 alpha = 1.254; 
 beta = 0.4;
 gamma = 1.1;
 cc = 1 + kn_kin .* (alpha + beta .* exp(-gamma ./ kn_kin));
-    % Cunningham correction factor (-)
+    
 
 % Aggregate mass (kg)
 m = ones(n_par,1);

@@ -8,8 +8,8 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 10; % Number of data storage occurrences
-n_try = 10; % Number of DLCA trials
+n_stor = 5; % Number of data storage occurrences
+n_try = 3; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
@@ -17,13 +17,15 @@ gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary 
 mu_da_glob = 1.25e-7;
 std_da_glob = 1.4;
 
-npp_min = 20; % Aggregate filtering criterion
+npp_min = 10; % Aggregate filtering criterion
 npp_max = 200; % Iteration limit parameter in terms of number of primaries within the aggregate
 
 j_max = 1e6; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
+
+opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -33,9 +35,9 @@ D_TEM = 0.35; % polydispersity exponent
 c_proj = 3; % the coefficient to improve the resolution of projected area...
     % ...calculation in the second stage
 
-k_max = 1e7; % Iteration limit parameter
+k_max = 1e4; % Iteration limit parameter
 
-n_kk = 5; % Number of saving timespots
+n_kk = 5; % Number of saving timespots (in round2)
 
 opts2.plotlabel = 'on'; % flag to display lablels of gstd on dp vs da plots
 opts2.ploteb = 'on'; % error bar display flag
@@ -100,7 +102,7 @@ for i = 1 : n_try
 
     pars = PAR.SIZING(pars); % Calculate sizes
 
-    pars = TRANSP.MOBIL(pars, fl, params_const); % Calculate mobility props
+    pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Calculate mobility props
 
     pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Randomize initial velocities
 
@@ -153,7 +155,7 @@ for i = 1 : n_try
         
         pars = PAR.SIZING(pars); % Update sizes
         
-        pars = TRANSP.MOBIL(pars, fl, params_const); % Update mobility properties
+        pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Update mobility properties
         
         UTILS.TEXTBAR([j, j_max]); % Update textbar
         
