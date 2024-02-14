@@ -1,5 +1,5 @@
 function [pa_avg, af_avg, h] = PROJECTION(pars, kk_pars, rsl_samp,...
-    rsl_avg, kk_h)
+    rsl_avg, kk_h, opts)
 % "PROJECTION" computes the orientation averaged projected area of the...
 %   ...agggregates based on Monte Carlo (MC) approach.
 % ----------------------------------------------------------------------- %
@@ -23,6 +23,14 @@ function [pa_avg, af_avg, h] = PROJECTION(pars, kk_pars, rsl_samp,...
 %       ...being inside(1)/outside(0) the aggregate layed over the...
 %       ...original aggregate outline)
 % ----------------------------------------------------------------------- %
+
+% initialize visibility options variable
+if ~exist('opts', 'var') 
+    opts = struct();
+end
+if (~isfield(opts, 'tbar')) || isempty(opts.tbar)
+    opts.tbar = 'on'; % textbar on by default
+end
 
 % Total number of aggregates
 if isa(pars, 'AGG')
@@ -90,8 +98,10 @@ n_agg = length(kk_pars); % Number of aggregates to be analyzed
 pa = zeros(n_agg, length(rsl_avg), 2); % Initializing the projected area...
     % ...set (average areas & area fractions)
 
-disp('Computing projected area...');
-UTILS.TEXTBAR([0, n_agg * rsl_avg]); % Initializing 1st layer textbar (for aggergates)
+if strcmp(opts.tbar, 'on') || strcmp(opts.tbar, 'ON') || strcmp(opts.tbar, 'On')
+    disp('Computing projected area...');
+    UTILS.TEXTBAR([0, n_agg * rsl_avg]); % Initializing 1st layer textbar (for aggergates)
+end
 
 for i = 1 : n_agg
 %     fprintf('Aggregate %d:', i);
@@ -137,7 +147,9 @@ for i = 1 : n_agg
             (y_rng(2) - y_rng(1))); % Multiplying by the total domain...
                 % ...area to get the projected area
         
-        UTILS.TEXTBAR([(i - 1) * rsl_avg + j, n_agg * rsl_avg]) % Updating textbar
+        if strcmp(opts.tbar, 'on') || strcmp(opts.tbar, 'ON') || strcmp(opts.tbar, 'On')
+            UTILS.TEXTBAR([(i - 1) * rsl_avg + j, n_agg * rsl_avg]) % Updating textbar
+        end
         
         % Plotting the results
         if ismember(kk_pars(i), kk_h) && ismember(j, jj) % Plotting only...

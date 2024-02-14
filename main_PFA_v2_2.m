@@ -20,7 +20,7 @@ std_da_glob = 1.4;
 npp_min = 10; % Aggregate filtering criterion
 npp_max = 200; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e6; % Stage 1 marching index limit
+j_max = 1e4; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
@@ -82,6 +82,9 @@ disp(newline)
 % Make an initial lognormal distibution of ensemble average size of primaries for classic dlca trials
 dppi = lognrnd(log(params_ud.Value(8)), log(gstd_dppi_ens), [n_try,1]);
 
+% Make a placeholder for diffusive properties
+mbl_0 = cell(n_stor, n_try);
+
 % Generate a library of monodisperse aggregates with classic DLCA
 for i = 1 : n_try
     fprintf('trial %d:', i)
@@ -139,6 +142,8 @@ for i = 1 : n_try
             %         end
             
             pp0{jjj,i} = pars.pp; % Store pp info
+            mbl_0{jjj,i}.kn_diff = pars.kn_diff; % diffusive Knudsen no.
+            mbl_0{jjj,i}.kn_kin = pars.kn_kin; % kinetic Knudsen no.
             
             % Update pp indices
             i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
@@ -308,7 +313,11 @@ params_ud.Value(1) = params_ud.Value(1) * f_dil * r_vfadj; % Dilute the concentr
 
 pars = PAR.SIZING(pars); % Get sizes
 
-pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
+% change the gas properties to room condition
+opts_fl.amb = 'room';
+[fl.mu, fl.lambda] = TRANSP.FLPROPS(fl, params_const, opts_fl);
+
+pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
@@ -392,7 +401,7 @@ while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
     
     pars = PAR.SIZING(pars); % Update sizes
     
-    pars = TRANSP.MOBIL(pars, fl, params_const); % Update mobility properties
+    pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Update mobility properties
     
     time(k) = time(k-1) + delt; % Update time
     n_agg2(k) = length(pars.n); % Record number of aggs

@@ -12,7 +12,7 @@ function [params_ud, params_const] = INIT_PARAMS(fname)
 % Defining the constant physical parameters used in the soot aggregation...
     % ...problem
 Name = {'rho_bc'; 'M_air'; 'kb'; 'Na'; 'Ru'};
-Value = [1.8e3; 28.97e-3; 1.381e-23; 6.022e23; 8.314];
+Value = [1.86e3; 28.97e-3; 1.381e-23; 6.022e23; 8.314];
 Unit = {'kg/m3'; 'kg/mol'; 'j/k'; 'mol^-1'; 'j/mol.k'};
 Description = {'Black Carbon bulk density'; 'Air molar mass';...
     'Boltzmann constant'; 'Avogadro constant'; 'Universal gas constant'};

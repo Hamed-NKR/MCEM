@@ -31,7 +31,8 @@ end
 if strcmp(opts.mtd, 'continuum')
     dm = 0.75 * cat(1, pars.dg);
 elseif strcmp(opts.mtd, 'interp')
-    da = 2 * sqrt(PAR.PROJECTION(pars, [], 2e2, 10) / pi);
+    opts_proj.tbar = 'off';
+    da = 2 * sqrt(PAR.PROJECTION(pars, [], 1e2, 5, [], opts_proj) / pi);
     dm = TRANSP.DIAMOBIL(pars.dg, da);
 end
 
