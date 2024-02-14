@@ -39,7 +39,7 @@ dm0 = 0.75 * dg; % initial guess
 dm = zeros(length(dm0),1);
 % dm2 = zeros(length(dm0),1);
 
-figure(1)
+% figure(1)
 
 for i = 1 : length(dm0)
 %     f = @(x) 3 * pi * mu * x ./ cc(2 * lambda ./ x);
