@@ -1,10 +1,11 @@
-function h = RHO_VS_DM(parsdata)
+function h = RHO_VS_DM(parsdata, fl)
 % "RHO_VS_DM" plots the effective density vs. mobility diameter...
 %   ...for a certain polydispersity levels.
 % ----------------------------------------------------------------------- %
 % 
 % Input:
 %   parsdata: a cell array of structures containing temporal aggregate info
+%   fl: fluid flow characteristics structure
 % ----------------------------------------------------------------------- %
 %
 % Output:
@@ -87,7 +88,7 @@ for i = 1 : n_dat
     
     rho_eff_i = zeros(n_agg_i,1);
     
-    dm_i = TRANSP.DIAMOBIL(parsdata(i).dg, parsdata(i).da);
+    dm_i = TRANSP.DIAMOBIL(parsdata(i).dg, parsdata(i).da, fl);
     
     for k = 1 : n_agg_i
         rho_eff_i(k) = 1860 * sum(parsdata(i).pp{k}(:,2).^3) ./ dm_i(k).^3;

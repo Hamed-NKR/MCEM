@@ -1,4 +1,4 @@
-function dm = DIAMOBIL(dg, da)
+function dm = DIAMOBIL(dg, da, fl)
 % "DIAMOBIL" calculates the mobility diameter by interpolation between...
 %   ...free molecular and continuum limit approximations.
 % ----------------------------------------------------------------------- %
@@ -6,6 +6,7 @@ function dm = DIAMOBIL(dg, da)
 % Inputs:
 %     dg: Aggregates' gyration diameter
 %     da: ~ projected area equivalent diameter
+%     fl: fluid flow characteristics structure
 % ----------------------------------------------------------------------- %
 % 
 % Outputs:
@@ -17,14 +18,10 @@ A1 = 1.165;
 A2 = 0.483;
 A3 = 0.997;
 
-lambda = 6.8e-8; % mean free path
-
-mu = 18.37e-6; % dynamic viscosity
-
 % Cunningham correction factor (x: particle diameter)
 cc = @(x) 1 + x .* (A1 + A2 * exp(-A3 ./ x));
 
-dm_c = 0.75 * dg; % continuum regime approximation initialized
+dm_c = 0.75 * dg; % continuum regime asymptotic approximation initialized
 
 % dm_c = zeros(length(dg),1);
 % dm_c(npp < 100) = dpp(npp < 100) .* npp(npp < 100).^0.46;
@@ -32,7 +29,7 @@ dm_c = 0.75 * dg; % continuum regime approximation initialized
 
 R_adj = da.^2 ./ (2 * dm_c);
 
-f_not = (mu * 3 * pi * dm_c) ./ cc(lambda ./ R_adj);
+f_not = (fl.mu * 3 * pi * dm_c) ./ cc(fl.lambda ./ R_adj);
 
 dm0 = 0.75 * dg; % initial guess
 
@@ -43,7 +40,7 @@ dm = zeros(length(dm0),1);
 
 for i = 1 : length(dm0)
 %     f = @(x) 3 * pi * mu * x ./ cc(2 * lambda ./ x);
-    df = @(x) 3 * pi * mu * x ./ cc(2 * lambda ./ x) - f_not(i);
+    df = @(x) 3 * pi * fl.mu * x ./ cc(2 * fl.lambda ./ x) - f_not(i);
     
     dm(i) = fzero(df,(dm0(i) + da(i)) / 2);
 %     dm(i) = lsqnonlin(df,(dm0(i) + da(i)) / 2);

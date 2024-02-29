@@ -39,7 +39,7 @@ if strcmp(opts.mtd, 'continuum')
 elseif strcmp(opts.mtd, 'interp')
     opts_proj.tbar = 'off';
     da = 2 * sqrt(PAR.PROJECTION(pars, [], 1e2, 5, [], opts_proj) / pi);
-    dm = TRANSP.DIAMOBIL(pars.dg, da);
+    dm = TRANSP.DIAMOBIL(pars.dg, da, fl);
 end
 
 % Cunningham correction factor (-)
