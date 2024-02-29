@@ -1,4 +1,4 @@
-function [g, r] = PCF_v3(pp, n_r, c_o, c_i, n_g, opts)
+function [g, r] = PCF_v4(pp, nr_o, nr_i, n_g, c_i, c_o, opts)
 % "PCF" calculates the Pair Correlation Function (PCF) of a fractal...
 %   ...aggregate based on descretizing primary particles and counting...
 %   ...the number of grid points in randomly origined radially swept...
@@ -7,7 +7,9 @@ function [g, r] = PCF_v3(pp, n_r, c_o, c_i, n_g, opts)
 % 
 % Inputs:
 %   pp: Primary particle information matrix
-%   n_r: Number of radial increments determining the resolution of PCF.
+%   n_r1: Number of radial increments determining the resolution of PCF...
+%       ...outside the central primary particle.
+%   n_r2: Number of radial increments inside the central primary particle.
 %   c_o: A coefficient determining the maximum extent of computational...
 %       ...domain (this is multiplied by the max pairwise primary...
 %       ...particle distance).
@@ -41,7 +43,7 @@ end
 
 % initialize the logging origin variable
 if (~isfield(opts, 'orig')) || isempty(opts.orig)
-    opts.orig = 'rand'; % default to start from the center of primaries
+    opts.orig = 'cntr'; % default to start from the center of primaries
 end
 
 % initialize figure 
@@ -52,14 +54,15 @@ if strcmp(opts.vis, 'on') || strcmp(opts.vis, 'ON') || strcmp(opts.vis, 'On')
     set(h, 'color', 'white');
 end
 
-% initialize resolution parameter
-if ~exist('n_r', 'var') || isempty(n_r); n_r = 100; end
-
-% initialize extension parameter
-if ~exist('c_o', 'var') || isempty(c_o); c_o = 2; end
+% initialize loggingresolution parameters
+if ~exist('nr_i', 'var') || isempty(nr_i); nr_i = 20; end
+if ~exist('nr_o', 'var') || isempty(nr_o); nr_o = 100; end
 
 % initialize extension parameter
 if ~exist('c_i', 'var') || isempty(c_i); c_i = 0.1; end
+
+% initialize extension parameter
+if ~exist('c_o', 'var') || isempty(c_o); c_o = 2; end
 
 % initialize grid resolution
 if ~exist('n_g', 'var') || isempty(n_g); n_g = 50; end
@@ -69,15 +72,27 @@ inds_pp = nchoosek(1:n_pp, 2);
 
 % maximum pair-wise primary particle distance
 r_o = c_o * max(sqrt(sum((pp(inds_pp(:,1),3:5) - pp(inds_pp(:,2),3:5)).^2, 2)) +...
-    (pp(inds_pp(:,1),2) + pp(inds_pp(:,2),2)) / 2) / 2;
+    (pp(inds_pp(:,1),2) + pp(inds_pp(:,2),2)) / 2);
+
+% the starting point of calculation within the primaries
 r_i = c_i * min(pp(:,2));
 
-% initialize pair correlation function vector
-r = zeros(n_r + 1,1);
-g = zeros(n_r + 1,1);
+% the interface bewteen descretization inside and outside the primaries
+r_m = geomean(pp(:,2)) / 2;
 
-rr = (r_o / r_i)^(1 / n_r); % radial increment factor
-r0 = r_i * ones(n_r + 1, 1); % initialize auxiliary vector for radial incrementation
+% initialize pair correlation function vector (along with the vector for...
+    % ...radial walk)
+g = zeros(nr_i + nr_o + 1, 1);
+r = zeros(nr_i + nr_o + 1, 1);
+
+rr_o = (r_o / r_m)^(1 / nr_o); % radial increment factor
+r0_o = r_m * ones(nr_o + 1, 1); % initialize auxiliary vector for radial incrementation
+
+% same as above but with non-log increments and for inside the primaries
+r0_i = (r_i : (r_m - r_i) / nr_i : r_m)';
+
+% merge the radii inside and outside the primaries
+r0 = [0; r0_i(1:end-1); r0_o];
 
 g0 = zeros(1,n_pp); % placeholder for temporary PCF values from each...
     % ...individual primary particle
@@ -95,20 +110,22 @@ for i = 1 : n_pp
         r_ppdis{i} = PAR.MCDISCRETIZEPP_v2(pp(i,2), pp(i,3:5), n_ppdis);
     end
 end
-r_ppdis = cat(1, r_ppdis{:});
+r_ppdis = cat(1, r_ppdis{:}); % merge the grids made in primaries
 
 % Initialize textbar
 if strcmp(opts.tbar, 'on') || strcmp(opts.tbar, 'ON') || strcmp(opts.tbar, 'On')
     fprintf('Volume sweeping started...')
     disp(' ')
-    UTILS.TEXTBAR([0, n_r + 1]);
+    UTILS.TEXTBAR([0, nr_i + nr_o + 1]);
 end
 
-for i = 1 : n_r + 1
+for i = 1 : nr_i + nr_o + 1
     % make radial incrementation point
-    if i > 1
-        r0(i) = r0(i) * rr^(i-1);
-        r(i) = sqrt(r0(i-1) * r0(i)); 
+    if i > nr_i + 1
+        r0(i+1) = r0(i+1) * rr_o^(i - (nr_i + 1));
+        r(i) = sqrt(r0(i+1) * r0(i));
+    else
+        r(i) = (r0(i+1) + r0(i)) / 2;
     end   
     
     % PCF equals number of grid points within the swept volume over that volume
@@ -128,30 +145,29 @@ for i = 1 : n_r + 1
         r_pair = sqrt(sum((r_ppdis - rc).^2, 2));
         
         if i > 1
-            g0(j) = nnz((r_pair >= r0(i-1)) & (r_pair < r0(i))) /...
-                (4 * pi * r(i)^2 * (r0(i) - r0(i-1))) / c_ppdis;
+            g0(j) = nnz((r_pair >= r0(i)) & (r_pair < r0(i+1))) /...
+                ((4/3) * pi * (r0(i+1)^3 - r0(i)^3)) / c_ppdis;
         else
-            g0(j) = nnz(r_pair < r0(i)) /...
-                (4 * pi * r0(i)^3) / (3 * c_ppdis);
+            g0(j) = nnz(r_pair < r0(i+1)) /...
+                ((4/3) * pi * (r0(i+1)^3 - r0(i)^3)) / c_ppdis;
         end            
     end
     
     g(i) = mean(g0);
     
     if strcmp(opts.tbar, 'on') || strcmp(opts.tbar, 'ON') || strcmp(opts.tbar, 'On')
-        UTILS.TEXTBAR([i, n_r + 1]); % Update textbar
+        UTILS.TEXTBAR([i, nr_i + nr_o + 1]); % Update textbar
     end
 end
-
-g = g(g~=0);
+% remove noises (partly)
 r = r(g~=0);
-    
-% plot PCF vs. normalized radial distance averaged over different primary particles
-r_norm = geomean(pp(:,2)) / 2;
-r = r / r_norm;
+g = g(g~=0);
 
+r = r / r_m; % normalize the radial increments
+
+% plot PCF vs. normalized radial distance averaged over different primary particles
 if strcmp(opts.vis, 'on') || strcmp(opts.vis, 'ON') || strcmp(opts.vis, 'On')
-    plot(r, g);
+    plot(r(2:end), g(2:end));
     hold on
 
     box on
