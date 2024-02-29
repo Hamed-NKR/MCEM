@@ -25,7 +25,7 @@ j_max = 1e6; % Stage 1 marching index limit
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
-opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
+opts_mobil.mtd = 'continuum'; % flag for caclculation method of mobility diameter
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration

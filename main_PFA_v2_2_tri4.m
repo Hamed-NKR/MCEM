@@ -1,4 +1,4 @@
-clc
+ssclc
 clear
 clf('reset')
 close all
@@ -9,7 +9,7 @@ close all
 
 % Stage 1:
 n_stor = 5; % Number of data storage occurrences
-n_try = 5; % Number of DLCA trials
+n_try = 1; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
@@ -20,12 +20,12 @@ std_da_glob = 1.4;
 npp_min = 10; % Aggregate filtering criterion
 npp_max = 120; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e6; % Stage 1 marching index limit
+j_max = 1e3; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
-opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
+opts_mobil.mtd = 'continuum'; % flag for caclculation method of mobility diameter
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -77,7 +77,15 @@ end
 fprintf('Simulating monodisperse clustering...')
 disp(newline)
 
+params_ud.Value(1) = 1e-3;
+params_ud.Value(5) = 200;
+
 [pars, fl] = TRANSP.INIT_DOM(params_ud, params_const); % Initialize particle and fluid structs
+
+fl.lambda= 6.8e-8;
+% fl.temp = 2000;
+fl.mu = 5.782e-5;
+opts_mobil.c_dt = 1e2;
 
 % Make an initial lognormal distibution of ensemble average size of primaries for classic dlca trials
 dppi = lognrnd(log(params_ud.Value(8)), log(gstd_dppi_ens), [n_try,1]);

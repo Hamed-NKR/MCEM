@@ -18,6 +18,11 @@ if (~isfield(opts, 'mtd')) || isempty(opts.mtd)
     opts.mtd = 'continuum'; % use continuum regime approximation
 end
 
+% initialize time-step sensitivity variable
+if (~isfield(opts, 'c_dt')) || isempty(opts.c_dt)
+    opts.c_dt = 1e-1; % multiply random-walk timestep by this factor
+end
+
 % Total number of (independent) particles
 if isa(pars, 'AGG')
     n_par = length(pars);
@@ -29,7 +34,8 @@ end
 
 % Mobility size
 if strcmp(opts.mtd, 'continuum')
-    dm = 0.75 * cat(1, pars.dg);
+    npp = cat(1, pars.n);
+    dm = 1.29 * npp.^(-0.13) .* cat(1, pars.dg);
 elseif strcmp(opts.mtd, 'interp')
     opts_proj.tbar = 'off';
     da = 2 * sqrt(PAR.PROJECTION(pars, [], 1e2, 5, [], opts_proj) / pi);
@@ -58,7 +64,7 @@ rho = (6 / pi) * (m ./ (dm.^3)); % Effective density (kg/m3)
 tau = rho .* (dm.^2) .* cc ./ (18 * fl.mu); % Response (relaxation) time (s)
 kb = params_const.Value(3); % Boltzmann's constant (j/k)
 f = (3 * pi * fl.mu) .* dm ./ cc; % Friction factor (-)
-delt = f .* (dm.^2) ./ (6 * kb * fl.temp); % Marching timestep
+delt = opts.c_dt * f .* (dm.^2) ./ (6 * kb * fl.temp); % Marching timestep
 diff = (kb * (fl.temp)) ./ f; % Particle diffusivity (m2/s)
 
 lambda = sqrt(m .* kb .* (fl.temp)) ./ f; % Diffusive mean free path (m)

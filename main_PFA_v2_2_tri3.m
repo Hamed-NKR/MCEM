@@ -20,12 +20,12 @@ std_da_glob = 1.4;
 npp_min = 10; % Aggregate filtering criterion
 npp_max = 120; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e6; % Stage 1 marching index limit
+j_max = 1e7; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
-opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
+opts_mobil.mtd = 'continuum'; % flag for caclculation method of mobility diameter
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -60,6 +60,8 @@ end
 opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
 
 %% 1st stage %%
+
+params_ud.Value(1) = 1e-4;
 
 pp0 = cell(n_stor, n_try); % Primary particle data storage cell array for initial monodisperse aggregation
 
