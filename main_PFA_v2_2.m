@@ -9,7 +9,7 @@ close all
 
 % Stage 1:
 n_stor = 5; % Number of data storage occurrences
-n_try = 5; % Number of DLCA trials
+n_try = 3; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
@@ -18,14 +18,14 @@ mu_da_glob = 1.25e-7;
 std_da_glob = 1.4;
 
 npp_min = 10; % Aggregate filtering criterion
-npp_max = 120; % Iteration limit parameter in terms of number of primaries within the aggregate
+npp_max = 200; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e6; % Stage 1 marching index limit
+j_max = 1e7; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
-opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
+% opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -61,6 +61,8 @@ opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
 
 %% 1st stage %%
 
+% params_ud.Value(1) = 1e-5; % reassign volume fraction (don't use unless for multiple serial runs)
+
 pp0 = cell(n_stor, n_try); % Primary particle data storage cell array for initial monodisperse aggregation
 
 pp0_n = cell(n_stor, n_try); % Placeholder for number of primaries withing aggs
@@ -83,7 +85,13 @@ disp(newline)
 dppi = lognrnd(log(params_ud.Value(8)), log(gstd_dppi_ens), [n_try,1]);
 
 % Make a placeholder for diffusive properties
-mbl_0 = cell(n_stor, n_try);
+mbl_stor = cell(n_stor, n_try); % the particle-resolved values for selected moments 
+mbl_rt.n = zeros(j_max, n_try); % real-time total number of aggregates
+mbl_rt.t = zeros(j_max, n_try); % time at each iteration
+mbl_rt.delt = zeros(j_max, 2 * n_try); % real-time mean and std. of calculated timesteps of aggregates 
+mbl_rt.tau = zeros(j_max, 2 * n_try); % real-time mean and std. of characteristic time-scales of aggregates
+mbl_rt.kn_kin = zeros(j_max, 2 * n_try); % real-time mean and std. of kinetic Knudsen number
+mbl_rt.kn_diff = zeros(j_max, 2 * n_try); % real-time mean and std. of diffusive Knudsen number
 
 % Generate a library of monodisperse aggregates with classic DLCA
 for i = 1 : n_try
@@ -142,8 +150,8 @@ for i = 1 : n_try
             %         end
             
             pp0{jjj,i} = pars.pp; % Store pp info
-            mbl_0{jjj,i}.kn_diff = pars.kn_diff; % diffusive Knudsen no.
-            mbl_0{jjj,i}.kn_kin = pars.kn_kin; % kinetic Knudsen no.
+            mbl_stor{jjj,i}.kn_diff = pars.kn_diff; % diffusive Knudsen no.
+            mbl_stor{jjj,i}.kn_kin = pars.kn_kin; % kinetic Knudsen no.
             
             % Update pp indices
             i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
@@ -157,6 +165,18 @@ for i = 1 : n_try
             
             jjj = jjj + 1;
         end
+        
+        % record real-time data
+        mbl_rt.n(j,i) = length(pars.n);
+        if j > 1
+            mbl_rt.t(j,i) = min(pars.delt) + mbl_rt.t(j-1,i);
+        else
+            mbl_rt.t(j,i) = min(pars.delt);
+        end
+        mbl_rt.delt(j,2*(i-1)+(1:2)) = [mean(pars.delt), std(pars.delt)];
+        mbl_rt.tau(j,2*(i-1)+(1:2)) = [mean(pars.tau), std(pars.tau)];
+        mbl_rt.kn_kin(j,2*(i-1)+(1:2)) = [mean(pars.kn_kin), std(pars.kn_kin)];
+        mbl_rt.kn_diff(j,2*(i-1)+(1:2)) = [mean(pars.kn_diff), std(pars.kn_diff)];
         
         pars = PAR.SIZING(pars); % Update sizes
         

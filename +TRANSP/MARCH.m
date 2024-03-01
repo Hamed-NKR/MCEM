@@ -30,10 +30,10 @@ v = cat(1, pars.v);
 f = cat(1, pars.f);
 delt = cat(1, pars.delt);
 
-delt_base = max(delt); % The baseline time step chosen as the one...
+delt_base = min(delt); % The baseline time step chosen as the one...
     % ...for the largest particle
-z_par = ceil(delt_base ./ delt); % Integer marching coefficients
-delt = delt_base ./ z_par; % Adjusting timesteps
+z_par = round(delt ./ delt_base); % Integer marching coefficients
+delt = delt_base .* z_par; % Adjusting timesteps
 
 % Solving the equation of motion
 var_march = exp(f .* delt ./ m);
@@ -55,11 +55,11 @@ if isa(pars, 'AGG')
     for i = 1 : n_par
         pars(i).v = par_v_new(i, :);
     end
-    pars = pars.TRANSLATE(dr .* z_par);
+    pars = pars.TRANSLATE(dr ./ z_par);
     
 else
     % Moving the primary particles and their center of mass
-    [pars.pp, pars.r] = PAR.TRANSLATE(pars.pp, pars.r, pars.n, dr .* z_par);
+    [pars.pp, pars.r] = PAR.TRANSLATE(pars.pp, pars.r, pars.n, dr ./ z_par);
         % The displacements are interpoldated for the baseline timestep
     pars.v = par_v_new; % Renewing the velocities
 end

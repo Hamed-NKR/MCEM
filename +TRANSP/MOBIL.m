@@ -20,7 +20,7 @@ end
 
 % initialize time-step sensitivity variable
 if (~isfield(opts, 'c_dt')) || isempty(opts.c_dt)
-    opts.c_dt = 1e-1; % multiply random-walk timestep by this factor
+    opts.c_dt = 1; % multiply random-walk timestep by this factor
 end
 
 % Total number of (independent) particles
@@ -87,6 +87,7 @@ if isa(pars, 'AGG')
 else
     pars.rho = rho;
     pars.m = m;
+    pars.dm = dm;
     pars.tau = tau;
     pars.f = f;
     pars.delt = delt;
