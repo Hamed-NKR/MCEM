@@ -25,7 +25,9 @@ j_max = 1e7; % Stage 1 marching index limit
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
-% opts_mobil.mtd = 'interp'; % flag for caclculation method of mobility diameter
+% flag for caclculation method of mobility diameter
+% opts_mobil.mtd = 'interp';
+opts_mobil.mtd = 'continuum';
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -115,6 +117,14 @@ for i = 1 : n_try
 
     pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Calculate mobility props
 
+    % record real-time kinetics-related data
+    mbl_rt.n(1,i) = length(pars.n);
+    mbl_rt.t(1,i) = min(pars.delt);
+    mbl_rt.delt(1,2*(i-1)+(1:2)) = [mean(pars.delt), std(pars.delt)];
+    mbl_rt.tau(1,2*(i-1)+(1:2)) = [mean(pars.tau), std(pars.tau)];
+    mbl_rt.kn_kin(1,2*(i-1)+(1:2)) = [mean(pars.kn_kin), std(pars.kn_kin)];
+    mbl_rt.kn_diff(1,2*(i-1)+(1:2)) = [mean(pars.kn_diff), std(pars.kn_diff)];
+
     pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Randomize initial velocities
 
     j = 2; % initialize iteration index
@@ -165,22 +175,18 @@ for i = 1 : n_try
             
             jjj = jjj + 1;
         end
-        
-        % record real-time data
-        mbl_rt.n(j,i) = length(pars.n);
-        if j > 1
-            mbl_rt.t(j,i) = min(pars.delt) + mbl_rt.t(j-1,i);
-        else
-            mbl_rt.t(j,i) = min(pars.delt);
-        end
-        mbl_rt.delt(j,2*(i-1)+(1:2)) = [mean(pars.delt), std(pars.delt)];
-        mbl_rt.tau(j,2*(i-1)+(1:2)) = [mean(pars.tau), std(pars.tau)];
-        mbl_rt.kn_kin(j,2*(i-1)+(1:2)) = [mean(pars.kn_kin), std(pars.kn_kin)];
-        mbl_rt.kn_diff(j,2*(i-1)+(1:2)) = [mean(pars.kn_diff), std(pars.kn_diff)];
-        
+                
         pars = PAR.SIZING(pars); % Update sizes
         
         pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Update mobility properties
+        
+        % record real-time kinetics-related data
+        mbl_rt.n(j+1,i) = length(pars.n);
+        mbl_rt.t(j+1,i) = min(pars.delt) + mbl_rt.t(j,i);
+        mbl_rt.delt(j+1,2*(i-1)+(1:2)) = [mean(pars.delt), std(pars.delt)];
+        mbl_rt.tau(j+1,2*(i-1)+(1:2)) = [mean(pars.tau), std(pars.tau)];
+        mbl_rt.kn_kin(j+1,2*(i-1)+(1:2)) = [mean(pars.kn_kin), std(pars.kn_kin)];
+        mbl_rt.kn_diff(j+1,2*(i-1)+(1:2)) = [mean(pars.kn_diff), std(pars.kn_diff)];
         
         UTILS.TEXTBAR([j, j_max]); % Update textbar
         
