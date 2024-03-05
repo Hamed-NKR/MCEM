@@ -30,7 +30,7 @@ opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 opts_mobil.mtd = 'continuum';
 
 % assign marching timecale multiplier
-% opts_mobil.c_dt = 0.1;
+% opts_mobil.c_dt = 0.3;
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -40,7 +40,7 @@ D_TEM = 0.35; % polydispersity exponent
 c_proj = 3; % the coefficient to improve the resolution of projected area...
     % ...calculation in the second stage
 
-k_max = 1e4; % Iteration limit parameter
+k_max = 1e5; % Iteration limit parameter
 
 n_kk = 5; % Number of saving timespots (in round2)
 
