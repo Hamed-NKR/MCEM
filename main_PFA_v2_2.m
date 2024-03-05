@@ -29,6 +29,9 @@ opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 % opts_mobil.mtd = 'interp';
 opts_mobil.mtd = 'continuum';
 
+% assign marching timecale multiplier
+% opts_mobil.c_dt = 0.1;
+
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
 
@@ -63,7 +66,7 @@ opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
 
 %% 1st stage %%
 
-% params_ud.Value(1) = 1e-5; % reassign volume fraction (don't use unless for multiple serial runs)
+% params_ud.Value(1) = 1e-3; % reassign volume fraction (don't use unless for multiple serial runs)
 
 pp0 = cell(n_stor, n_try); % Primary particle data storage cell array for initial monodisperse aggregation
 
