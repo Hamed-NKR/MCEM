@@ -24,10 +24,12 @@ h.Position = [0, 0, 700, 700];
 set(h, 'color', 'white');
 
 for i = 1 : length(g)
-    if i < 5
+    if i <= 5
         plot(r{i}, g{i});
-    else
+    elseif i <= 10
         plot(r{i}, g{i}, ':');
+    else
+        plot(r{i}, g{i}, '.-');
     end
     hold on
 end
@@ -38,7 +40,7 @@ set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
 xlabel('$\overline{r}$ (-)', 'interpreter', 'latex', 'FontSize', 20)
 ylabel('$\overline{g}$($\overline{r}$) (-)', 'interpreter', 'latex', 'FontSize', 20)
 legend(lbl, 'interpreter', 'latex', 'FontSize', 12, 'Location', 'northoutside',...
-    'Orientation', 'horizontal', 'NumColumns', 2);
+    'NumColumns', 2);
 
 end
 
