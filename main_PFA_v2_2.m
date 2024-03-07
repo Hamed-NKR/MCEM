@@ -26,8 +26,8 @@ opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
 % flag for caclculation method of mobility diameter
-% opts_mobil.mtd = 'interp';
-opts_mobil.mtd = 'continuum';
+opts_mobil.mtd = 'interp';
+% opts_mobil.mtd = 'continuum';
 
 % assign marching timecale multiplier
 % opts_mobil.c_dt = 0.3;
