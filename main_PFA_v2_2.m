@@ -32,6 +32,9 @@ opts_mobil.mtd = 'interp';
 % assign marching timecale multiplier
 % opts_mobil.c_dt = 0.1;
 
+% flag for collision type determination if applicable
+% opts_grow.col = 'coal';
+
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
 
