@@ -30,7 +30,7 @@ opts_mobil.mtd = 'interp';
 % opts_mobil.mtd = 'continuum';
 
 % assign marching timecale multiplier
-% opts_mobil.c_dt = 0.3;
+% opts_mobil.c_dt = 0.1;
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
