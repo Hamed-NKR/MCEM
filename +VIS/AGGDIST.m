@@ -65,7 +65,7 @@ end
 pars.pp = pp1;
 pars.n = npp0;
 
-da1 = 2 * sqrt(PAR.PROJECTION(pars, [], 1e4, 20) / pi); % get projected area diameter after rescaling
+da1 = 2 * sqrt(PAR.PROJECTION(pars, [], n_pnt, n_ang) / pi); % get projected area diameter after rescaling
 
 % set aggregate size bins
 if ~isfield(opts, 'n_bin') || isempty(opts.n_bin)
@@ -155,16 +155,16 @@ hold on
 
 % plot before scaling population
 p12 = scatter(1e9 * da0, 1e9 * dpp0, 10, [0.6, 0.6, 0.6], 'o',...
-    'LineWidth', 0.1);
+    'LineWidth', 1);
 
 % plot after scaling population
 p13 = scatter(1e9 * da1, 1e9 * dpp1, 10, [0.1, 0.1, 0.1], '^',...
-    'LineWidth', 0.1);
+    'LineWidth', 1);
 
 box on
 set(gca, 'FontSize', 18, 'TickLength', [0.02 0.02], 'XScale', 'log',...
     'YScale', 'log', 'TickLabelInterpreter','latex')
-xlabel('$d_a$ [nm]', 'FontSize', 20, 'interpreter','latex')
+xlabel('$\overline{d}_a$ [nm]', 'FontSize', 20, 'interpreter','latex')
 xlim([35, 2500])
 ylim([10, 100])
 ylabel('$\overline{d}_{pp}$ [nm]', 'FontSize', 20, 'interpreter', 'latex')
@@ -192,10 +192,10 @@ p23 = plot(x_bin, y_bin2, 'Color', [0.1 0.1 0.1], 'LineWidth', 1.5);
 box on
 set(gca, 'FontSize', 18, 'TickLength', [0.02 0.02], 'XScale', 'log',...
     'TickLabelInterpreter','latex')
-xlabel('$d_a$ [nm]', 'FontSize', 20, 'interpreter','latex')
+xlabel('$\overline{d}_a$ [nm]', 'FontSize', 20, 'interpreter','latex')
 xlim([min(x_fit), max(x_fit)])
 ylim([0, 2200])
-ylabel('d$n_a$/dlog($d_a$) [-]', 'FontSize', 20, 'interpreter', 'latex')
+ylabel('d$n_a$/dlog($\overline{d}_a$) [-]', 'FontSize', 20, 'interpreter', 'latex')
 legend([p22, p23, p21], {'Unfiltered population', 'Filtered sample', 'Target distribution'},...
     'Orientation', 'horizontal', 'Location', 'northoutside', 'FontSize', 16,...
     'NumColumns', 2, 'interpreter', 'latex');

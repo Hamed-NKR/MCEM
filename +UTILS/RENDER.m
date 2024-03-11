@@ -23,7 +23,7 @@ if ~exist('dom_size', 'var'); dom_size = []; end
 
 % Setting default colormap as "summer"
 if ~exist('cm', 'var'); cm = []; end
-if isempty(cm); cm = summer; end
+if isempty(cm); cm = copper; end
 
 % Setting default quality to 60 points in the sphere.
 if ~exist('q', 'var'); q = []; end

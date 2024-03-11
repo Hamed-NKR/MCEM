@@ -1,4 +1,4 @@
-function [mu_f, lambda_f] = FLPROPS(fl, params_const)
+function [mu_f, lambda_f] = FLPROPS(fl, params_const, opts)
 % "KINETIC" calculates the fluid slip-related properties based on the...
 %     ...kinetic theory of gases.
 % ----------------------------------------------------------------------- %
@@ -24,8 +24,21 @@ function [mu_f, lambda_f] = FLPROPS(fl, params_const)
 % lambda_f = mu_f / (0.499*(fl.p)*sqrt(8*M_air/(pi*Ru*(fl.temp)))); % Mean...
 %     % ...free path 
 
-mu_f = 5.782e-5; % Viscosity (Pa.s, @ 1500 k: typical of soot formation)
-lambda_f = 6.8e-8; % Mean free path (m, @ ambient pressure)
+% initialize ambient variable
+if ~exist('opts', 'var') 
+    opts = struct();
+end
+if (~isfield(opts, 'amb')) || isempty(opts.amb)
+    opts.amb = 'flame'; % assume flame conditions as default
+end
+
+if strcmp(opts.amb, 'room') % @ 20 c & 1 atm: room conditions; typical of post-flame agglomeration
+    mu_f = 1.813e-5; % Viscosity (Pa.s)
+    lambda_f = 6.8e-8; % Mean free path (m)
+elseif strcmp(opts.amb, 'flame') % @ 1700 k & 1 atm: typical of soot formation within flame
+    mu_f = 5.647e-5;
+    lambda_f = 4.98e-7;
+end
 
 end
 

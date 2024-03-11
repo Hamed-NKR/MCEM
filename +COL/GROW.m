@@ -8,14 +8,19 @@ function [pars, timetable] = GROW(pars, opts, timetable)
 % ----------------------------------------------------------------------- %
 
 % initialize option input if not given
-if ~(exist('opts', 'var') && isfield(opts, 'indupdate'))
-    opts = struct('indupdate', []);
+if ~exist('opts', 'var')
+    opts = struct();
+end
+
+if (~isfield(opts, 'indupdate')) || isempty(opts.indupdate)
+    opts.indupdate = 'on'; % default to update agg indices after collision
 end
 
 opts_indupdate = opts.indupdate;
 
-if isempty(opts_indupdate)
-    opts_indupdate = 'on'; % default to update agg indices after collision
+% set default for collision mechanism
+if (~isfield(opts, 'col')) || isempty(opts.col)
+    opts.col = 'agg'; % default to be aggregation/agglomeration, not coalescense
 end
 
 % Total number of (independent) particles
@@ -74,7 +79,7 @@ if any(ovrs == 1)
                 
                 % Merging the particles info
                 [pars, ind_new] = COL.UNITE(pars, [ind_chk(i,1),...
-                    ind_chk(i,2)]);
+                    ind_chk(i,2)], opts.col);
 
                 % Updating the general overlap checking indices after...
                     % ...each unification

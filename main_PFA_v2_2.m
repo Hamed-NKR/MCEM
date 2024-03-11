@@ -8,8 +8,8 @@ close all
 [params_ud, params_const] = TRANSP.INIT_PARAMS('MCEM_PFAParams'); % Read the input file
 
 % Stage 1:
-n_stor = 10; % Number of data storage occurrences
-n_try = 10; % Number of DLCA trials
+n_stor = 5; % Number of data storage occurrences
+n_try = 3; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
@@ -17,13 +17,23 @@ gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary 
 mu_da_glob = 1.25e-7;
 std_da_glob = 1.4;
 
-npp_min = 20; % Aggregate filtering criterion
+npp_min = 10; % Aggregate filtering criterion
 npp_max = 200; % Iteration limit parameter in terms of number of primaries within the aggregate
 
-j_max = 1e6; % Stage 1 marching index limit
+j_max = 1e7; % Stage 1 marching index limit
 
 opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
+
+% flag for caclculation method of mobility diameter
+opts_mobil.mtd = 'interp';
+% opts_mobil.mtd = 'continuum';
+
+% assign marching timecale multiplier
+% opts_mobil.c_dt = 0.1;
+
+% flag for collision type determination if applicable
+% opts_grow.col = 'coal';
 
 % Stage 2
 f_dil = 0.1; % Dilution factor for post-flame agglomeration
@@ -33,9 +43,9 @@ D_TEM = 0.35; % polydispersity exponent
 c_proj = 3; % the coefficient to improve the resolution of projected area...
     % ...calculation in the second stage
 
-k_max = 1e7; % Iteration limit parameter
+k_max = 1e5; % Iteration limit parameter
 
-n_kk = 5; % Number of saving timespots
+n_kk = 5; % Number of saving timespots (in round2)
 
 opts2.plotlabel = 'on'; % flag to display lablels of gstd on dp vs da plots
 opts2.ploteb = 'on'; % error bar display flag
@@ -59,6 +69,8 @@ opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
 
 %% 1st stage %%
 
+% params_ud.Value(1) = 1e-3; % reassign volume fraction (don't use unless for multiple serial runs)
+
 pp0 = cell(n_stor, n_try); % Primary particle data storage cell array for initial monodisperse aggregation
 
 pp0_n = cell(n_stor, n_try); % Placeholder for number of primaries withing aggs
@@ -80,6 +92,15 @@ disp(newline)
 % Make an initial lognormal distibution of ensemble average size of primaries for classic dlca trials
 dppi = lognrnd(log(params_ud.Value(8)), log(gstd_dppi_ens), [n_try,1]);
 
+% Make a placeholder for diffusive properties
+mbl_stor = cell(n_stor, n_try); % the particle-resolved values for selected moments 
+mbl_rt.n = zeros(j_max, n_try); % real-time total number of aggregates
+mbl_rt.t = zeros(j_max, n_try); % time at each iteration
+mbl_rt.delt = zeros(j_max, 2 * n_try); % real-time mean and std. of calculated timesteps of aggregates 
+mbl_rt.tau = zeros(j_max, 2 * n_try); % real-time mean and std. of characteristic time-scales of aggregates
+mbl_rt.kn_kin = zeros(j_max, 2 * n_try); % real-time mean and std. of kinetic Knudsen number
+mbl_rt.kn_diff = zeros(j_max, 2 * n_try); % real-time mean and std. of diffusive Knudsen number
+
 % Generate a library of monodisperse aggregates with classic DLCA
 for i = 1 : n_try
     fprintf('trial %d:', i)
@@ -100,7 +121,15 @@ for i = 1 : n_try
 
     pars = PAR.SIZING(pars); % Calculate sizes
 
-    pars = TRANSP.MOBIL(pars, fl, params_const); % Calculate mobility props
+    pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Calculate mobility props
+
+    % record real-time kinetics-related data
+    mbl_rt.n(1,i) = length(pars.n);
+    mbl_rt.t(1,i) = min(pars.delt);
+    mbl_rt.delt(1,2*(i-1)+(1:2)) = [mean(pars.delt), std(pars.delt)];
+    mbl_rt.tau(1,2*(i-1)+(1:2)) = [mean(pars.tau), std(pars.tau)];
+    mbl_rt.kn_kin(1,2*(i-1)+(1:2)) = [mean(pars.kn_kin), std(pars.kn_kin)];
+    mbl_rt.kn_diff(1,2*(i-1)+(1:2)) = [mean(pars.kn_diff), std(pars.kn_diff)];
 
     pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Randomize initial velocities
 
@@ -137,6 +166,8 @@ for i = 1 : n_try
             %         end
             
             pp0{jjj,i} = pars.pp; % Store pp info
+            mbl_stor{jjj,i}.kn_diff = pars.kn_diff; % diffusive Knudsen no.
+            mbl_stor{jjj,i}.kn_kin = pars.kn_kin; % kinetic Knudsen no.
             
             % Update pp indices
             i_pp0{jjj} = cell(length(cat(1, pars.n)), 1);
@@ -150,10 +181,18 @@ for i = 1 : n_try
             
             jjj = jjj + 1;
         end
-        
+                
         pars = PAR.SIZING(pars); % Update sizes
         
-        pars = TRANSP.MOBIL(pars, fl, params_const); % Update mobility properties
+        pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Update mobility properties
+        
+        % record real-time kinetics-related data
+        mbl_rt.n(j+1,i) = length(pars.n);
+        mbl_rt.t(j+1,i) = min(pars.delt) + mbl_rt.t(j,i);
+        mbl_rt.delt(j+1,2*(i-1)+(1:2)) = [mean(pars.delt), std(pars.delt)];
+        mbl_rt.tau(j+1,2*(i-1)+(1:2)) = [mean(pars.tau), std(pars.tau)];
+        mbl_rt.kn_kin(j+1,2*(i-1)+(1:2)) = [mean(pars.kn_kin), std(pars.kn_kin)];
+        mbl_rt.kn_diff(j+1,2*(i-1)+(1:2)) = [mean(pars.kn_diff), std(pars.kn_diff)];
         
         UTILS.TEXTBAR([j, j_max]); % Update textbar
         
@@ -306,7 +345,11 @@ params_ud.Value(1) = params_ud.Value(1) * f_dil * r_vfadj; % Dilute the concentr
 
 pars = PAR.SIZING(pars); % Get sizes
 
-pars = TRANSP.MOBIL(pars, fl, params_const); % Get mobility props
+% change the gas properties to room condition
+opts_fl.amb = 'room';
+[fl.mu, fl.lambda] = TRANSP.FLPROPS(fl, params_const, opts_fl);
+
+pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Get mobility props
 
 pars.v = PAR.INIT_VEL(pars.pp, pars.n, fl.temp, params_const); % Assign random velocities to aggregates
 
@@ -390,7 +433,7 @@ while (k <= k_max) && (kkk <= n_kk) && (length(pars.n) > 1)
     
     pars = PAR.SIZING(pars); % Update sizes
     
-    pars = TRANSP.MOBIL(pars, fl, params_const); % Update mobility properties
+    pars = TRANSP.MOBIL(pars, fl, params_const, opts_mobil); % Update mobility properties
     
     time(k) = time(k-1) + delt; % Update time
     n_agg2(k) = length(pars.n); % Record number of aggs

@@ -1,4 +1,4 @@
-function pp = MANUPP_v3(fname_pp, da, fad_pp, n_hyb, opts)
+function pp = MANUPP_v4(fname_pp, da, fad_pp, n_hyb, opts)
 % "manu_pp" calculates the properties of primary particles extracted from...
 %   ...manual sizing of a real TEM aggregate.
 % ----------------------------------------------------------------------- %
@@ -36,7 +36,7 @@ if ~isfield(opts, 'visual')
 end
 opts_visual = opts.visual;
 if isempty(opts_visual)
-    opts_visual = 'on'; % default not to plot the outputs
+    opts_visual = 'on'; % default to plot the outputs
 end
 
 if (~exist('n_hyb', 'var')) || isempty(n_hyb)
@@ -65,18 +65,25 @@ for i = 1 : n_agg
     
     % detect source and hybridity and label aggregates
     if (contains(fname_pp{i},'D1') || contains(fname_pp{i},'D2') ||...
-        contains(fname_pp{i},'D3')) && (n_hyb(i) == 1) % Argonaut, uniform
+        contains(fname_pp{i},'D3')) && (n_hyb(i) == 1) % Argonaut, semiuniform
         ii{1,1} = [ii{1,1}, i];
     
     elseif (contains(fname_pp{i},'D1') || contains(fname_pp{i},'D2') ||...
-        contains(fname_pp{i},'D3')) && (n_hyb(i) > 1) % Argonaut, hybrid
+        contains(fname_pp{i},'D3')) && (n_hyb(i) > 1) % Argonaut, biregional hybrid
         ii{1,2} = [ii{1,2}, i];
     
-    elseif contains(fname_pp{i},'D8') && (n_hyb(i) == 1) % Flare, uniform
+%     elseif (contains(fname_pp{i},'D1') || contains(fname_pp{i},'D2') ||...
+%         contains(fname_pp{i},'D3')) && (n_hyb(i) > 2) % Argonaut, multiregional hybrid
+%         ii{1,3} = [ii{1,3}, i];
+%     
+    elseif contains(fname_pp{i},'D8') && (n_hyb(i) == 1) % Flare, semiuniform
         ii{2,1} = [ii{2,1}, i];
     
-    elseif contains(fname_pp{i},'D8') && (n_hyb(i) > 1) % Flare, hybrid
+    elseif contains(fname_pp{i},'D8') && (n_hyb(i) > 1) % Flare, biregional hybrid
         ii{2,2} = [ii{2,2}, i];
+
+%     elseif (contains(fname_pp{i},'D8')) && (n_hyb(i) > 2) % Flare, multiregional hybrid
+%         ii{2,3} = [ii{2,3}, i];    
     end
 end
 
@@ -84,10 +91,16 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     % initialize figure properties
     figure
     h = gcf;
-    if ~all(h.Position == [0, 0, 700, 700])
-        h.Position = [0, 0, 700, 700];
+    if ~all(h.Position == [0, 0, 850, 500])
+        h.Position = [0, 0, 850, 500];
     end
     set(h, 'color', 'white')
+    
+    % initialize layout
+    tt = tiledlayout(1,4);
+    tt.TileSpacing = 'compact';
+    tt.Padding = 'compact';
+    nexttile(2,[1,2])
     
     % Plot universal correlation
     dpp_uc = linspace(5, 65, 1000);
@@ -96,46 +109,61 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
         'LineStyle', '-.', 'LineWidth', 3);
     hold on
     
-    p{1} = scatter(da(ii{1,1}), pp.mu_d(ii{1,1}), 60, pp.std_d(ii{1,1},2), 's');
-    legtxt{1} = 'Argonaut burner - Uniform';
+    % plot manual dpp vs da data
+    p{1} = scatter(da(ii{1,1}), pp.mu_d(ii{1,1},2), 30, [0.1 0.1 0.1], 's');
+    legtxt{1} = 'Argonaut - Semi-uniform';
     
-    p{2} = scatter(da(ii{1,2}), pp.mu_d(ii{1,2}), 60, pp.std_d(ii{1,2},2), 's', 'filled');
-    legtxt{2} = 'Argonaut burner - Hybrid';
+    p{2} = scatter(da(ii{1,2}), pp.mu_d(ii{1,2},2), 40, [0.1 0.1 0.1], 's', 'filled');
+    legtxt{2} = 'Argonaut - Hybrid';
     
-    p{3} = scatter(da(ii{2,1}), pp.mu_d(ii{2,1}), 40, pp.std_d(ii{2,1},2), '^');
-    legtxt{3} = 'Flare - Uniform';
+    p{3} = scatter(da(ii{2,1}), pp.mu_d(ii{2,1},2), 20, [0.1 0.1 0.1], '^');
+    legtxt{3} = 'Flare - Semi-uniform';
     
-    p{4} = scatter(da(ii{2,2}), pp.mu_d(ii{2,2}), 40, pp.std_d(ii{2,2},2), '^', 'filled');
+    p{4} = scatter(da(ii{2,2}), pp.mu_d(ii{2,2},2), 25, [0.1 0.1 0.1], '^', 'filled');
     legtxt{4} = 'Flare - Hybrid';
     
-    cb = colorbar;
-    colormap turbo
-    cb.Label.String = '$\sigma_{g,pp,agg}$ [-]';
-    cb.Label.Interpreter  = 'latex';
-    cb.Label.Rotation = 0;
-    cb.TickLabelInterpreter  = 'latex';
-    cb.FontSize = 14;
-    cb.Label.FontSize = 18;
-    cbpos = get(cb, 'Position');
-    cb.Label.Position = [cbpos(1) + 1.3 , cbpos(2) + 1.61];
+    if (~isfield(opts, 'select')) || isempty(opts.select)
+        opts.select = 'off'; % default not to select points
+    end
+    opts_select = opts.select;
+    if ismember(opts_select, {'ON', 'On', 'on'})
+        if (~isfield(opts, 'tem')) || isempty(opts.tem)
+            opts.tem = {'D1_062_1_S', 'D3_044', 'D3_072', 'D8_026',...
+                'D8_052_1_S_H', 'D8_051', 'D8_052_2_L_U'};
+        end
+        opts_tem = opts.tem;
         
+        jj = zeros(length(opts_tem),1);
+        for j = 1 : length(opts_tem)
+            for i = 1 : n_agg
+                if contains(fname_pp{i}, opts_tem{j})
+                    jj(j) = i;
+                end
+            end
+        end
+        
+        scatter(da(jj), pp.mu_d(jj,2), 150, [0.1 0.1 0.1], 'o',...
+            'LineWidth', 1);
+    end    
+    
     if (~isfield(opts, 'label')) || isempty(opts.label)
-        opts.label = 'off'; % default to plot std labels
+        opts.label = 'off'; % default not to plot std labels
     end
     opts_label = opts.label;
     if ismember(opts_label, {'ON', 'On', 'on'})
         labtex = cell(n_agg,1);
         for i = 1 : n_agg
-            labtex{i} = strcat(fname_pp{i}(4:5), '-', fname_pp{i}(7:9));
+            labtex{i} = strrep(fname_pp{i}(4:end), '_', '-');
         end
         
-        text(da, pp.mu_d(:,2), labtex, 'VerticalAlignment', 'bottom',...
-            'HorizontalAlignment', 'right', 'FontSize', 8)        
+        text(da, pp.mu_d(:,2), labtex, 'Interpreter', 'latex',...
+            'VerticalAlignment', 'middle', 'HorizontalAlignment', 'center',...
+            'FontSize', 8)        
     end        
 
     box on
     
-    set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16, 'TickLength', [0.01 0.01])
+    set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16, 'TickLength', [0.02 0.02])
     
     xlabel('$d_a$ [nm]', 'Interpreter', 'latex', 'FontWeight', 'bold',...
         'FontSize', 20)
@@ -144,13 +172,17 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     
     ylabel('$\overline{d}_{pp}$ [nm]', 'Interpreter', 'latex',...
         'FontWeight', 'bold', 'FontSize', 20)
-    ylim([7, 75])
+    ylim([7, 70])
     set(gca, 'YScale', 'log')
+    xticks([100, 1000])
     yticks(10 : 10 : 70)
     
-    legend([cat(1, p{:})', p0], cat(2, legtxt{:}, {'Universal correlation'}),...
-        'interpreter', 'latex', 'Location', 'northwest', 'FontSize', 14)
-%         'Orientation', 'horizontal', 'NumColumns', 2)
+    lgd = legend([p0, cat(1, p{:})'], cat(2, {'Universal correlation'}, legtxt{:}),...
+        'interpreter', 'latex', 'Location', 'southoutside', 'FontSize', 16,...
+        'Orientation', 'horizontal', 'NumColumns', 3);
 end
+
+% axis square
+lgd.Layout.Tile = 'south';
 
 end

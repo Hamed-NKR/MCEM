@@ -1,4 +1,4 @@
-function [pars, i_list] = UNITE(pars, i_col)
+function [pars, i_list] = UNITE(pars, i_col, col_type)
 % "UNITE" unifies the properties of a set of colliding aggregate pairs
 % ----------------------------------------------------------------------- %
 % 
@@ -7,6 +7,8 @@ function [pars, i_list] = UNITE(pars, i_col)
 %     i_col: An N*2 (independent) particle index set for colliding pairs
 %     i_list: A list of (independent) particle indices before (column 1)...
 %         ...and after (column 2) merging
+%     col_type: a flag for whether the collision results in...
+%         ...aggregation/agglomeration or coalescence
 % ----------------------------------------------------------------------- %
 
 % Initial total number of independent particles
@@ -16,6 +18,10 @@ else
     n_par0 = size(pars.n, 1);
 end
 
+if ~(exist('col_type', 'var')) || isempty(col_type)
+    col_type = 'agg';
+end
+
 i_list = zeros(n_par0,3); % Initializing the list of indices
 i_list(:,1:2) = repmat((1 : n_par0)', 1, 2); % Partcile indices before...
     % ...merging
@@ -23,8 +29,9 @@ i_list(:,1:2) = repmat((1 : n_par0)', 1, 2); % Partcile indices before...
 n_col = size(i_col, 1); % Number of colliding pairs
 
 for i = 1 : n_col
+    
+    % Initial update of second set of indices
     i_list(find(i_list(:,1) == i_col(i,2), 1), 2) = i_col(i,1);
-        % Initial update of second set of indices
     
     % Merging primary particle info cells
     if isa(pars, 'AGG')
@@ -55,13 +62,28 @@ for i = 1 : n_col
         pars(i_col(i,2)) = [];
         
     else
-        pars.pp{i_col(i,1)} = cat(1, pars.pp{i_col(i,1)},...
-            pars.pp{i_col(i,2)});
+          pars.pp{i_col(i,1)} = cat(1, pars.pp{i_col(i,1)},...
+                pars.pp{i_col(i,2)});
         
 %         pars.nnl{i_col(i,1)} = cat(1, pars.nnl{i_col(i,1)},...
 %             pars.nnl{i_col(i,2)});
 %         pars.nnl{i_col(i,1)}((pars.nnl{i_col(i,1)} == i_col(i,1)) |...
 %             (pars.nnl{i_col(i,1)} == i_col(i,2))) = [];
+        
+        if strcmp(col_type, 'coal') % primary particles merge into a larger sphere (i.e., coalescence)
+            
+            % equivalent volumetric diameter
+            dv = nthroot(sum(pars.pp{i_col(i,1)}(:,2) .^ 3), 3);
+            
+            % center of mass
+            r_com = sum((pars.pp{i_col(i,1)}(:,2) .^ 3) .*...
+                pars.pp{i_col(i,1)}(:,3:5), 1) ./...
+                sum(pars.pp{i_col(i,1)}(:,2) .^ 3);
+            
+            pars.pp{i_col(i,1)} = [pars.pp{i_col(i,1)}(1,1), dv, r_com,...
+                pars.pp{i_col(i,1)}(1,6)];
+            
+        end
     end
     
 end
@@ -76,16 +98,20 @@ i_list(:,2) = [];
 
 if ~ isa(pars, 'AGG')
     
-    % Updating the aggregate level properties
-    pars.n(i_col(:,1)) = pars.n(i_col(:,1)) + pars.n(i_col(:,2));
-        % Number of primaries
-    pars.r(i_col(:,1),:) = PAR.COM(pars.pp(i_col(:,1)),...
-        pars.n(i_col(:,1))); % Center of mass locations
+    % Updating the particle properties
+    if strcmp(col_type, 'coal')
+        pars.n(i_col(:,1)) = 1;
+        pars.r(i_col(:,1),:) = pars.pp{i_col(:,1)}(1,3:5);
+    else
+        pars.n(i_col(:,1)) = pars.n(i_col(:,1)) + pars.n(i_col(:,2)); % Number of primaries
+        pars.r(i_col(:,1),:) = PAR.COM(pars.pp(i_col(:,1)),...
+            pars.n(i_col(:,1))); % Center of mass locations
+    end
+    
     pars.v(i_col(:,1),:) = (pars.m(i_col(:,1)) .* pars.v(i_col(:,1),:) +...
         pars.m(i_col(:,2)) .* pars.v(i_col(:,2),:)) ./...
         (pars.m(i_col(:,1)) + pars.m(i_col(:,2))); % Net velocties
-    pars.m(i_col(:,1)) = pars.m(i_col(:,1)) + pars.m(i_col(:,2));
-        % Total mass
+    pars.m(i_col(:,1)) = pars.m(i_col(:,1)) + pars.m(i_col(:,2)); % Total mass
 
     % Removing redundant pre-collision data
     pars.pp(i_col(:,2)) = [];
@@ -104,6 +130,7 @@ if ~ isa(pars, 'AGG')
     pars.dm = [];
     pars.da = [];
     pars.dpp = [];
+    pars.dpp_g = [];
     pars.dmax = [];
 
     % Resetting mass mobility properties
@@ -113,7 +140,8 @@ if ~ isa(pars, 'AGG')
     pars.f = [];
     pars.diff = [];
     pars.lambda = [];
-    pars.kn = [];
+    pars.kn_kin = [];
+    pars.kn_diff = [];
     
 end
 
