@@ -1,4 +1,4 @@
-function h = PCF_MULTI(g, r, lbl)
+function h = PCF_MULTI(g, r, n_hyb_0, sigma_pp_0)
 % PCF_MULTI gets multiple pair-correlation function (PCF) distributions...
 %   ...from different aggregates/scenarios and visualizes them for...
 %   ...comparison in a single PCF vs. radial location plot. 
@@ -10,7 +10,10 @@ function h = PCF_MULTI(g, r, lbl)
 %   r: The raidal logarithmic points of calculation for PCF starting...
 %       ...from inside a central primary particle. This can also be...
 %       ...different for each aggregates.
-%   lbl: A cell array of labels to be used for each aggregate data.
+%   n_hyb_0: A vector containing number of sub-agggregates for individual
+%       ...aggregates
+%   sigma_pp_0: The geometric standard deviation of primary particle size
+%       ...withing aggregates
 % ----------------------------------------------------------------------- %
 % 
 % Outputs:
@@ -20,17 +23,36 @@ function h = PCF_MULTI(g, r, lbl)
 % initialize figure 
 figure;
 h = gcf;
-h.Position = [0, 0, 700, 700];
+h.Position = [0, 0, 800, 900];
 set(h, 'color', 'white');
 
-for i = 1 : length(g)
-    if i <= 5
-        plot(r{i}, g{i});
-    elseif i <= 10
-        plot(r{i}, g{i}, ':');
-    else
-        plot(r{i}, g{i}, '.-');
-    end
+% a placeholder for unique values of number of subaggregates
+n_hyb_00 = unique(n_hyb_0);
+count_hyb = length(n_hyb_00);
+
+n_agg = length(g); % number of aggregates to be plotted
+
+plt = cell(n_agg, 1); % initialize plot variable
+lbl = cell(n_agg, 1); % initialize placeholder for legends
+
+lin_c = [141,160,203;
+    252,141,98;
+    102,194,165] / 255; % line color repository
+lin_w = [1.5, 1.5, 1.5]; % line width repo.
+lin_t = {'-', '--', ':', '-.', '--'}; % line style repo.
+
+for i = 1 : n_agg
+    ii = find(n_hyb_00 == n_hyb_0(i)); % label aggregates with their number of sub-aggregates
+    iii = i - find(n_hyb_0 == n_hyb_00(ii),1) + 1; % identify the order of datapoints
+    
+    plt{i} = plot(r{i}, g{i}, 'Color', lin_c(ii,:), 'LineStyle', lin_t{iii},...
+        'LineWidth', lin_w(ii)); % plot pair-correlation function
+    if iii > 4; plt{i}.Marker = 'o'; plt{i}.MarkerSize = 2; end
+    
+    % make the legend
+    lbl{i} = strcat({'$n_\mathrm{hyb}$ ='}, {' '}, num2str(n_hyb_0(i), '%d'),...
+        {','}, ' $\sigma_\mathrm{g,pp}$ =', {' '}, num2str(sigma_pp_0(i), '%.2f'));    
+    
     hold on
 end
 
@@ -39,8 +61,10 @@ set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
 xlabel('$\overline{r}$ (-)', 'interpreter', 'latex', 'FontSize', 20)
 ylabel('$\overline{g}$($\overline{r}$) (-)', 'interpreter', 'latex', 'FontSize', 20)
-legend(lbl, 'interpreter', 'latex', 'FontSize', 12, 'Location', 'northoutside',...
-    'NumColumns', 2);
+xlim([0.05 120])
+ylim([5e-5 1])
+legend(cat(2, plt{:})', cat(2, lbl{:})', 'interpreter', 'latex', 'FontSize', 12, 'Location', 'northoutside',...
+    'NumColumns', count_hyb);
 
 end
 
