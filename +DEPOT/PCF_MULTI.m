@@ -23,21 +23,21 @@ function h = PCF_MULTI(g, r, n_hyb_0, sigma_pp_0)
 % initialize figure 
 figure;
 h = gcf;
-h.Position = [0, 0, 800, 900];
+h.Position = [0, 0, 800, 500];
 set(h, 'color', 'white');
 
 % a placeholder for unique values of number of subaggregates
 n_hyb_00 = unique(n_hyb_0);
-count_hyb = length(n_hyb_00);
+% count_hyb = length(n_hyb_00);
 
 n_agg = length(g); % number of aggregates to be plotted
 
 plt = cell(n_agg, 1); % initialize plot variable
 lbl = cell(n_agg, 1); % initialize placeholder for legends
 
-lin_c = [141,160,203;
-    252,141,98;
-    102,194,165] / 255; % line color repository
+lin_c = [252,141,98;
+    102,194,165;
+    141,160,203] / 255; % line color repository
 lin_w = [1.5, 1.5, 1.5]; % line width repo.
 lin_t = {'-', '--', ':', '-.', '--'}; % line style repo.
 
@@ -47,7 +47,7 @@ for i = 1 : n_agg
     
     plt{i} = plot(r{i}, g{i}, 'Color', lin_c(ii,:), 'LineStyle', lin_t{iii},...
         'LineWidth', lin_w(ii)); % plot pair-correlation function
-    if iii > 4; plt{i}.Marker = 'o'; plt{i}.MarkerSize = 2; end
+    if iii > 4; plt{i}.Marker = '+'; plt{i}.MarkerSize = 5; set(plt{i}, 'linewidth', 0.5); end
     
     % make the legend
     lbl{i} = strcat({'$n_\mathrm{hyb}$ ='}, {' '}, num2str(n_hyb_0(i), '%d'),...
@@ -63,8 +63,8 @@ xlabel('$\overline{r}$ (-)', 'interpreter', 'latex', 'FontSize', 20)
 ylabel('$\overline{g}$($\overline{r}$) (-)', 'interpreter', 'latex', 'FontSize', 20)
 xlim([0.05 120])
 ylim([5e-5 1])
-legend(cat(2, plt{:})', cat(2, lbl{:})', 'interpreter', 'latex', 'FontSize', 12, 'Location', 'northoutside',...
-    'NumColumns', count_hyb);
+legend(cat(2, plt{:})', cat(2, lbl{:})', 'interpreter', 'latex', 'FontSize', 16, 'Location', 'eastoutside',...
+    'NumColumns', 1);
 
 end
 

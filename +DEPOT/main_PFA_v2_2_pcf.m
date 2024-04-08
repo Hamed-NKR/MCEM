@@ -9,7 +9,7 @@ close all
 
 % Stage 1:
 n_stor = 5; % Number of data storage occurrences
-n_try = 3; % Number of DLCA trials
+n_try = 10; % Number of DLCA trials
 
 gstd_dppi_ens = 1.4; % Geometric standard deviation of ensemble average primary particle size
 
@@ -18,7 +18,7 @@ mu_da_glob = 1.25e-7;
 std_da_glob = 1.4;
 
 npp_min = 10; % Aggregate filtering criterion
-npp_max = 200; % Iteration limit parameter in terms of number of primaries within the aggregate
+npp_max = 2000; % Iteration limit parameter in terms of number of primaries within the aggregate
 
 j_max = 1e7; % Stage 1 marching index limit
 
@@ -26,8 +26,8 @@ opts.visual = 'on'; % flage for display of lognormal sampling process
 opts.randvar = 'area'; % flag for type of size used in lognormal sampling
 
 % flag for caclculation method of mobility diameter
-opts_mobil.mtd = 'interp';
-% opts_mobil.mtd = 'continuum';
+% opts_mobil.mtd = 'interp';
+opts_mobil.mtd = 'continuum';
 
 % assign marching timecale multiplier
 % opts_mobil.c_dt = 0.1;
@@ -69,7 +69,11 @@ opts2_kin.visual = 'on'; % flag to visualization of kinetic properties
 
 %% 1st stage %%
 
-% params_ud.Value(1) = 1e-3; % reassign volume fraction (don't use unless for multiple serial runs)
+params_ud.Value(1) = 1e-3; % reassign volume fraction (don't use unless for multiple serial runs)
+
+% Agg 12
+params_ud.Value(5) = 580;
+params_ud.Value(9) = 1.1360;
 
 pp0 = cell(n_stor, n_try); % Primary particle data storage cell array for initial monodisperse aggregation
 
