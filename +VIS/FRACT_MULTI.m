@@ -20,21 +20,24 @@ function [df, kf, h] = FRACT_MULTI(pp, lbl)
 % initialize figure 
 figure;
 h = gcf;
-h.Position = [0, 0, 700, 700];
+h.Position = [0, 0, 500, 750];
 set(h, 'color', 'white');
 
 plt = cell(4,1); % initialize plots
 
-ms = [25, 25, 50]; % set marker sizes
+ms = [5, 5, 10]; % set marker sizes
 mt = {'o', '^', 's'}; % set marker types
 % mc = [4,90,141;...
 %     116,169,207;
 %     208,209,230] / 255; % set of marker colors
 % mc = [103,169,207;...
 %     239,138,98] / 255;
-mc = [49,163,84;...
-    173,221,142;
-    247,252,185] / 255;
+% mc = [49,163,84;...
+%     173,221,142;
+%     247,252,185] / 255;
+mc = [239,138,98;...
+    103,169,207;...
+    216,179,101] / 255;
 
 % plot Sorensen's (2011) recommended benchmark
 rbar_0 = log10(logspace(0, 1e3, 1e4));
@@ -106,15 +109,15 @@ end
 box on
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlabel('$d_\mathrm{g}/\overline{d}_\mathrm{g,pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
-ylabel('$n_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 20)
+legend(cat(2, plt{:})', cat(2, [lbl(:); lbl_0]), 'interpreter', 'latex',...
+    'FontSize', 18, 'Location', 'southoutside');
+xlabel('$d_\mathrm{g}/\overline{d}_\mathrm{g,pp}$ [-]', 'interpreter', 'latex', 'FontSize', 24)
+ylabel('$n_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 24)
 xlim([2 60])
 ylim([4 1200])
-legend(cat(2, plt{:})', cat(2, [lbl(:); lbl_0]), 'interpreter', 'latex',...
-    'FontSize', 14, 'Location', 'northwest');
 
 % title('Parameteric study of fractality in aggregates', 'FontSize', 22, 'interpreter','latex')
-title('(c)', 'FontSize', 22, 'interpreter','latex')
+title('(a)', 'FontSize', 24, 'interpreter','latex')
 
 end
 
