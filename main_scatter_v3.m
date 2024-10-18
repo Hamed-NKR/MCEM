@@ -25,10 +25,6 @@ n_da0 = 1e4;
 mu = 0; % mean
 sigma = 0.3; % sd
 
-% Monte Carlo parameters for projected area calculation
-n_pnt_mc = 1e2;
-n_ang_mc = 5;
-
 %% literature correlations
 
 % initialize scatter data figure
@@ -61,29 +57,18 @@ hold on
 %% non-scattered library data
 
 % load data from first-stage library
-load('D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\wsp-1e4.mat', 'pp0')
+load('D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\database.mat', 'parsdata_sigma')
 
-pars_raw.pp = pp0;
-pars_raw.n = zeros(length(pp0), 1);
-for i = 1 : length(pp0)
-    pars_raw.n(i) = length(pp0{i}); % number of primaries in each aggregate
-end
-clear pp0
-
-pars_raw = PAR.SIZING(pars_raw); % charcteristic sizes
-
-% projected area diameter
-pars_raw.da = 2 * sqrt(PAR.PROJECTION(pars_raw, [], n_pnt_mc, n_ang_mc) / pi);
-
-% plot raw library in dpp vs. npp domain
+% plot scaled stage 1 library data in dpp vs. npp domain
 nexttile(1)
-plt1_raw = scatter(pars_raw.n, 1e9 * pars_raw.dpp_g(:,1), 10,...
-    hex2rgb('#295F98'), 'o', 'LineWidth', 1);
+npp_uc = parsdata_sigma{4}(1).npp;
+dpp_uc = 1e9 * parsdata_sigma{4}(1).dpp_g(:,1);
+plt1_uc = scatter(npp_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
 
-% plot raw library in dpp vs. da domain
+% plot the same "perfectly" scaled aggregates of above in dpp vs. da domain
 nexttile(2)
-plt2_raw = scatter(1e9 * pars_raw.da, 1e9 * pars_raw.dpp_g(:,1), 10,...
-    hex2rgb('#295F98'), 'o', 'LineWidth', 1);
+da_uc = 1e9 * parsdata_sigma{4}(1).da;
+plt2_uc = scatter(da_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
 
 %% apply scatter on the perfectly scaled data
 
@@ -193,7 +178,7 @@ lgd_fit1 = strcat(string(newline), string(newline),...
     string(newline), '$k_\mathrm{\beta_{scat}}$ =', {' '}, num2str(k_beta_scat, '%.2f'),...
     {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_beta_scat, dcin_k_beta_scat), '%.2f'));
 
-legend(cat(2, plt1_raw, plt1_scat, plt01, plt1_fit),...
+legend(cat(2, plt1_uc, plt1_scat, plt01, plt1_fit),...
     cat(2, {'Original scaling'}, {'Secondary dispersion'},...
     lgd_uc1, lgd_fit1), 'interpreter', 'latex', 'FontSize', 11,...
     'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
@@ -239,7 +224,7 @@ lgd_fit2 = strcat(string(newline), string(newline), '$D_\mathrm{TEM_{scat}}$ =',
     '$d_\mathrm{pp,100_{scat}}$ =', {' '}, num2str(dpp100_scat, '%.2f'),...
     {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_dpp100_scat, dcin_dpp100_scat), '%.2f'));
 
-legend(cat(2, plt2_raw, plt2_scat, plt02, plt2_fit),...
+legend(cat(2, plt2_uc, plt2_scat, plt02, plt2_fit),...
     cat(2, {'Original scaling'}, {'Secondary dispersion'},...
     lgd_uc2, lgd_fit2), 'interpreter', 'latex', 'FontSize', 11,...
     'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
