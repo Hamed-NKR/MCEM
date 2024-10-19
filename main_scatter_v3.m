@@ -3,29 +3,51 @@ clear
 close all
 warning('off')
 
-%% initialize
+%% define parameters
 
-% parameters for universal correlation
-dpp100 = 17.8;
-D_TEM = 0.35;
+% Olfert and Rogak (2019)'s universal correlation
+D_TEM = 0.35; % exponent
+dpp100 = 17.8; % pefactor
+da0_lim = [1e0 2e4];  % limits on the projected area diameter (for plotting)
+n_da0 = 1e4; % plot data counts
+uc = @(x) dpp100 * (x/100).^D_TEM; % on-demand function for the correlation
+b_uc = dpp100 * 100^(-D_TEM);
 
-% parameters for Brasil's correlation
-alpha_a = 1.08;
-k_a = 1.1;
+% Brasil et al. (1999)'s correlation
+alpha_a = 1.08; % exponent
+k_a = 1.1; % pefactor
+npp0_lim = [1e0 2e4]; % limits on the number of primaries (for plotting)
+n_npp0 = 1e4; % plot data counts
+bc = @(x,y) k_a * (x/y).^(2 * alpha_a); % on-demand function for the...
+    % ...forward correlation
+bc_inv = @(x) (x / k_a).^(1 / (2 * alpha_a)); % inverse function to get...
+    % ...npp from dpp/da
 
-% limits for plotting Brasil's correlation
-npp0_lim = [1e0 2e4];
-n_npp0 = 1e4;
+% spread variables
+mu = 0; % Gaussiam mean of noise distribution around the universal...
+    % ...correlation in log-log space
+sigma = 0.1; % Gaussian standard deviation
+da_noise_lim = [1e1 2e3]; % extents of noise generation 
+cn_noise = 10;
 
-% limits for plotting universal correlation
-da0_lim = [1e0 2e4];
-n_da0 = 1e4;
+fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
+fname = 'wsp_sigmapp_1.3_Aug9';
+varname = 'pp0';
+vardir = '';
 
-% scattering parameters
-mu = 0; % mean
-sigma = 0.3; % sd
+%% raw data against the correlations
 
-%% literature correlations
+% load non-scaled first-stage library data
+load(strcat(fdir, '\', fname, '.mat'), varname)
+
+% create particle structure  
+pars_raw.pp = eval(strcat(varname, vardir)); % store primary particle info
+n_agg_raw = length(pars_raw.pp);
+for i = 1 : n_agg_raw
+    size(pars_raw.pp, 1);
+end
+
+eval(['clear ', varname])
 
 % initialize scatter data figure
 f1 = figure(1);
@@ -33,16 +55,28 @@ f1.Position = [50, 50, 1000, 600];
 set(f1, 'color', 'white');
 tt1 = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
 
-nexttile % dpp vs. npp figure
+nexttile(1) % dpp vs. npp figure
 
 % plot combination of Brasil's and universal correlations
-r01 = (npp0_lim(2) / npp0_lim(1)) ^ (1 / (n_npp0 - 1));
-npp0 = 1e0 * ones(n_npp0,1) .* r01 .^ (((1 : n_npp0) - 1)');
-dpp01 = (((dpp100 ^ (1 / D_TEM)) / 100) * (npp0 / k_a).^(1 / (2 * alpha_a))) .^...
+r_bc = (npp0_lim(2) / npp0_lim(1)) ^ (1 / (n_npp0 - 1));
+npp_bc = 1e0 * ones(n_npp0,1) .* r_bc .^ (((1 : n_npp0) - 1)');
+dpp_bc = (((dpp100 ^ (1 / D_TEM)) / 100) * (npp_bc / k_a).^(1 / (2 * alpha_a))) .^...
     (D_TEM / (1 - D_TEM));
-plt01 = plot(npp0, dpp01, 'Color', [0.4940 0.1840 0.5560],...
+plt1_bc = plot(npp_bc, dpp_bc, 'Color', [0.4940 0.1840 0.5560],...
     'LineStyle', '-.', 'LineWidth', 2);
 hold on
+
+% plot scaled stage 1 library data in dpp vs. npp domain
+npp_raw = parsdata_sigma{4}(1).npp;
+dpp_uc = 1e9 * parsdata_sigma{4}(1).dpp_g(:,1);
+plt1_uc = scatter(npp_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
+
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
+xlim([1,2000])
+ylim([5,50])
+xlabel('$n_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
 nexttile % dpp vs. da figure
 
@@ -54,21 +88,21 @@ plt02 = plot(da0, dpp02, 'Color', [0.4940 0.1840 0.5560],...
     'LineStyle', '-.', 'LineWidth', 2);
 hold on
 
-%% non-scattered library data
-
-% load data from first-stage library
-load('D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\database.mat', 'parsdata_sigma')
-
-% plot scaled stage 1 library data in dpp vs. npp domain
-nexttile(1)
-npp_uc = parsdata_sigma{4}(1).npp;
-dpp_uc = 1e9 * parsdata_sigma{4}(1).dpp_g(:,1);
-plt1_uc = scatter(npp_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
-
 % plot the same "perfectly" scaled aggregates of above in dpp vs. da domain
 nexttile(2)
 da_uc = 1e9 * parsdata_sigma{4}(1).da;
 plt2_uc = scatter(da_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
+
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
+xlim([10,1500])
+ylim([5,50])
+xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+
+%%
+n_noise = cn_noise * length(pars.n); % number of noise points for random selection
+
 
 %% apply scatter on the perfectly scaled data
 
@@ -157,15 +191,15 @@ dcip_k_beta_scat = max(ci_k_beta_scat) - k_beta_scat;
 dcin_k_beta_scat = k_beta_scat - min(ci_k_beta_scat);
 
 % generate the fit data
-dpp_scat_fit1 = k_beta_scat * (npp0.^D_beta_scat);
-ci_dpp_scat_fit1 = [ci_k_beta_scat(1) * (npp0.^ci_D_beta_scat(1)),...
-    ci_k_beta_scat(2) * (npp0.^ci_D_beta_scat(2))];
+dpp_scat_fit1 = k_beta_scat * (npp_bc.^D_beta_scat);
+ci_dpp_scat_fit1 = [ci_k_beta_scat(1) * (npp_bc.^ci_D_beta_scat(1)),...
+    ci_k_beta_scat(2) * (npp_bc.^ci_D_beta_scat(2))];
 
 nexttile(1)
 % plot the main fit and CI bounds
-plt1_fit = plot(npp0, dpp_scat_fit1, 'Color', hex2rgb('#C96868'),...
+plt1_fit = plot(npp_bc, dpp_scat_fit1, 'Color', hex2rgb('#C96868'),...
     'LineStyle', '--', 'LineWidth', 1.5);
-plt1_err = plot(npp0, ci_dpp_scat_fit1(:,1), npp0, ci_dpp_scat_fit1(:,2),...
+plt1_err = plot(npp_bc, ci_dpp_scat_fit1(:,1), npp_bc, ci_dpp_scat_fit1(:,2),...
     'Color', hex2rgb('#C96868'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd_uc1 = strcat(string(newline), 'Olfert $\&$ Rogak (2019)', string(newline),...
@@ -178,7 +212,7 @@ lgd_fit1 = strcat(string(newline), string(newline),...
     string(newline), '$k_\mathrm{\beta_{scat}}$ =', {' '}, num2str(k_beta_scat, '%.2f'),...
     {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_beta_scat, dcin_k_beta_scat), '%.2f'));
 
-legend(cat(2, plt1_uc, plt1_scat, plt01, plt1_fit),...
+legend(cat(2, plt1_uc, plt1_scat, plt1_bc, plt1_fit),...
     cat(2, {'Original scaling'}, {'Secondary dispersion'},...
     lgd_uc1, lgd_fit1), 'interpreter', 'latex', 'FontSize', 11,...
     'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
