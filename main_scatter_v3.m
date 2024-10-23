@@ -3,25 +3,37 @@ clear
 close all
 warning('off')
 
-%% define parameters
+%% initialize, define parameters
 
 % Olfert and Rogak (2019)'s universal correlation
 D_TEM = 0.35; % exponent
 dpp100 = 17.8; % pefactor
-da0_lim = [1e0 2e4];  % limits on the projected area diameter (for plotting)
-n_da0 = 1e4; % plot data counts
-uc = @(x) dpp100 * (x/100).^D_TEM; % on-demand function for the correlation
-b_uc = dpp100 * 100^(-D_TEM);
+da_lim_uc = [1e0 2e4];  % limits on the projected area diameter (for plotting)
+n_da_uc = 1e4; % plot data counts
+uc = @(y) dpp100 * (y / 100) .^ D_TEM; % on-demand function for the...
+    % ...forward correlation (da and dpp are in [nm])
+uc_inv = @(x) 100 * (x / dpp100) .^ (1 / D_TEM); % inverse function to get...
+    % ...da from dpp
+b0_uc = dpp100 * 100^(-D_TEM);
 
 % Brasil et al. (1999)'s correlation
 alpha_a = 1.08; % exponent
 k_a = 1.1; % pefactor
-npp0_lim = [1e0 2e4]; % limits on the number of primaries (for plotting)
-n_npp0 = 1e4; % plot data counts
+npp_lim_bc = [1e0 2e4]; % limits on the number of primaries (for plotting)
+n_npp_uc = 1e4; % plot data counts
 bc = @(x,y) k_a * (x/y).^(2 * alpha_a); % on-demand function for the...
     % ...forward correlation
-bc_inv = @(x) (x / k_a).^(1 / (2 * alpha_a)); % inverse function to get...
+bc_inv = @(z) (z / k_a).^(1 / (2 * alpha_a)); % inverse function to get...
     % ...npp from dpp/da
+
+% combination of universal and Brasil correlations
+m_ubc = D_TEM / (2 * alpha_a * (1 - D_TEM)); % exponent
+b0_ubc = (((dpp100^(1 / D_TEM)) / 100) * ((1 / k_a)^(1 / (2 * alpha_a)))) ^...
+    (D_TEM / (1 - D_TEM)); % prefactor
+ubc = @(z) b0_ubc * (z .^ m_ubc); % convert, on-demand, number of...
+    % ...primaries to primary particle size based on the correlations 
+ubc_inv = @(x) (b0_ubc * x) .^ (1 / m_ubc); % inverse combined...
+    % ...function to get npp from dpp
 
 % spread variables
 mu = 0; % Gaussiam mean of noise distribution around the universal...
@@ -30,10 +42,15 @@ sigma = 0.1; % Gaussian standard deviation
 da_noise_lim = [1e1 2e3]; % extents of noise generation 
 cn_noise = 10;
 
-fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
+% address of aggregate library to be imported for scaling and dispersion
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
 fname = 'wsp_sigmapp_1.3_Aug9';
 varname = 'pp0';
 vardir = '';
+
+% resolution for projected area calculation
+n_mc = 1e2;
+n_ang = 5;
 
 %% raw data against the correlations
 
@@ -42,74 +59,82 @@ load(strcat(fdir, '\', fname, '.mat'), varname)
 
 % create particle structure  
 pars_raw.pp = eval(strcat(varname, vardir)); % store primary particle info
-n_agg_raw = length(pars_raw.pp);
+n_agg_raw = length(pars_raw.pp); % number of aggregates
+pars_raw.n = zeros(n_agg_raw,1);
 for i = 1 : n_agg_raw
-    size(pars_raw.pp, 1);
+    pars_raw.n(i) = size(pars_raw.pp{i}, 1); % count the number of primaries
 end
+pars_raw = PAR.SIZING(pars_raw); % get characteristic sizes
 
 eval(['clear ', varname])
 
 % initialize scatter data figure
 f1 = figure(1);
-f1.Position = [50, 50, 1000, 600];
+f1.Position = [50, 50, 800, 450];
 set(f1, 'color', 'white');
 tt1 = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
 
 nexttile(1) % dpp vs. npp figure
 
 % plot combination of Brasil's and universal correlations
-r_bc = (npp0_lim(2) / npp0_lim(1)) ^ (1 / (n_npp0 - 1));
-npp_bc = 1e0 * ones(n_npp0,1) .* r_bc .^ (((1 : n_npp0) - 1)');
-dpp_bc = (((dpp100 ^ (1 / D_TEM)) / 100) * (npp_bc / k_a).^(1 / (2 * alpha_a))) .^...
-    (D_TEM / (1 - D_TEM));
-plt1_bc = plot(npp_bc, dpp_bc, 'Color', [0.4940 0.1840 0.5560],...
+r_bc = (npp_lim_bc(2) / npp_lim_bc(1)) ^ (1 / (n_npp_uc - 1));
+npp_bc = 1e0 * ones(n_npp_uc,1) .* r_bc .^ (((1 : n_npp_uc) - 1)');
+dpp_bc = ubc(npp_bc);
+% dpp_bc = (((dpp100 ^ (1 / D_TEM)) / 100) * (npp_bc / k_a).^(1 / (2 * alpha_a))) .^...
+%     (D_TEM / (1 - D_TEM));
+plt1a_bc = plot(npp_bc, dpp_bc, 'Color', hex2rgb('#597445'),...
     'LineStyle', '-.', 'LineWidth', 2);
 hold on
 
-% plot scaled stage 1 library data in dpp vs. npp domain
-npp_raw = parsdata_sigma{4}(1).npp;
-dpp_uc = 1e9 * parsdata_sigma{4}(1).dpp_g(:,1);
-plt1_uc = scatter(npp_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
+% plot stage-1 library of aggregates in dpp vs npp domain
+plt1a_raw = scatter(pars_raw.n, 1e9 * pars_raw.dpp_g(:,1), 8,...
+    hex2rgb('#789DBC'), 'o', 'LineWidth', 1);
 
+% appearance configs for dpp vs npp subplot
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([1,2000])
-ylim([5,50])
-xlabel('$n_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+xlim([0.8 * min(pars_raw.n), 1.2 * max(pars_raw.n)])
+ylim([1e9 * 0.9 * min(pars_raw.dpp_g(:,1)), 1e9 * 1.1 * max(pars_raw.dpp_g(:,1))])
+xlabel('$n_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
-nexttile % dpp vs. da figure
+nexttile(2) % dpp vs. da figure
 
 % plot universal correlation
-r02 = (da0_lim(2) / da0_lim(1)) ^ (1 / (n_da0 - 1));
-da0 = 1e0 * ones(n_da0,1) .* r02 .^ (((1 : n_da0) - 1)');
-dpp02 = dpp100 * (da0 / 100) .^ (D_TEM);
-plt02 = plot(da0, dpp02, 'Color', [0.4940 0.1840 0.5560],...
+r_uc = (da_lim_uc(2) / da_lim_uc(1)) ^ (1 / (n_da_uc - 1));
+da_uc = 1e0 * ones(n_da_uc,1) .* r_uc .^ (((1 : n_da_uc) - 1)');
+dpp_uc = uc(da_uc);
+plt1b_uc = plot(da_uc, dpp_uc, 'Color', [0.4940 0.1840 0.5560],...
     'LineStyle', '-.', 'LineWidth', 2);
 hold on
 
-% plot the same "perfectly" scaled aggregates of above in dpp vs. da domain
-nexttile(2)
-da_uc = 1e9 * parsdata_sigma{4}(1).da;
-plt2_uc = scatter(da_uc, dpp_uc, 10, hex2rgb('#295F98'), 'o', 'LineWidth', 1);
+% plot library in dpp vs. da domain
+pars_raw.da = 2 * sqrt(PAR.PROJECTION(pars_raw, [], n_mc, n_ang) / pi);
+plt1b_raw = scatter(1e9 * pars_raw.da, 1e9 * pars_raw.dpp_g(:,1), 8,...
+    hex2rgb('#789DBC'), 'o', 'LineWidth', 1);
 
+% appearance configs for dpp vs da subplot
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([10,1500])
-ylim([5,50])
+xlim([1e9 * 0.9 * min(pars_raw.da(:,1)), 1e9 * 1.1 * max(pars_raw.da(:,1))])
+ylim([1e9 * 0.9 * min(pars_raw.dpp_g(:,1)), 1e9 * 1.1 * max(pars_raw.dpp_g(:,1))])
 xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
-%%
-n_noise = cn_noise * length(pars.n); % number of noise points for random selection
+% generate legend for the entire tile
+lgd1 = legend(cat(2, plt1a_bc, plt1b_uc, plt1a_raw),...
+    cat(2, {strcat('Brasil et al. (1999) +', string(newline),...
+    'Olfert $\&$ Rogak (2019)')}, {'Olfert $\&$ Rogak (2019)'},...
+    {strcat('First-stage simulated aggregates', string(newline),...
+    '(non-scaled, non-filtered)')}), 'interpreter', 'latex', 'FontSize', 11,...
+    'orientation', 'horizontal', 'NumColumns', 3);
+lgd1.Layout.Tile = 'south';
 
 
-%% apply scatter on the perfectly scaled data
+%% Generate Gaussian random noise around the universal correlation
 
-% parameters of universal correlation in dpp vs. npp domain, in log-log scale
-m = D_TEM / (2 * alpha_a * (1 - D_TEM)); % slope
-b = (((dpp100^(1 / D_TEM)) / 100) * ((1 / k_a)^(1 / (2 * alpha_a)))) ^...
-    (D_TEM / (1 - D_TEM)); % intercept
+n_noise = cn_noise * length(pars_raw.n); % number of noise points for random selection
+
 
 % % Compute unit vector perpendicular to the universal dpp vs. npp line
 % perp_npp = -1 / sqrt(1 + m^2);  % x-component of the perpendicular direction
@@ -212,7 +237,7 @@ lgd_fit1 = strcat(string(newline), string(newline),...
     string(newline), '$k_\mathrm{\beta_{scat}}$ =', {' '}, num2str(k_beta_scat, '%.2f'),...
     {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_beta_scat, dcin_k_beta_scat), '%.2f'));
 
-legend(cat(2, plt1_uc, plt1_scat, plt1_bc, plt1_fit),...
+legend(cat(2, plt1_uc, plt1_scat, plt1a_bc, plt1_fit),...
     cat(2, {'Original scaling'}, {'Secondary dispersion'},...
     lgd_uc1, lgd_fit1), 'interpreter', 'latex', 'FontSize', 11,...
     'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
@@ -238,15 +263,15 @@ dcip_dpp100_scat = max(ci_dpp100_scat) - dpp100_scat;
 dcin_dpp100_scat = dpp100_scat - min(ci_dpp100_scat);
 
 % generate the fit data
-dpp_scat_fit2 = dpp100_scat * ((da0/100).^D_TEM_scat);
-ci_dpp_scat_fit2 = [ci_dpp100_scat(1) * (da0/100).^ci_D_TEM_scat(1),...
-    ci_dpp100_scat(2) * (da0/100).^ci_D_TEM_scat(2)];
+dpp_scat_fit2 = dpp100_scat * ((da_uc/100).^D_TEM_scat);
+ci_dpp_scat_fit2 = [ci_dpp100_scat(1) * (da_uc/100).^ci_D_TEM_scat(1),...
+    ci_dpp100_scat(2) * (da_uc/100).^ci_D_TEM_scat(2)];
 
 nexttile(2)
 % plot the main fit and CI bounds
-plt2_fit = plot(da0, dpp_scat_fit2, 'Color', hex2rgb('#C96868'),...
+plt2_fit = plot(da_uc, dpp_scat_fit2, 'Color', hex2rgb('#C96868'),...
     'LineStyle', '--', 'LineWidth', 1.5);
-plt2_err = plot(da0, ci_dpp_scat_fit2(:,1), da0, ci_dpp_scat_fit2(:,2),...
+plt2_err = plot(da_uc, ci_dpp_scat_fit2(:,1), da_uc, ci_dpp_scat_fit2(:,2),...
     'Color', hex2rgb('#C96868'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd_uc2 = strcat(string(newline), string(newline), 'Olfert $\&$ Rogak (2019)',...
@@ -258,7 +283,7 @@ lgd_fit2 = strcat(string(newline), string(newline), '$D_\mathrm{TEM_{scat}}$ =',
     '$d_\mathrm{pp,100_{scat}}$ =', {' '}, num2str(dpp100_scat, '%.2f'),...
     {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_dpp100_scat, dcin_dpp100_scat), '%.2f'));
 
-legend(cat(2, plt2_uc, plt2_scat, plt02, plt2_fit),...
+legend(cat(2, plt1b_uc, plt2_scat, plt1b_uc, plt2_fit),...
     cat(2, {'Original scaling'}, {'Secondary dispersion'},...
     lgd_uc2, lgd_fit2), 'interpreter', 'latex', 'FontSize', 11,...
     'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
