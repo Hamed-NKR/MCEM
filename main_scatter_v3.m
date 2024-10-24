@@ -39,7 +39,7 @@ ubc_inv = @(x) (b0_ubc * x) .^ (1 / m_ubc); % inverse combined...
 mu = 0; % Gaussiam mean of noise distribution around the universal...
     % ...correlation in log-log space
 sigma = 0.1; % Gaussian standard deviation
-da_noise_lim = [1e1 2e3]; % extents of noise generation 
+da_lim_noise = [1e1 2e3]; % extents of noise generation 
 cn_noise = 10;
 
 % address of aggregate library to be imported for scaling and dispersion
@@ -78,7 +78,7 @@ nexttile(1) % dpp vs. npp figure
 
 % plot combination of Brasil's and universal correlations
 r_bc = (npp_lim_bc(2) / npp_lim_bc(1)) ^ (1 / (n_npp_uc - 1));
-npp_bc = 1e0 * ones(n_npp_uc,1) .* r_bc .^ (((1 : n_npp_uc) - 1)');
+npp_bc = npp_lim_bc(1) * ones(n_npp_uc,1) .* r_bc .^ (((1 : n_npp_uc) - 1)');
 dpp_bc = ubc(npp_bc);
 % dpp_bc = (((dpp100 ^ (1 / D_TEM)) / 100) * (npp_bc / k_a).^(1 / (2 * alpha_a))) .^...
 %     (D_TEM / (1 - D_TEM));
@@ -102,7 +102,7 @@ nexttile(2) % dpp vs. da figure
 
 % plot universal correlation
 r_uc = (da_lim_uc(2) / da_lim_uc(1)) ^ (1 / (n_da_uc - 1));
-da_uc = 1e0 * ones(n_da_uc,1) .* r_uc .^ (((1 : n_da_uc) - 1)');
+da_uc = da_lim_uc(1) * ones(n_da_uc,1) .* r_uc .^ (((1 : n_da_uc) - 1)');
 dpp_uc = uc(da_uc);
 plt1b_uc = plot(da_uc, dpp_uc, 'Color', [0.4940 0.1840 0.5560],...
     'LineStyle', '-.', 'LineWidth', 2);
@@ -135,23 +135,35 @@ lgd1.Layout.Tile = 'south';
 
 n_noise = cn_noise * length(pars_raw.n); % number of noise points for random selection
 
+% baseline distribution of projected area size for scattering to be...
+    % ...implemented
+r_noise = (da_lim_noise(2) / da_lim_noise(1)) ^ (1 / (n_noise - 1));
+da0_noise = da_lim_noise(1) * ones(n_noise,1) .* r_noise .^ (((1 : n_noise) - 1)');
 
-% % Compute unit vector perpendicular to the universal dpp vs. npp line
-% perp_npp = -1 / sqrt(1 + m^2);  % x-component of the perpendicular direction
-% perp_dpp = m / sqrt(1 + m^2);   % y-component of the perpendicular direction
+dpp0_noise = uc(da0_noise); % convert to baseline primary particle size
+
+% Compute unit vector perpendicular to the universal dpp vs. da line
+h2_perp_da = -1 / sqrt(1 + D_TEM^2);  % x-component
+h2_perp_dpp = D_TEM / sqrt(1 + D_TEM^2);  % y-component
 
 % Generate noise values (dispersion distances) that follow a certain distribution
-% dist_scat = normrnd(mu, sigma, size(npp_uc)); % Gaussian
-dist_scat = mu + sigma * sqrt(12) * (rand(size(npp_uc)) - 0.5); % uniform
-% dist_scat = mu + sigma * randn(size(npp_uc)); % Gaussian
+% dist_scat = mu + sigma * sqrt(12) * (rand(size(n_noise)) - 0.5); % uniform
+% dist_scat = mu + sigma * randn(size(n_noise)); % Gaussian
+dist_scat = normrnd(mu, sigma, size(n_noise)); % Gaussian
 
-% Scatter the dpp vs. npp points vertically from the universal line in...
-% ...dpp vs. npp space
-dpp_scat = exp(log(dpp_uc) + dist_scat);
-% dpp_scat = exp(log(dpp_uc) + dist_scat / cos(atan(m)));
+% Scatter the points perpendicularly to the universal dpp vs. da correlation
+da0_scat = exp(log(da0_noise) + dist_scat * h2_perp_da);
+dpp0_scat = exp(log(dpp0_noise) + dist_scat * h2_perp_dpp);
+
+npp0_scat = bc(da0_scat, dpp0_scat); % raw converted number of primaries
+npp_scat = round(npp0_scat); % corrected number of primaries (has to be integer)
+
+for i = 1 : n_agg_raw
+    ;
+end
 
 % rescaling factor for noise around universal correlation
-rpp_scat = dpp_scat ./ dpp_uc;
+rpp_scat = dpp0_scat ./ dpp_uc;
 
 pp_scat = parsdata_sigma{4}(1).pp; % load primary particle data
 
