@@ -3,7 +3,7 @@ clear
 close all
 warning('off')
 
-%% initialize, define parameters
+%% Initialize and define key parameters %%
 
 % Olfert and Rogak (2019)'s universal correlation
 D_TEM = 0.35; % exponent
@@ -21,10 +21,10 @@ alpha_a = 1.08; % exponent
 k_a = 1.1; % pefactor
 npp_lim_bc = [1e0 2e4]; % limits on the number of primaries (for plotting)
 n_npp_uc = 1e4; % plot data counts
-bc = @(x,y) k_a * (x/y).^(2 * alpha_a); % on-demand function for the...
+bc = @(x,y) k_a * (x./y).^(2 * alpha_a); % on-demand function for the...
     % ...forward correlation
 bc_inv = @(z) (z / k_a).^(1 / (2 * alpha_a)); % inverse function to get...
-    % ...npp from dpp/da
+    % ...dpp/da from npp
 
 % combination of universal and Brasil correlations
 m_ubc = D_TEM / (2 * alpha_a * (1 - D_TEM)); % exponent
@@ -35,12 +35,18 @@ ubc = @(z) b0_ubc * (z .^ m_ubc); % convert, on-demand, number of...
 ubc_inv = @(x) (b0_ubc * x) .^ (1 / m_ubc); % inverse combined...
     % ...function to get npp from dpp
 
-% spread variables
-mu = 0; % Gaussiam mean of noise distribution around the universal...
+% spread variables for the baseline aggregate size distribution
+gm_da = 100; % geometric mean of projected area diameter distribution
+gsd_da = 1.6; % geometric standard deviation of ~
+% mu_da = log(gm_da^2 / sqrt(gsd_da + gm_da^2)); % convert to mean in log-log space
+% sigma_da = sqrt(log(1 + (gsd_da / gm_da^2))); % sd in log-log space
+
+% spread variables for the noise
+mu_scat = 0; % Gaussiam mean of noise distribution around the universal...
     % ...correlation in log-log space
-sigma = 0.1; % Gaussian standard deviation
-da_lim_noise = [1e1 2e3]; % extents of noise generation 
-cn_noise = 10;
+sigma_scat = 0.2; % Gaussian standard deviation
+da_lim_noise = [2e1 2e3]; % extents of noise generation 
+cn_scat = 10;
 
 % address of aggregate library to be imported for scaling and dispersion
 fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
@@ -52,7 +58,7 @@ vardir = '';
 n_mc = 1e2;
 n_ang = 5;
 
-%% raw data against the correlations
+%% Raw data against the Brasil's and universal correlations %%
 
 % load non-scaled first-stage library data
 load(strcat(fdir, '\', fname, '.mat'), varname)
@@ -68,7 +74,7 @@ pars_raw = PAR.SIZING(pars_raw); % get characteristic sizes
 
 eval(['clear ', varname])
 
-% initialize scatter data figure
+% initialize figure for raw data vs. correlations
 f1 = figure(1);
 f1.Position = [50, 50, 800, 450];
 set(f1, 'color', 'white');
@@ -131,16 +137,20 @@ lgd1 = legend(cat(2, plt1a_bc, plt1b_uc, plt1a_raw),...
 lgd1.Layout.Tile = 'south';
 
 
-%% Generate Gaussian random noise around the universal correlation
+%% Generate Gaussian random noise around the universal correlation %%
 
-n_noise = cn_noise * length(pars_raw.n); % number of noise points for random selection
+n0_scat = cn_scat * length(pars_raw.n); % number of noise points for random selection
 
-% baseline distribution of projected area size for scattering to be...
-    % ...implemented
-r_noise = (da_lim_noise(2) / da_lim_noise(1)) ^ (1 / (n_noise - 1));
-da0_noise = da_lim_noise(1) * ones(n_noise,1) .* r_noise .^ (((1 : n_noise) - 1)');
+% % uniform baseline distribution of projected area size for scattering to be...
+%     % ...implemented
+% r_scat = (da_lim_noise(2) / da_lim_noise(1)) ^ (1 / (n0_scat - 1));
+% da0_scat = da_lim_noise(1) * ones(n0_scat,1) .* r_scat .^ (((1 : n0_scat) - 1)');
 
-dpp0_noise = uc(da0_noise); % convert to baseline primary particle size
+% make a log-normal distribution of projected area diameter
+% da0_scat = lognrnd(mu_da, sigma_da, [n0_scat, 1]);
+da0_scat = exp(normrnd(log(gm_da), log(gsd_da), [n0_scat, 1]));
+
+dpp00_scat = uc(da0_scat); % convert to baseline primary particle size
 
 % Compute unit vector perpendicular to the universal dpp vs. da line
 h2_perp_da = -1 / sqrt(1 + D_TEM^2);  % x-component
@@ -149,14 +159,115 @@ h2_perp_dpp = D_TEM / sqrt(1 + D_TEM^2);  % y-component
 % Generate noise values (dispersion distances) that follow a certain distribution
 % dist_scat = mu + sigma * sqrt(12) * (rand(size(n_noise)) - 0.5); % uniform
 % dist_scat = mu + sigma * randn(size(n_noise)); % Gaussian
-dist_scat = normrnd(mu, sigma, size(n_noise)); % Gaussian
+dist_scat = normrnd(mu_scat, sigma_scat, [n0_scat, 1]); % Gaussian
 
 % Scatter the points perpendicularly to the universal dpp vs. da correlation
-da0_scat = exp(log(da0_noise) + dist_scat * h2_perp_da);
-dpp0_scat = exp(log(dpp0_noise) + dist_scat * h2_perp_dpp);
+da_scat = exp(log(da0_scat) + dist_scat * h2_perp_da);
+dpp0_scat = exp(log(dpp00_scat) + dist_scat * h2_perp_dpp);
 
-npp0_scat = bc(da0_scat, dpp0_scat); % raw converted number of primaries
+npp0_scat = bc(da_scat, dpp0_scat); % raw converted number of primaries
 npp_scat = round(npp0_scat); % corrected number of primaries (has to be integer)
+
+dpp_scat = da_scat ./ bc_inv(npp_scat); % get corrected primary particle size
+
+% initialize figure for baseline monte carlo points
+f2 = figure(2);
+f2.Position = [100, 100, 800, 450];
+set(f2, 'color', 'white');
+tt2 = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
+
+nexttile(1) % dpp vs. npp figure
+
+% plot combination of Brasil's and universal correlations
+plt2a_bc = plot(npp_bc, dpp_bc, 'Color', hex2rgb('#597445'),...
+    'LineStyle', '-.', 'LineWidth', 2);
+hold on
+
+% plot random gussian points generated above in dpp vs npp domain
+plt2a_mc = scatter(npp_scat, dpp_scat, 5, hex2rgb('#789DBC'), '.',...
+    'LineWidth', 1);
+
+% appearance configs for dpp vs npp subplot
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
+xlim([0.8 * min(npp_scat), 1.2 * max(npp_scat)])
+ylim([0.9 * min(dpp_scat), 1.1 * max(dpp_scat)])
+xlabel('$n_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+
+nexttile(2) % dpp vs. da figure
+
+% plot universal correlation
+plt2b_uc = plot(da_uc, dpp_uc, 'Color', [0.4940 0.1840 0.5560],...
+    'LineStyle', '-.', 'LineWidth', 2);
+hold on
+
+% plot library in dpp vs. da domain
+plt2b_mc = scatter(da_scat, dpp_scat, 8, hex2rgb('#789DBC'), '.',...
+    'LineWidth', 1);
+
+% appearance configs for dpp vs da subplot
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
+xlim([0.9 * min(da_scat), 1.1 * max(da_scat)])
+ylim([0.9 * min(dpp_scat), 1.1 * max(dpp_scat)])
+xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+
+% generate legend for the entire tile
+lgd2 = legend(cat(2, plt2a_bc, plt2b_uc, plt2a_mc),...
+    cat(2, {strcat('Brasil et al. (1999) +', string(newline),...
+    'Olfert $\&$ Rogak (2019)')}, {'Olfert $\&$ Rogak (2019)'},...
+    {strcat('Monte Carlo log-nomral sampling seeds', string(newline),...
+    'to induce bivariate dispersion')}), 'interpreter', 'latex', 'FontSize', 11,...
+    'orientation', 'horizontal', 'NumColumns', 3);
+lgd2.Layout.Tile = 'south';
+
+%% evaluate trends of Monte Carlo points  %%
+
+% find the best curve fit to the Monte Carlo dpp vs npp data
+fit2a = fitlm(table(log(npp_scat), log(dpp_scat)), 'linear', 'Weights',...
+    sqrt(npp_scat)); % fit a linear regression weighted by sqrt of...
+        % ...number of primaries
+
+D_2a = fit2a.Coefficients.Estimate(2); % ensemble scaling exponent
+k_2a = exp(fit2a.Coefficients.Estimate(1)); % ensemble scaling prefactor
+
+% 95% confidence intervals for scaling properties
+ci_2a = coefCI(fit2a);
+ci_D_2a = ci_2a(2,:);
+ci_k_2a = exp(ci_2a(1,:));
+
+% 95% ci error bars
+dci_D_2a = max(ci_D_2a) - D_2a;
+dcip_k_2a = max(ci_k_2a) - k_2a;
+dcin_k_2a = k_2a - min(ci_k_2a);
+
+% generate the fit data
+dpp_fit2a = k_2a * (npp_bc.^D_2a);
+ci_dpp_fit2a = [ci_k_2a(1) * (npp_bc.^ci_D_2a(1)),...
+    ci_k_2a(2) * (npp_bc.^ci_D_2a(2))];
+
+figure(f2)
+nexttile(1)
+
+% plot the main fit and CI bounds
+plt2a_fit = plot(npp_bc, dpp_fit2a, 'Color', hex2rgb('#C96868'),...
+    'LineStyle', '--', 'LineWidth', 1.5);
+plt2a_err = plot(npp_bc, ci_dpp_fit2a(:,1), npp_bc, ci_dpp_fit2a(:,2),...
+    'Color', hex2rgb('#C96868'), 'LineStyle', ':', 'LineWidth', 1);
+
+lgd2a_cor = strcat(string(newline), 'Olfert $\&$ Rogak (2019)', string(newline),...
+    'and Brasil et al. (1991)', string(newline), '$D_\mathrm{\beta_{uc}}$ =',...
+    {' '}, num2str(m, '%.2f'), ', $k_\mathrm{\beta_{uc}}$ =', {' '}, num2str(b, '%.2f'));
+
+lgd2a_fit = strcat(string(newline), string(newline),...
+    '$D_\mathrm{\beta_{scat}}$ =', {' '}, num2str(D_beta_scat, '%.2f'),...
+    {' '}, '$\pm$', {' '}, num2str(dci_D_beta_scat, '%.2f'), {','},...
+    string(newline), '$k_\mathrm{\beta_{scat}}$ =', {' '}, num2str(k_beta_scat, '%.2f'),...
+    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_beta_scat, dcin_k_beta_scat), '%.2f'));
+
+%%
 
 for i = 1 : n_agg_raw
     ;
