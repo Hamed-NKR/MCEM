@@ -49,7 +49,7 @@ da_lim_noise = [2e1 2e3]; % extents of noise generation
 cn_scat = 10;
 
 % address of aggregate library to be imported for scaling and dispersion
-fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
 fname = 'wsp_sigmapp_1.3_Aug9';
 varname = 'pp0';
 vardir = '';
@@ -213,7 +213,7 @@ plt2b_uc = plot(da_uc, dpp_uc, 'Color', [0.4940 0.1840 0.5560],...
     'LineStyle', '-.', 'LineWidth', 3);
 lgd2b_uc = strcat('Olfert $\&$ Rogak (2019)',...
     string(newline), '$D_\mathrm{TEM}$ =', {' '}, num2str(D_TEM, '%.2f'),...
-    ', $d_\mathrm{pp,100}$ =', {' '}, num2str(dpp100, '%.2f'));
+    ', $k_\mathrm{TEM}$ =', {' '}, num2str(b0_uc, '%.2f'));
 hold on
 
 % plot library in dpp vs. da domain
@@ -296,16 +296,16 @@ dcip_k_2b = max(ci_k_2b) - k_2b;
 dcin_k_2b = k_2b - min(ci_k_2b);
 
 % generate the fit data
-dpp_fit2b = k_2b * (npp_bc.^D_2b);
-ci_dpp_fit2b = [ci_k_2b(1) * (npp_bc.^ci_D_2b(1)),...
-    ci_k_2b(2) * (npp_bc.^ci_D_2b(2))];
+dpp_fit2b = k_2b * (da_uc.^D_2b);
+ci_dpp_fit2b = [ci_k_2b(1) * (da_uc.^ci_D_2b(1)),...
+    ci_k_2b(2) * (da_uc.^ci_D_2b(2))];
 
 nexttile(2)
 
 % plot the main fit and CI bounds
-plt2b_fit = plot(npp_bc, dpp_fit2b, 'Color', hex2rgb('#B06161'),...
+plt2b_fit = plot(da_uc, dpp_fit2b, 'Color', hex2rgb('#B06161'),...
     'LineStyle', '--', 'LineWidth', 1.5);
-plt2b_err = plot(npp_bc, ci_dpp_fit2b(:,1), npp_bc, ci_dpp_fit2b(:,2),...
+plt2b_err = plot(da_uc, ci_dpp_fit2b(:,1), da_uc, ci_dpp_fit2b(:,2),...
     'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd2b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)', ...
@@ -417,14 +417,14 @@ dcip_k_3b = max(ci_k_3b) - k_3b;
 dcin_k_3b = k_3b - min(ci_k_3b);
 
 % generate the fit data
-dpp_fit3b = k_3b * (npp_bc.^D_3b);
-ci_dpp_fit3b = [ci_k_3b(1) * (npp_bc.^ci_D_3b(1)),...
-    ci_k_3b(2) * (npp_bc.^ci_D_3b(2))];
+dpp_fit3b = k_3b * (da_uc.^D_3b);
+ci_dpp_fit3b = [ci_k_3b(1) * (da_uc.^ci_D_3b(1)),...
+    ci_k_3b(2) * (da_uc.^ci_D_3b(2))];
 
 % plot the main fit and CI bounds
-plt3b_fit = plot(npp_bc, dpp_fit3b, 'Color', hex2rgb('#B06161'),...
+plt3b_fit = plot(da_uc, dpp_fit3b, 'Color', hex2rgb('#B06161'),...
     'LineStyle', '--', 'LineWidth', 1.5);
-plt3b_err = plot(npp_bc, ci_dpp_fit3b(:,1), npp_bc, ci_dpp_fit3b(:,2),...
+plt3b_err = plot(da_uc, ci_dpp_fit3b(:,1), da_uc, ci_dpp_fit3b(:,2),...
     'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd3b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
@@ -446,51 +446,6 @@ xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 box on
 
-%% evaluate trends of "non-rounded" Monte Carlo points  %%
-
-figure(f2)
-
-%%% find best fitting to the dpp vs da data
-fit2b = fitlm(table(log(da_scat), log(dpp0_scat)), 'linear', 'Weights',...
-    sqrt(npp_scat)); % fit a linear regression weighted by sqrt of...
-        % ...number of primaries
-
-D_2b = fit2b.Coefficients.Estimate(2); % ensemble scaling exponent
-k_2b = exp(fit2b.Coefficients.Estimate(1)); % ensemble scaling prefactor
-
-% 95% confidence intervals for scaling properties
-ci_2b = coefCI(fit2b);
-ci_D_2b = ci_2b(2,:);
-ci_k_2b = exp(ci_2b(1,:));
-
-% 95% ci error bars
-dci_D_2b = max(ci_D_2b) - D_2b;
-dcip_k_2b = max(ci_k_2b) - k_2b;
-dcin_k_2b = k_2b - min(ci_k_2b);
-
-% generate the fit data
-dpp_fit2b = k_2b * (npp_bc.^D_2b);
-ci_dpp_fit2b = [ci_k_2b(1) * (npp_bc.^ci_D_2b(1)),...
-    ci_k_2b(2) * (npp_bc.^ci_D_2b(2))];
-
-nexttile(2)
-
-% plot the main fit and CI bounds
-plt2b_fit = plot(npp_bc, dpp_fit2b, 'Color', hex2rgb('#B06161'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
-plt2b_err = plot(npp_bc, ci_dpp_fit2b(:,1), npp_bc, ci_dpp_fit2b(:,2),...
-    'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
-
-lgd2b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)', ...
-    string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_2b, '%.2f'),...
-    {' '}, '$\pm$', {' '}, num2str(dci_D_2b, '%.2f'), {','}, {' '},...
-    '$k_\mathrm{fit}$ =', {' '}, num2str(k_2b, '%.2f'),...
-    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_2b, dcin_k_2b), '%.2f'));
-
-legend(cat(2, plt2b_uc, plt2b_scat, plt2b_fit),...
-    cat(2, lgd2b_uc, lgd2b_scat, lgd2b_fit),...
-    'interpreter', 'latex', 'FontSize', 11, 'location', 'southoutside');
-
 %% select seeds and scale aggregates
 
 % randomize the order of aggregates
@@ -499,183 +454,186 @@ pars_out.pp = cat(1, pars_raw.pp(ind_rand));
 pars_out.n = cat(1, pars_raw.n(ind_rand));
 
 % logical variable for the following pass/reject loop
-chk_agg = false(n_agg_raw, 1); % whether an aggergate is successfuly scaled
-chk_scat = true(n_scat, 1); % whether an scatter seed is previously not selected...
-    % ...(i.e. still available)
+chk_scat = true(n_scat, 1); % whether an scatter seed is previously not...
+    % ...selected (i.e. still available)
 
 % assign scatter seeds to the aggregates
 for i = 1 : n_agg_raw
 
     % find points with the same number of primaries as selected aggregate
-    ii = find(abs(npp_scat - pars_out.n(i)) ==...
-        min(abs(npp_scat - pars_out.n(i))));
+    ii = find(abs(npp_scat(chk_scat) - pars_out.n(i)) ==...
+        min(abs(npp_scat(chk_scat) - pars_out.n(i))));
 
+    iii = ii(randperm(length(ii),1)); % index of selected seed
+
+    % scale aggregate to the selected seed
+    rpp_scat = (1e-9) * dpp_scat(iii) / pars_raw.dpp_g(ind_rand(i),1);
+    pars_out.pp{i}(:,2:5) = repmat(rpp_scat, pars_out.n(i), 4) .*...
+        pars_out.pp{i}(:,2:5);
+
+    chk_scat(iii) = false; % don't use this seed another time
     
-
 end
 
-% rescaling factor for noise around universal correlation
-rpp_scat = dpp0_scat ./ dpp_uc;
-
-pp_scat = parsdata_sigma{4}(1).pp; % load primary particle data
-
-% introduce noise to the perfectly scales aggregates
-for i = 1 : length(pp_scat)
-    pp_scat{i}(:,2:5) = repmat(rpp_scat(i), npp_uc(i), 4) .* pp_scat{i}(:,2:5);
-end
-
-% make a new aggregate population structure for later calculations
-pars_out.n = npp_uc;
-pars_out.pp = pp_scat;
-
-% recalculate projected area based on the the new scaling
+% recalculate projected area based on new scaling (as a sanity check)
 pars_out.da = 2 * sqrt(PAR.PROJECTION(pars_out, [], 1e2, 5) / pi);
 
-% calculate GM and GSD of primary particle size
-pars_out.dpp_g = PAR.GEOMEANPP(pars_out.pp);
+% calculate GM and GSD of primary particle size for the scaled aggregates
+pars_out = PAR.SIZING(pars_out);
 
-%% draw scatterd data
+%% Plot scaled aggregates
 
-nexttile(1)
+% initialize figure
+f4= figure(4);
+f4.Position = [200, 200, 900, 600];
+set(f4, 'color', 'white');
+tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact')
 
-plt1_scat = scatter(pars_out.n, 1e9 * pars_out.dpp_g(:,1),...
-    10, hex2rgb('#EF9C66'), '^', 'LineWidth', 1);
+nexttile(1) % dpp vs. npp figure
 
+% plot combination of Brasil's and universal correlations
+plt4a_bc = copyobj(plt2a_bc, f4.CurrentAxes);
+hold on
+
+% plot scaled aggregates
+plt4a_scat = scatter(pars_out.n, 1e9 * pars_out.dpp_g(:,1), 5,...
+    hex2rgb('#789DBC'), 'o', 'LineWidth', 1);
+lgd4a_scat = strcat(string(newline), 'Aggregates scaled to a random Gaussian',...
+    string(newline), 'bivariate distribution');
+
+% find best curve fit
+fit4a = fitlm(table(log(pars_out.n), log(1e9 * pars_out.dpp_g(:,1))),...
+    'linear', 'Weights', sqrt(pars_out.n)); % fit a linear regression...
+        % ...weighted by sqrt of number of primaries
+
+D_4a = fit4a.Coefficients.Estimate(2); % ensemble scaling exponent
+k_4a = exp(fit4a.Coefficients.Estimate(1)); % ensemble scaling prefactor
+
+% 95% confidence intervals for scaling properties
+ci_4a = coefCI(fit4a);
+ci_D_4a = ci_4a(2,:);
+ci_k_4a = exp(ci_4a(1,:));
+
+% 95% ci error bars
+dci_D_4a = max(ci_D_4a) - D_4a;
+dcip_k_4a = max(ci_k_4a) - k_4a;
+dcin_k_4a = k_4a - min(ci_k_4a);
+
+% generate the fit data
+dpp_fit4a = k_4a * (npp_bc.^D_4a);
+ci_dpp_fit4a = [ci_k_4a(1) * (npp_bc.^ci_D_4a(1)),...
+    ci_k_4a(2) * (npp_bc.^ci_D_4a(2))];
+
+% plot the main fit and CI bounds
+plt4a_fit = plot(npp_bc, dpp_fit4a, 'Color', hex2rgb('#295F98'),...
+    'LineStyle', '--', 'LineWidth', 1.5);
+plt4a_err = plot(npp_bc, ci_dpp_fit4a(:,1), npp_bc, ci_dpp_fit4a(:,2),...
+    'Color', hex2rgb('#295F98'), 'LineStyle', ':', 'LineWidth', 1);
+
+lgd4a_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
+    string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_4a, '%.3f'),...
+    {' '}, '$\pm$', {' '}, num2str(dci_D_4a, '%.3f'), {','}, {' '},...
+    '$k_\mathrm{fit}$ =', {' '}, num2str(k_4a, '%.2f'),...
+    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_4a, dcin_k_4a), '%.2f'));
+
+legend(cat(2, plt4a_bc, plt4a_scat, plt4a_fit),...
+    cat(2, lgd2a_bc, lgd4a_scat, lgd4a_fit),...
+    'interpreter', 'latex', 'FontSize', 11, 'location', 'southoutside');
+
+% appearance configs for dpp vs npp subplot
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([1,2000])
-ylim([5,50])
-xlabel('$n_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+xlim([0.8 * min(pars_out.n), 1.2 * max(pars_out.n)])
+ylim([1e9 * 0.9 * min(pars_out.dpp_g(:,1)), 1e9 * 1.1 * max(pars_out.dpp_g(:,1))])
+xlabel('$n_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+box on
 
-nexttile(2)
+nexttile(2) % dpp vs. da figure
 
-plt2_scat = scatter(1e9 * pars_out.da, 1e9 * pars_out.dpp_g(:,1),...
-    10, hex2rgb('#EF9C66'), '^', 'LineWidth', 1);
+% plot universal correlation
+plt4b_uc = copyobj(plt2b_uc, f4.CurrentAxes);
+hold on
 
+% plot library in dpp vs. da domain
+plt4b_scat = scatter(1e9 * pars_out.da, 1e9 * pars_out.dpp_g(:,1), 8,...
+    hex2rgb('#B06161'), 'o', 'LineWidth', 1);
+lgd4b_scat = strcat(string(newline), 'Aggregates scaled to a random Gaussian',...
+    string(newline), 'bivariate distribution');
+
+% find best curve fit
+fit4b = fitlm(table(log(1e9 * pars_out.da), log(1e9 * pars_out.dpp_g(:,1))),...
+    'linear', 'Weights', sqrt(pars_out.n)); % fit a linear regression...
+        % ...weighted by sqrt of number of primaries
+
+D_4b = fit4b.Coefficients.Estimate(2); % ensemble scaling exponent
+k_4b = exp(fit4b.Coefficients.Estimate(1)); % ensemble scaling prefactor
+
+% 95% confidence intervals for scaling properties
+ci_4b = coefCI(fit4b);
+ci_D_4b = ci_4b(2,:);
+ci_k_4b = exp(ci_4b(1,:));
+
+% 95% ci error bars
+dci_D_4b = max(ci_D_4b) - D_4b;
+dcip_k_4b = max(ci_k_4b) - k_4b;
+dcin_k_4b = k_3b - min(ci_k_4b);
+
+% generate the fit data
+dpp_fit4b = k_4b * (da_uc.^D_4b);
+ci_dpp_fit4b = [ci_k_4b(1) * (da_uc.^ci_D_4b(1)),...
+    ci_k_4b(2) * (da_uc.^ci_D_4b(2))];
+
+% plot the main fit and CI bounds
+plt4b_fit = plot(da_uc, dpp_fit4b, 'Color', hex2rgb('#B06161'),...
+    'LineStyle', '--', 'LineWidth', 1.5);
+plt4b_err = plot(da_uc, ci_dpp_fit4b(:,1), da_uc, ci_dpp_fit4b(:,2),...
+    'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
+
+lgd4b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
+    string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_4b, '%.2f'),...
+    {' '}, '$\pm$', {' '}, num2str(dci_D_4b, '%.2f'), {','}, {' '},...
+    '$k_\mathrm{fit}$ =', {' '}, num2str(k_4b, '%.2f'),...
+    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_4b, dcin_k_4b), '%.2f'));
+
+legend(cat(2, plt4b_uc, plt4b_scat, plt4b_fit),...
+    cat(2, lgd2b_uc, lgd4b_scat, lgd4b_fit),...
+    'interpreter', 'latex', 'FontSize', 11, 'location', 'southoutside');
+
+% appearance configs for dpp vs da subplot
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([10,1500])
-ylim([5,50])
+xlim([1e9 * 0.9 * min(pars_out.da(:,1)), 1e9 * 1.1 * max(pars_out.da(:,1))])
+ylim([1e9 * 0.9 * min(pars_out.dpp_g(:,1)), 1e9 * 1.1 * max(pars_out.dpp_g(:,1))])
 xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+box on
 
-%% characterize the imposed dispersion in dpp vs. npp domain
+%% Draw resulting aggregates %%
 
-fit1 = fitlm(table(log(pars_out.n), log(1e9 * pars_out.dpp_g(:,1))),...
-    'linear', 'Weights', sqrt(pars_out.n)); % fit a linear regression...
-% ...weighted by sqrt of number of primaries
+f5 = figure(5);
+f5.Position = [250, 100, 1200, 800];
+set(f5, 'color', 'white');
 
-D_beta_scat = fit1.Coefficients.Estimate(2); % ensemble scaling exponent
-k_beta_scat = exp(fit1.Coefficients.Estimate(1)); % ensemble scaling prefactor
+tiledlayout(2, 3, 'Padding', 'none', 'TileSpacing', 'none')
 
-% 95% confidence intervals for fractal properties
-ci1 = coefCI(fit1);
-ci_D_beta_scat = ci1(2,:);
-ci_k_beta_scat = exp(ci1(1,:));
+jj = sort(randperm(n_agg_raw, 6));
 
-% 95% ci error bars
-dci_D_beta_scat = max(ci_D_beta_scat) - D_beta_scat;
-dcip_k_beta_scat = max(ci_k_beta_scat) - k_beta_scat;
-dcin_k_beta_scat = k_beta_scat - min(ci_k_beta_scat);
-
-% generate the fit data
-dpp_scat_fit1 = k_beta_scat * (npp_bc.^D_beta_scat);
-ci_dpp_scat_fit1 = [ci_k_beta_scat(1) * (npp_bc.^ci_D_beta_scat(1)),...
-    ci_k_beta_scat(2) * (npp_bc.^ci_D_beta_scat(2))];
-
-nexttile(1)
-% plot the main fit and CI bounds
-plt1_fit = plot(npp_bc, dpp_scat_fit1, 'Color', hex2rgb('#C96868'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
-plt1_err = plot(npp_bc, ci_dpp_scat_fit1(:,1), npp_bc, ci_dpp_scat_fit1(:,2),...
-    'Color', hex2rgb('#C96868'), 'LineStyle', ':', 'LineWidth', 1);
-
-lgd_uc1 = strcat(string(newline), 'Olfert $\&$ Rogak (2019)', string(newline),...
-    'and Brasil et al. (1999)', string(newline), '$D_\mathrm{\beta_{uc}}$ =',...
-    {' '}, num2str(m, '%.2f'), ', $k_\mathrm{\beta_{uc}}$ =', {' '}, num2str(b, '%.2f'));
-
-lgd_fit1 = strcat(string(newline), string(newline),...
-    '$D_\mathrm{\beta_{scat}}$ =', {' '}, num2str(D_beta_scat, '%.2f'),...
-    {' '}, '$\pm$', {' '}, num2str(dci_D_beta_scat, '%.2f'), {','},...
-    string(newline), '$k_\mathrm{\beta_{scat}}$ =', {' '}, num2str(k_beta_scat, '%.2f'),...
-    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_beta_scat, dcin_k_beta_scat), '%.2f'));
-
-legend(cat(2, plt1_uc, plt1_scat, plt1a_bc, plt1_fit),...
-    cat(2, {'Original scaling'}, {'Secondary dispersion'},...
-    lgd_uc1, lgd_fit1), 'interpreter', 'latex', 'FontSize', 11,...
-    'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
-
-
-%% check scaling properties for dpp vs. da
-
-fit2 = fitlm(table(log(1e7 * pars_out.da), log(1e9 * pars_out.dpp_g(:,1))),...
-    'linear', 'Weights', sqrt(pars_out.n)); % fit a linear regression...
-% ...weighted by sqrt of number of primaries
-
-D_TEM_scat = fit2.Coefficients.Estimate(2); % ensemble scaling exponent
-dpp100_scat = exp(fit2.Coefficients.Estimate(1)); % ensemble scaling prefactor
-
-% 95% confidence intervals for fractal properties
-ci2 = coefCI(fit2);
-ci_D_TEM_scat = ci2(2,:);
-ci_dpp100_scat = exp(ci2(1,:));
-
-% 95% ci error bars
-dci_D_TEM_scat = max(ci_D_TEM_scat) - D_TEM_scat;
-dcip_dpp100_scat = max(ci_dpp100_scat) - dpp100_scat;
-dcin_dpp100_scat = dpp100_scat - min(ci_dpp100_scat);
-
-% generate the fit data
-dpp_scat_fit2 = dpp100_scat * ((da_uc/100).^D_TEM_scat);
-ci_dpp_scat_fit2 = [ci_dpp100_scat(1) * (da_uc/100).^ci_D_TEM_scat(1),...
-    ci_dpp100_scat(2) * (da_uc/100).^ci_D_TEM_scat(2)];
-
-nexttile(2)
-% plot the main fit and CI bounds
-plt2_fit = plot(da_uc, dpp_scat_fit2, 'Color', hex2rgb('#C96868'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
-plt2_err = plot(da_uc, ci_dpp_scat_fit2(:,1), da_uc, ci_dpp_scat_fit2(:,2),...
-    'Color', hex2rgb('#C96868'), 'LineStyle', ':', 'LineWidth', 1);
-
-lgd_uc2 = strcat(string(newline), string(newline), 'Olfert $\&$ Rogak (2019)',...
-    string(newline), '$D_\mathrm{TEM}$ = 0.35, $d_\mathrm{pp,100}$ = 17.8');
-
-lgd_fit2 = strcat(string(newline), string(newline), '$D_\mathrm{TEM_{scat}}$ =',...
-    {' '}, num2str(D_TEM_scat, '%.2f'), {' '}, '$\pm$', {' '},...
-    num2str(dci_D_TEM_scat, '%.2f'), {','}, string(newline),...
-    '$d_\mathrm{pp,100_{scat}}$ =', {' '}, num2str(dpp100_scat, '%.2f'),...
-    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_dpp100_scat, dcin_dpp100_scat), '%.2f'));
-
-legend(cat(2, plt1b_uc, plt2_scat, plt1b_uc, plt2_fit),...
-    cat(2, {'Original scaling'}, {'Secondary dispersion'},...
-    lgd_uc2, lgd_fit2), 'interpreter', 'latex', 'FontSize', 11,...
-    'location', 'southoutside', 'orientation', 'horizontal', 'NumColumns', 2)
-
-%% Draw resulting aggregates
-
-f2 = figure(2);
-f2.Position = [100, 100, 1200, 800];
-set(f2, 'color', 'white');
-
-tt2 = tiledlayout(2, 3, 'Padding', 'none', 'TileSpacing', 'none');
-
-jj_render = sort(randperm(length(pp_scat), 6));
-
-for j = 1 : length(jj_render)
-
-    % figure(j+2)
-    % set(gcf, 'Position', [(2*j+3)*50, (2*j-1)*50, 500, 500], 'color', 'white');
-
+for j = 1 : 6
     nexttile
-    UTILS.PLOTPP(pp_scat{j}(:,3), pp_scat{j}(:,4), pp_scat{j}(:,5),...
-        pp_scat{j}(:,2))
-
+    UTILS.PLOTPP(pars_out.pp{jj(j)}(:,3), pars_out.pp{jj(j)}(:,4),...
+        pars_out.pp{jj(j)}(:,5), pars_out.pp{jj(j)}(:,2))
 end
 
-%% Export plots
+%% Export plots %%
 
-exportgraphics(f1, 'outputs\dispersion.png',...
-    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 150)
-exportgraphics(f2, 'outputs\render.png',...
-    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 150)
+exportgraphics(f1, 'outputs\raw.png',...
+    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 300)
+exportgraphics(f2, 'outputs\seeds_initial.png',...
+    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 300)
+exportgraphics(f3, 'outputs\seeds_corrected.png',...
+    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 300)
+exportgraphics(f4, 'outputs\scaled.png',...
+    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 300)
+exportgraphics(f5, 'outputs\render.png',...
+    'BackgroundColor','none', 'ContentType','vector', 'Resolution', 300)
