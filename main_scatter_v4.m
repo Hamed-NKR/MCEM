@@ -49,7 +49,7 @@ da_lim_noise = [2e1 2e3]; % extents of noise generation
 cn_scat = 0.5;
 
 % address of aggregate library to be imported for scaling and dispersion
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
+fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
 fname = 'wsp_sigmapp_1.3_Aug9';
 varname = 'pp0';
 vardir = '';
@@ -463,18 +463,17 @@ chk_agg = true(n_agg_raw, 1); % whether an aggregate is previously not...
 for i = 1 : n_scat
 
     % find points with the same number of primaries as selected aggregate
-    ii = find(abs(pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg) -...
-        dpp_scat(i) ./ da_scat(i)) == min(abs(pars_out.dpp_g(chk_agg,1) ./...
-        pars_out.da(chk_agg)) - dpp_scat(i) ./ da_scat(i)));
+    ii = find(abs((dpp_scat(i) ./ da_scat(i)) -...
+        (pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg))) ==...
+        min(abs((dpp_scat(i) ./ da_scat(i)) -...
+        (pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg)))), 1);    
     
-    iii = ii(randperm(length(ii),1)); % index of selected seed
-
     % scale aggregate to the selected seed
-    rpp_scat = (1e-9) * dpp_scat(iii) / pars_raw.dpp_g(ind_rand(i),1);
-    pars_out.pp{i}(:,2:5) = repmat(rpp_scat, pars_out.n(i), 4) .*...
-        pars_out.pp{i}(:,2:5);
-
-    chk_agg(iii) = false; % don't use this seed another time
+    rpp_scat = (1e-9) * dpp_scat(i) / pars_raw.dpp_g(ind_rand(ii),1);
+    pars_out.pp{ii}(:,2:5) = repmat(rpp_scat, pars_out.n(ii), 4) .*...
+        pars_out.pp{ii}(:,2:5);
+    
+    chk_agg(ii) = false; % won't be using this seed another time
     
 end
 
@@ -624,7 +623,7 @@ set(f5, 'color', 'white');
 
 tiledlayout(2, 3, 'Padding', 'none', 'TileSpacing', 'none')
 
-jj = sort(randperm(n_agg_raw, 6));
+jj = sort(randperm(n_scat, 6));
 
 for j = 1 : 6
     nexttile
