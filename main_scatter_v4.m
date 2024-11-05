@@ -459,21 +459,45 @@ pars_out.da = cat(1, pars_raw.da(ind_rand));
 chk_agg = true(n_agg_raw, 1); % whether an aggregate is previously not...
     % ...selected (i.e. still available)
 
+ii0 = cell(n_scat,1);
+ii = zeros(n_scat,1);
+n_ii = zeros(n_scat,1);
+rpp_scat = zeros(n_scat,1);
+
+iii = [];
+
+ind_agg_raw = 1 : n_agg_raw;
+
 % assign scatter seeds to the aggregates
 for i = 1 : n_scat
 
     % find points with the same number of primaries as selected aggregate
-    ii = find(abs((dpp_scat(i) ./ da_scat(i)) -...
-        (pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg))) ==...
+    ii0{i} = find(abs((dpp_scat(i) ./ da_scat(i)) -...
+        (pars_out.dpp_g(:,1) ./ pars_out.da)) ==...
         min(abs((dpp_scat(i) ./ da_scat(i)) -...
-        (pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg)))), 1);    
+        (pars_out.dpp_g(:,1) ./ pars_out.da))));
     
+    ii_finder = ismember(ii0{i}, ind_agg_raw(chk_agg));
+    ii0{i} = ii0{i}(ii_finder);
+    ii(i) = ii0{i}(1); 
+
+    n_ii(i) = length(ii(i));
+
+    if length(abs((dpp_scat(i) ./ da_scat(i)) -...
+        (pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg)))) ~=...
+        (n_agg_raw - i - size(iii,1) + 1)
+
+            iii = [iii; i, ii(i)];
+
+    end
+
     % scale aggregate to the selected seed
-    rpp_scat = (1e-9) * dpp_scat(i) / pars_raw.dpp_g(ind_rand(ii),1);
-    pars_out.pp{ii}(:,2:5) = repmat(rpp_scat, pars_out.n(ii), 4) .*...
-        pars_out.pp{ii}(:,2:5);
+    rpp_scat(i) = (1e-9) * dpp_scat(i) / pars_out.dpp_g(ii(i),1);
+    pars_out.pp{ii(i)}(:,2:5) = repmat(rpp_scat(i), pars_out.n(ii(i)), 4) .*...
+        pars_out.pp{ii(i)}(:,2:5);
     
-    chk_agg(ii) = false; % won't be using this seed another time
+    chk_agg(ii(i)) = false; % won't be using this seed another time
+
     
 end
 
