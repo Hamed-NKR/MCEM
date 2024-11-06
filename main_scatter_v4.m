@@ -49,14 +49,14 @@ da_lim_noise = [2e1 2e3]; % extents of noise generation
 cn_scat = 0.6;
 
 % address of aggregate library to be imported for scaling and dispersion
-fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
 fname = 'wsp_sigmapp_1.3_Aug9';
 varname = 'pp0';
 vardir = '';
 
 % resolution for projected area calculation
-n_mc = 1e3;
-n_ang = 10;
+n_mc = 1e4;
+n_ang = 20;
 
 %% Raw data against the Brasil's and universal correlations %%
 
@@ -496,10 +496,25 @@ pars_out.da = 2 * sqrt(PAR.PROJECTION(pars_out, [], n_mc, n_ang) / pi); % sanity
 % calculate GM and GSD of primary particle size for the scaled aggregates
 pars_out = PAR.SIZING(pars_out);
 
-% find projected area size distribution parameters after Monte Carlo...
-    % ...sampling
+% find projected area size distribution parameters of aggregates...
+    % ...after Monte Carlo sampling
 GM_da_out = geomean(pars_out.da); % geometric mean
 GSD_da_out = UTILS.GEOSTD(pars_out.da); % geometric standard deviation
+
+% find ensemble primary particle size distribution metrics
+pp_ens = cat(1, pars_out.pp{:}); % concatinate primaries across aggregates
+GM_dpp_ens_out = geomean(pp_ens(:,2)); % geometric mean
+GSD_dpp_ens_out = UTILS.GEOSTD(pp_ens(:,2)); % geometric standard deviation
+
+% metrics for primary particle size distribution within the aggregates
+GM_dpp_out = geomean(pars_out.dpp_g(:,1)); % geometric mean of...
+    % ...geomtric mean of primary particle size within aggregates
+GSD_dpp_out = UTILS.GEOSTD(pars_out.dpp_g(:,1)); % geometric standard...
+    % ...deviation of geomtric mean of primary particle size within aggregates
+mu_sigmapp_out = mean(pars_out.dpp_g(:,2)); % arithmetic mean of...
+    % ...geomtric standard deviation of primary particle size within aggregates
+sd_sigmapp_out = std(pars_out.dpp_g(:,2)); % arithmetic standard deviation of...
+    % ...geomtric standard deviation of primary particle size within aggregates
 
 %% Plot scaled aggregates
 
