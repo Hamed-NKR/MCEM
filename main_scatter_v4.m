@@ -46,7 +46,7 @@ mu_scat = 0; % Gaussiam mean of noise distribution around the universal...
     % ...correlation in log-log space
 sigma_scat = 0.2; % Gaussian standard deviation
 da_lim_noise = [2e1 2e3]; % extents of noise generation 
-cn_scat = 0.5;
+cn_scat = 0.6;
 
 % address of aggregate library to be imported for scaling and dispersion
 fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
@@ -55,8 +55,8 @@ varname = 'pp0';
 vardir = '';
 
 % resolution for projected area calculation
-n_mc = 1e2;
-n_ang = 5;
+n_mc = 1e3;
+n_ang = 10;
 
 %% Raw data against the Brasil's and universal correlations %%
 
@@ -191,7 +191,7 @@ lgd2a_bc = strcat('Brasil et al. (1999) + Olfert $\&$ Rogak (2019)',...
 hold on
 
 % plot random gussian points generated above in dpp vs npp domain
-plt2a_scat = scatter(npp0_scat, dpp0_scat, 5, hex2rgb('#789DBC'), '.',...
+plt2a_scat = scatter(npp0_scat, dpp0_scat, 12, hex2rgb('#789DBC'), '.',...
     'LineWidth', 1);
 lgd2a_scat = strcat(string(newline), 'Transformation of Gaussian noise seeds', string(newline),...
     'from $d_\mathrm{pp}$-$d_\mathrm{a}$ space to $d_\mathrm{pp}$-$n_\mathrm{pp}$ space',...
@@ -217,7 +217,7 @@ lgd2b_uc = strcat('Olfert $\&$ Rogak (2019)',...
 hold on
 
 % plot library in dpp vs. da domain
-plt2b_scat = scatter(da_scat, dpp0_scat, 8, hex2rgb('#B06161'), '.',...
+plt2b_scat = scatter(da_scat, dpp0_scat, 12, hex2rgb('#B06161'), '.',...
     'LineWidth', 1);
 lgd2b_scat = strcat(string(newline), 'Gaussian noise seeds (in log-log space)',...
     string(newline), '$\mu$ =', {' '}, num2str(mu_scat, '%.0f'), ',', {' '},...
@@ -234,7 +234,7 @@ box on
 
 %% evaluate trends of "non-rounded" Monte Carlo points  %%
 
-figure(f2)
+figure(f2);
 
 %%% find the best curve fit to the Monte Carlo dpp vs npp data
 fit2a = fitlm(table(log(npp0_scat), log(dpp0_scat)), 'linear',...
@@ -262,10 +262,10 @@ ci_dpp_fit2a = [ci_k_2a(1) * (npp_bc.^ci_D_2a(1)),...
 nexttile(1)
 
 % plot the main fit and CI bounds
-plt2a_fit = plot(npp_bc, dpp_fit2a, 'Color', hex2rgb('#295F98'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
+plt2a_fit = plot(npp_bc, dpp_fit2a, 'Color', hex2rgb('#374259'),...
+    'LineStyle', '-', 'LineWidth', 1.5);
 plt2a_err = plot(npp_bc, ci_dpp_fit2a(:,1), npp_bc, ci_dpp_fit2a(:,2),...
-    'Color', hex2rgb('#295F98'), 'LineStyle', ':', 'LineWidth', 1);
+    'Color', hex2rgb('#374259'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd2a_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_2a, '%.3f'),...
@@ -303,10 +303,10 @@ ci_dpp_fit2b = [ci_k_2b(1) * (da_uc.^ci_D_2b(1)),...
 nexttile(2)
 
 % plot the main fit and CI bounds
-plt2b_fit = plot(da_uc, dpp_fit2b, 'Color', hex2rgb('#B06161'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
+plt2b_fit = plot(da_uc, dpp_fit2b, 'Color', hex2rgb('#632626'),...
+    'LineStyle', '-', 'LineWidth', 1.5);
 plt2b_err = plot(da_uc, ci_dpp_fit2b(:,1), da_uc, ci_dpp_fit2b(:,2),...
-    'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
+    'Color', hex2rgb('#632626'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd2b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)', ...
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_2b, '%.2f'),...
@@ -333,7 +333,7 @@ plt3a_bc = copyobj(plt2a_bc, f3.CurrentAxes);
 hold on
 
 % plot random gussian points with npp rounded to integer numbers
-plt3a_scat = scatter(npp_scat, dpp_scat, 5, hex2rgb('#789DBC'), '.',...
+plt3a_scat = scatter(npp_scat, dpp_scat, 12, hex2rgb('#789DBC'), '.',...
     'LineWidth', 1);
 lgd3a_scat = strcat(string(newline), 'Gaussian noise seeds with $n_\mathrm{pp}$ rounded');
 
@@ -361,10 +361,10 @@ ci_dpp_fit3a = [ci_k_3a(1) * (npp_bc.^ci_D_3a(1)),...
     ci_k_3a(2) * (npp_bc.^ci_D_3a(2))];
 
 % plot the main fit and CI bounds
-plt3a_fit = plot(npp_bc, dpp_fit3a, 'Color', hex2rgb('#295F98'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
+plt3a_fit = plot(npp_bc, dpp_fit3a, 'Color', hex2rgb('#374259'),...
+    'LineStyle', '-', 'LineWidth', 1.5);
 plt3a_err = plot(npp_bc, ci_dpp_fit3a(:,1), npp_bc, ci_dpp_fit3a(:,2),...
-    'Color', hex2rgb('#295F98'), 'LineStyle', ':', 'LineWidth', 1);
+    'Color', hex2rgb('#374259'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd3a_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_3a, '%.3f'),...
@@ -392,7 +392,7 @@ plt3b_uc = copyobj(plt2b_uc, f3.CurrentAxes);
 hold on
 
 % plot library in dpp vs. da domain
-plt3b_scat = scatter(da_scat, dpp_scat, 8, hex2rgb('#B06161'), '.',...
+plt3b_scat = scatter(da_scat, dpp_scat, 12, hex2rgb('#B06161'), '.',...
     'LineWidth', 1);
 lgd3b_scat = strcat(string(newline), 'Transformation of Gaussian noise seeds', string(newline),...
     'from $d_\mathrm{pp}$-$n_\mathrm{pp}$ space to $d_\mathrm{pp}$-$d_\mathrm{a}$ space',...
@@ -422,10 +422,10 @@ ci_dpp_fit3b = [ci_k_3b(1) * (da_uc.^ci_D_3b(1)),...
     ci_k_3b(2) * (da_uc.^ci_D_3b(2))];
 
 % plot the main fit and CI bounds
-plt3b_fit = plot(da_uc, dpp_fit3b, 'Color', hex2rgb('#B06161'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
+plt3b_fit = plot(da_uc, dpp_fit3b, 'Color', hex2rgb('#632626'),...
+    'LineStyle', '-', 'LineWidth', 1.5);
 plt3b_err = plot(da_uc, ci_dpp_fit3b(:,1), da_uc, ci_dpp_fit3b(:,2),...
-    'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
+    'Color', hex2rgb('#632626'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd3b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_3b, '%.2f'),...
@@ -459,45 +459,29 @@ pars_out.da = cat(1, pars_raw.da(ind_rand));
 chk_agg = true(n_agg_raw, 1); % whether an aggregate is previously not...
     % ...selected (i.e. still available)
 
-ii0 = cell(n_scat,1);
-ii = zeros(n_scat,1);
-n_ii = zeros(n_scat,1);
-rpp_scat = zeros(n_scat,1);
+rpp_scat = zeros(n_scat,1); % initialize scaling ratios
 
-iii = [];
+ind_agg_raw = 1 : n_agg_raw; % to keep track of aggregate id selected for scaling
 
-ind_agg_raw = 1 : n_agg_raw;
-
-% assign scatter seeds to the aggregates
+% assign aggregates to scatter seeds 
 for i = 1 : n_scat
+    
+    ii = ind_agg_raw(chk_agg); % first load all aggregate ids available
 
-    % find points with the same number of primaries as selected aggregate
-    ii0{i} = find(abs((dpp_scat(i) ./ da_scat(i)) -...
-        (pars_out.dpp_g(:,1) ./ pars_out.da)) ==...
+    % find the closest (to the seed) aggregate in terms of dpp/da ratio 
+    ii0 = find(abs((dpp_scat(i) ./ da_scat(i)) -...
+        (pars_out.dpp_g(chk_agg) ./ pars_out.da(chk_agg))) ==...
         min(abs((dpp_scat(i) ./ da_scat(i)) -...
-        (pars_out.dpp_g(:,1) ./ pars_out.da))));
+        (pars_out.dpp_g(chk_agg) ./ pars_out.da(chk_agg)))), 1);
     
-    ii_finder = ismember(ii0{i}, ind_agg_raw(chk_agg));
-    ii0{i} = ii0{i}(ii_finder);
-    ii(i) = ii0{i}(1); 
-
-    n_ii(i) = length(ii(i));
-
-    if length(abs((dpp_scat(i) ./ da_scat(i)) -...
-        (pars_out.dpp_g(chk_agg,1) ./ pars_out.da(chk_agg)))) ~=...
-        (n_agg_raw - i - size(iii,1) + 1)
-
-            iii = [iii; i, ii(i)];
-
-    end
-
+    ii = ii(ii0); % find actual id of aggregate selected
+        
     % scale aggregate to the selected seed
-    rpp_scat(i) = (1e-9) * dpp_scat(i) / pars_out.dpp_g(ii(i),1);
-    pars_out.pp{ii(i)}(:,2:5) = repmat(rpp_scat(i), pars_out.n(ii(i)), 4) .*...
-        pars_out.pp{ii(i)}(:,2:5);
+    rpp_scat(i) = (1e-9) * dpp_scat(i) / pars_out.dpp_g(ii,1);
+    pars_out.pp{ii}(:,2:5) = repmat(rpp_scat(i), pars_out.n(ii), 4) .*...
+        pars_out.pp{ii}(:,2:5);
     
-    chk_agg(ii(i)) = false; % won't be using this seed another time
-
+    chk_agg(ii) = false; % won't be using this seed another time
     
 end
 
@@ -505,11 +489,17 @@ end
 pars_out.pp = cat(1, pars_out.pp(~chk_agg));
 pars_out.n = cat(1, pars_out.n(~chk_agg));
 
-% recalculate projected area based on new scaling (as a sanity check)
-pars_out.da = 2 * sqrt(PAR.PROJECTION(pars_out, [], 1e2, 5) / pi);
+% recalculate projected area based on new scaling
+pars_out.da = 2 * sqrt(PAR.PROJECTION(pars_out, [], n_mc, n_ang) / pi); % sanity check
+% pars_out.da = rpp_scat .* cat(1, pars_out.da(~chk_agg));
 
 % calculate GM and GSD of primary particle size for the scaled aggregates
 pars_out = PAR.SIZING(pars_out);
+
+% find projected area size distribution parameters after Monte Carlo...
+    % ...sampling
+GM_da_out = geomean(pars_out.da); % geometric mean
+GSD_da_out = UTILS.GEOSTD(pars_out.da); % geometric standard deviation
 
 %% Plot scaled aggregates
 
@@ -555,10 +545,10 @@ ci_dpp_fit4a = [ci_k_4a(1) * (npp_bc.^ci_D_4a(1)),...
     ci_k_4a(2) * (npp_bc.^ci_D_4a(2))];
 
 % plot the main fit and CI bounds
-plt4a_fit = plot(npp_bc, dpp_fit4a, 'Color', hex2rgb('#295F98'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
+plt4a_fit = plot(npp_bc, dpp_fit4a, 'Color', hex2rgb('#374259'),...
+    'LineStyle', '-', 'LineWidth', 1.5);
 plt4a_err = plot(npp_bc, ci_dpp_fit4a(:,1), npp_bc, ci_dpp_fit4a(:,2),...
-    'Color', hex2rgb('#295F98'), 'LineStyle', ':', 'LineWidth', 1);
+    'Color', hex2rgb('#374259'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd4a_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_4a, '%.3f'),...
@@ -615,10 +605,10 @@ ci_dpp_fit4b = [ci_k_4b(1) * (da_uc.^ci_D_4b(1)),...
     ci_k_4b(2) * (da_uc.^ci_D_4b(2))];
 
 % plot the main fit and CI bounds
-plt4b_fit = plot(da_uc, dpp_fit4b, 'Color', hex2rgb('#B06161'),...
-    'LineStyle', '--', 'LineWidth', 1.5);
+plt4b_fit = plot(da_uc, dpp_fit4b, 'Color', hex2rgb('#632626'),...
+    'LineStyle', '-', 'LineWidth', 1.5);
 plt4b_err = plot(da_uc, ci_dpp_fit4b(:,1), da_uc, ci_dpp_fit4b(:,2),...
-    'Color', hex2rgb('#B06161'), 'LineStyle', ':', 'LineWidth', 1);
+    'Color', hex2rgb('#632626'), 'LineStyle', ':', 'LineWidth', 1);
 
 lgd4b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\mathrm{pp}$)',...
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_4b, '%.2f'),...
@@ -642,14 +632,14 @@ box on
 %% Draw resulting aggregates %%
 
 f5 = figure(5);
-f5.Position = [250, 100, 1200, 800];
+f5.Position = [250, 100, 900, 900];
 set(f5, 'color', 'white');
 
-tiledlayout(2, 3, 'Padding', 'none', 'TileSpacing', 'none')
+tiledlayout(3, 3, 'Padding', 'none', 'TileSpacing', 'none')
 
-jj = sort(randperm(n_scat, 6));
+jj = sort(randperm(n_scat, 9));
 
-for j = 1 : 6
+for j = 1 : 9
     nexttile
     UTILS.PLOTPP(pars_out.pp{jj(j)}(:,3), pars_out.pp{jj(j)}(:,4),...
         pars_out.pp{jj(j)}(:,5), pars_out.pp{jj(j)}(:,2))
