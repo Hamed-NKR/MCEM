@@ -39,7 +39,7 @@ buc_inv = @(x) (b0_buc * x) .^ (1 / m_buc); % inverse combined...
 gm_da = 100; % geometric mean of projected area diameter distribution
 gsd_da = 1.6; % geometric standard deviation of ~
 gm_dpp = uc(gm_da); % geometric mean of primary particle diameter distribution
-gsd_dpp = 1.2; % geometric standard deviation of ~
+gsd_dpp = 1.4; % geometric standard deviation of ~
 
 cn_scat = 0.6; % proportion of random aggregates chosen for bivariate sampling
 
@@ -142,7 +142,7 @@ n_scat = round(cn_scat * length(pars_raw.n));
 mu_log_2d = [log(gm_da), log(gm_dpp)];
 sigma_log_2d = [log(gsd_da), log(gsd_dpp)];
 
-rho = D_TEM * (sigma_log_2d(2) / sigma_log_2d(1)); % estimated bivariate correlation
+rho = D_TEM * (sigma_log_2d(1) / sigma_log_2d(2)); % estimated bivariate correlation
 
 % covariance matrix in log-log space
 sigma_cov = [sigma_log_2d(1)^2, rho * sigma_log_2d(1) * sigma_log_2d(2); 
@@ -522,8 +522,12 @@ hold on
 % plot scaled aggregates
 plt4a_scat = scatter(pars_out.n, 1e9 * pars_out.dpp_g(:,1), 5,...
     hex2rgb('#789DBC'), 'o', 'LineWidth', 1);
-lgd4a_scat = strcat(string(newline), 'Aggregates scaled to a random Gaussian',...
-    string(newline), 'bivariate distribution');
+lgd4a_scat = strcat(string(newline), 'Aggregates scaled to a bivariate distribution with:',...
+    string(newline), '$\overline{d}_\mathrm{a}$ =', {' '},...
+    num2str(gm_da, '%.0f'), ',', {' '}, '$\sigma_\mathrm{a}$ =', {' '},...
+    num2str(gsd_da, '%.1f'), ', $\overline{d}_\mathrm{pp}$ =', {' '},...
+    num2str(gm_dpp, '%.0f'), ',', {' '}, '$\sigma_\mathrm{pp}$ =', {' '},...
+    num2str(gsd_dpp, '%.1f'));
 
 % find best curve fit
 fit4a = fitlm(table(log(pars_out.n), log(1e9 * pars_out.dpp_g(:,1))),...
