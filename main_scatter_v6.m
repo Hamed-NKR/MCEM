@@ -44,7 +44,7 @@ gsd_dpp = 1.2; % geometric standard deviation of ~
 cn_scat = 0.6; % proportion of random aggregates chosen for bivariate sampling
 
 % address of aggregate library to be imported for scaling and dispersion
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
+fdir = 'D:\HN\DLCA\AUG-02-22\sigmapp1\3';
 fname = 'wsp_sigmapp_1.3_Aug9';
 varname = 'pp0';
 vardir = '';
@@ -266,23 +266,17 @@ legend(cat(2, plt2a_bc, plt2a_scat, plt2a_fit),...
     cat(2, lgd2a_bc, lgd2a_scat, lgd2a_fit),...
     'interpreter', 'latex', 'FontSize', 11, 'location', 'southoutside');
 
-%%% find best fitting to the dpp vs da data
-fit2b = fitlm(table(log(da_scat), log(dpp0_scat)), 'linear', 'Weights',...
-    sqrt(npp_scat)); % fit a linear regression weighted by sqrt of...
-        % ...number of primaries
+% total least squares fit and 95% confidence intervals using singular...
+    % ...value decomposition 
+[D_2b, k_2b, ci_D_2b, ci_k_2b] = UTILS.SVD_LOGFIT(log([da_scat,dpp0_scat]));
 
-D_2b = fit2b.Coefficients.Estimate(2); % ensemble scaling exponent
-k_2b = exp(fit2b.Coefficients.Estimate(1)); % ensemble scaling prefactor
+% convert to non-log scale
+k_2b = exp(k_2b);
+ci_k_2b = exp(ci_k_2b);
 
-% 95% confidence intervals for scaling properties
-ci_2b = coefCI(fit2b);
-ci_D_2b = ci_2b(2,:);
-ci_k_2b = exp(ci_2b(1,:));
-
-% 95% ci error bars
-dci_D_2b = max(ci_D_2b) - D_2b;
-dcip_k_2b = max(ci_k_2b) - k_2b;
-dcin_k_2b = k_2b - min(ci_k_2b);
+% 95% ci error bars (differences)
+dci_D_2b = abs(max(ci_D_2b) - D_2b);
+dci_k_2b = abs(max(ci_k_2b) - k_2b);
 
 % generate the fit data
 dpp_fit2b = k_2b * (da_uc.^D_2b);
@@ -301,7 +295,7 @@ lgd2b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\math
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_2b, '%.2f'),...
     {' '}, '$\pm$', {' '}, num2str(dci_D_2b, '%.2f'), {','}, {' '},...
     '$k_\mathrm{fit}$ =', {' '}, num2str(k_2b, '%.2f'),...
-    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_2b, dcin_k_2b), '%.2f'));
+    {' '}, {'$\pm$'}, {' '}, num2str(dci_k_2b, '%.2f'));
 
 legend(cat(2, plt2b_uc, plt2b_scat, plt2b_fit),...
     cat(2, lgd2b_uc, lgd2b_scat, lgd2b_fit),...
@@ -387,23 +381,17 @@ lgd3b_scat = strcat(string(newline), 'Transformation of Gaussian noise seeds', s
     'from $d_\mathrm{pp}$-$n_\mathrm{pp}$ space to $d_\mathrm{pp}$-$d_\mathrm{a}$ space',...
     string(newline), 'using correlation of Brasil et al. (1999)');
 
-% find best curve fit
-fit3b = fitlm(table(log(da_scat), log(dpp_scat)), 'linear',...
-    'Weights', sqrt(npp_scat)); % fit a linear regression weighted by sqrt of...
-        % ...number of primaries
+% total least squares fit and 95% confidence intervals using singular...
+    % ...value decomposition 
+[D_3b, k_3b, ci_D_3b, ci_k_3b] = UTILS.SVD_LOGFIT(log([da_scat,dpp_scat]));
 
-D_3b = fit3b.Coefficients.Estimate(2); % ensemble scaling exponent
-k_3b = exp(fit3b.Coefficients.Estimate(1)); % ensemble scaling prefactor
+% convert to non-log scale
+k_3b = exp(k_3b);
+ci_k_3b = exp(ci_k_3b);
 
-% 95% confidence intervals for scaling properties
-ci_3b = coefCI(fit3b);
-ci_D_3b = ci_3b(2,:);
-ci_k_3b = exp(ci_3b(1,:));
-
-% 95% ci error bars
-dci_D_3b = max(ci_D_3b) - D_3b;
-dcip_k_3b = max(ci_k_3b) - k_3b;
-dcin_k_3b = k_3b - min(ci_k_3b);
+% 95% ci error bars (differences)
+dci_D_3b = abs(max(ci_D_3b) - D_3b);
+dci_k_3b = abs(max(ci_k_3b) - k_3b);
 
 % generate the fit data
 dpp_fit3b = k_3b * (da_uc.^D_3b);
@@ -420,7 +408,7 @@ lgd3b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\math
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_3b, '%.2f'),...
     {' '}, '$\pm$', {' '}, num2str(dci_D_3b, '%.2f'), {','}, {' '},...
     '$k_\mathrm{fit}$ =', {' '}, num2str(k_3b, '%.2f'),...
-    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_3b, dcin_k_3b), '%.2f'));
+    {' '}, {'$\pm$'}, {' '}, num2str(dci_k_3b, '%.2f'));
 
 legend(cat(2, plt3b_uc, plt3b_scat, plt3b_fit),...
     cat(2, lgd2b_uc, lgd3b_scat, lgd3b_fit),...
@@ -585,23 +573,18 @@ plt4b_scat = scatter(1e9 * pars_out.da, 1e9 * pars_out.dpp_g(:,1), 8,...
 lgd4b_scat = strcat(string(newline), 'Aggregates scaled to a random Gaussian',...
     string(newline), 'bivariate distribution');
 
-% find best curve fit
-fit4b = fitlm(table(log(1e9 * pars_out.da), log(1e9 * pars_out.dpp_g(:,1))),...
-    'linear', 'Weights', sqrt(pars_out.n)); % fit a linear regression...
-        % ...weighted by sqrt of number of primaries
+% total least squares fit and 95% confidence intervals using singular...
+    % ...value decomposition 
+[D_4b, k_4b, ci_D_4b, ci_k_4b] = UTILS.SVD_LOGFIT(log(1e9 * [pars_out.da,...
+    pars_out.dpp_g(:,1)]));
 
-D_4b = fit4b.Coefficients.Estimate(2); % ensemble scaling exponent
-k_4b = exp(fit4b.Coefficients.Estimate(1)); % ensemble scaling prefactor
+% convert to non-log scale
+k_4b = exp(k_4b);
+ci_k_4b = exp(ci_k_4b);
 
-% 95% confidence intervals for scaling properties
-ci_4b = coefCI(fit4b);
-ci_D_4b = ci_4b(2,:);
-ci_k_4b = exp(ci_4b(1,:));
-
-% 95% ci error bars
-dci_D_4b = max(ci_D_4b) - D_4b;
-dcip_k_4b = max(ci_k_4b) - k_4b;
-dcin_k_4b = k_3b - min(ci_k_4b);
+% 95% ci error bars (differences)
+dci_D_4b = abs(max(ci_D_4b) - D_4b);
+dci_k_4b = abs(max(ci_k_4b) - k_4b);
 
 % generate the fit data
 dpp_fit4b = k_4b * (da_uc.^D_4b);
@@ -618,7 +601,7 @@ lgd4b_fit = strcat(string(newline), 'Linear regression fit (weighted by $n_\math
     string(newline), '$D_\mathrm{fit}$ =', {' '}, num2str(D_4b, '%.2f'),...
     {' '}, '$\pm$', {' '}, num2str(dci_D_4b, '%.2f'), {','}, {' '},...
     '$k_\mathrm{fit}$ =', {' '}, num2str(k_4b, '%.2f'),...
-    {' '}, {'$\pm$'}, {' '}, num2str(max(dcip_k_4b, dcin_k_4b), '%.2f'));
+    {' '}, {'$\pm$'}, {' '}, num2str(dci_k_4b, '%.2f'));
 
 legend(cat(2, plt4b_uc, plt4b_scat, plt4b_fit),...
     cat(2, lgd2b_uc, lgd4b_scat, lgd4b_fit),...
