@@ -175,19 +175,26 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     ensdata.da(k,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
     ensdata.dm(k,1:2) = [geomean(pars_LD2.dm), UTILS.GEOSTD(pars_LD2.dm)];
     
-    if ensdata.n_agg(k) <= (r_n_agg(ind_dat) * ensdata.n_agg(1))
+    if ensdata.n_agg(ind_dat) <= (r_n_agg(ind_dat) * ensdata.n_agg(1))
         
         % save data of individual aggregates in selected times
-        parsdata(k).pp = pars_LD2.pp;
-        parsdata(k).npp = pars_LD2.n;
-        parsdata(k).dpp = pars_LD2.dpp_g(:,1);
-        parsdata(k).sigmapp = pars_LD2.dpp_g(:,2);
-        parsdata(k).da = pars_LD2.da;
-        parsdata(k).dg = pars_LD2.dg;
-        parsdata(k).n_hyb = pars_LD2.n_hyb;
+        parsdata(ind_dat).pp = pars_LD2.pp;
+        parsdata(ind_dat).npp = pars_LD2.n;
+        parsdata(ind_dat).dpp = pars_LD2.dpp_g(:,1);
+        parsdata(ind_dat).sigmapp = pars_LD2.dpp_g(:,2);
+        parsdata(ind_dat).da = pars_LD2.da;
+        parsdata(ind_dat).dg = pars_LD2.dg;
+        parsdata(ind_dat).n_hyb = pars_LD2.n_hyb;
                         
         ind_dat = ind_dat + 1; % update data saving index
         
+    end
+
+    if mod(k,250) == 1
+        dt = datestr(datetime('now')); % current date and time
+        dt = regexprep(dt, ':', '-');
+        dt = regexprep(dt, ' ', '_');
+        save(strcat('outputs\', dt, '.mat'))
     end
 
     UTILS.TEXTBAR([k, k_max]); % update progress textbar
@@ -195,5 +202,18 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     k = k + 1; % update iteration index
 
 end
+
+% Remove unused elements from the data storage structures
+parsdata(ind_dat:end) = [];
+ensdata.t(k:end) = [];
+ensdata.n_agg(k:end) = [];
+ensdata.tau(k:end,:) = [];
+ensdata.kn_kin(k:end,:) = [];
+ensdata.kn_diff(k:end,:) = [];
+ensdata.dpp(k:end,:) = [];
+ensdata.sigmapp(k:end,:) = [];
+ensdata.da(k:end,:) = [];
+ensdata.dm(k:end,:) = [];
+
 
 
