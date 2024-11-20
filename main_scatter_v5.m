@@ -36,22 +36,22 @@ buc_inv = @(x) (b0_buc * x) .^ (1 / m_buc); % inverse combined...
     % ...function to get npp from dpp
 
 % metrics of the bivariate size distribution in dpp-da space
-gm_da = 100; % geometric mean of projected area diameter distribution
-gsd_da = 1.6; % geometric standard deviation of ~
-gm_dpp = uc(gm_da); % geometric mean of primary particle diameter distribution
-gsd_dpp = 1.4; % geometric standard deviation of ~
+gm_da = 83.22; % geometric mean of projected area diameter distribution
+gsd_da = 1.67; % geometric standard deviation of ~
+gm_dpp = 16.67; % geometric mean of primary particle diameter distribution
+gsd_dpp = 1.22; % geometric standard deviation of ~
 
-cn_scat = 0.6; % proportion of random aggregates chosen for bivariate sampling
+cn_scat = 0.4; % proportion of random aggregates chosen for bivariate sampling
 
 % address of aggregate library to be imported for scaling and dispersion
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA1\Results\DAT\Desktop-simulations\AUG-02-22\sigmapp1\3';
-fname = 'wsp_sigmapp_1.3_Aug9';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp10';
+fname = 'classicDLCA_lib0_stdint10';
 varname = 'pp0';
 vardir = '';
 
 % resolution for projected area calculation
-n_mc = 1e2;
-n_ang = 5;
+n_mc = 1e4;
+n_ang = 25;
 
 %% Raw data against the Brasil's and universal correlations %%
 
@@ -60,6 +60,21 @@ load(strcat(fdir, '\', fname, '.mat'), varname)
 
 % create particle structure  
 pars_raw.pp = eval(strcat(varname, vardir)); % store primary particle info
+
+% correct the structure if necessary
+if logical(nnz(size(pars_raw.pp)))
+    
+    % Convert the pp data into a 1d cell array
+    pars_raw.pp = pars_raw.pp(:);
+    
+    % Remove unused cells
+    pars_raw.pp = pars_raw.pp(~cellfun('isempty', pars_raw.pp));
+    
+    % Merge pp info from different times
+    pars_raw.pp = cat(1, pars_raw.pp{:});
+
+end
+
 n_agg_raw = length(pars_raw.pp); % number of aggregates
 pars_raw.n = zeros(n_agg_raw,1);
 for i = 1 : n_agg_raw
@@ -67,7 +82,7 @@ for i = 1 : n_agg_raw
 end
 pars_raw = PAR.SIZING(pars_raw); % get characteristic sizes
 
-eval(['clear ', varname])
+eval(['clear ', varname]) % delete pp0
 
 % initialize figure for raw data vs. correlations
 f1 = figure(1);
