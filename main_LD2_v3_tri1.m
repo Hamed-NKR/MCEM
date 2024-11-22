@@ -72,6 +72,7 @@ opts_fl.amb = 'room';
 
 % calculate initial mobility properties
 opts_mobil.mtd = 'interp'; % choose the method of mobility size calculation
+opts_mobil.c_dt = 100;
 pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
 
 % adjust the volume fraction 
@@ -162,7 +163,7 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
         pars_LD2.da = 2 * sqrt(PAR.PROJECTION(pars_LD2, [], n_mc_prj,...
             n_ang_prj, [], opts_prj) / pi);
     end
-    
+
     % update mobility properties
     pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
     

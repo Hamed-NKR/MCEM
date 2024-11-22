@@ -6,8 +6,8 @@ close all
 %% Load scaled first-stage LD aggregates %%
 
 % address of data library to be imported
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp13';
-fname = '18NOV24';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp10';
+fname = '19NOV24';
 varname = 'pars_out';
 
 % load previously scaled stage 1 aggregate data
@@ -71,7 +71,8 @@ opts_fl.amb = 'room';
 [fl.mu, fl.lambda] = TRANSP.FLPROPS(fl, params_const, opts_fl);
 
 % calculate initial mobility properties
-opts_mobil.mtd = 'interp'; % choose the method of mobility size calculation
+opts_mobil.mtd = 'continuum'; % choose the method of mobility size calculation
+opts_mobil.c_dt = 100;
 pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
 
 % adjust the volume fraction 
@@ -96,7 +97,7 @@ ensdata.kn_kin = zeros(k_max, 2);
 ensdata.kn_diff = zeros(k_max, 2);
 ensdata.dpp = zeros(k_max, 2);
 ensdata.sigmapp = zeros(k_max, 2);
-ensdata.da = zeros(k_max, 2);
+% ensdata.da = zeros(k_max, 2);
 ensdata.dm = zeros(k_max, 2);
 
 % store ensemble values at the first moment
@@ -107,7 +108,7 @@ ensdata.kn_kin(1,1:2) = [mean(pars_LD2.kn_kin), std(pars_LD2.kn_kin)];
 ensdata.kn_diff(1,1:2) = [mean(pars_LD2.kn_diff), std(pars_LD2.kn_diff)];
 ensdata.dpp(1,1:2) = [geomean(pars_LD2.dpp_g(:,1)), UTILS.GEOSTD(pars_LD2.dpp_g(:,1))];
 ensdata.sigmapp(1,1:2) = [geomean(pars_LD2.dpp_g(:,2)), UTILS.GEOSTD(pars_LD2.dpp_g(:,2))];
-ensdata.da(1,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
+% ensdata.da(1,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
 ensdata.dm(1,1:2) = [geomean(pars_LD2.dm), UTILS.GEOSTD(pars_LD2.dm)];
 
 pars_LD2.n_hyb = ones(n0_agg, 1); % initialize number of sub-aggregates...
@@ -124,7 +125,7 @@ parsdata(1).pp = pars_LD2.pp;
 parsdata(1).npp = pars_LD2.n;
 parsdata(1).dpp = pars_LD2.dpp_g(:,1);
 parsdata(1).sigmapp = pars_LD2.dpp_g(:,2);
-parsdata(1).da = pars_LD2.da;
+% parsdata(1).da = pars_LD2.da;
 parsdata(1).dg = pars_LD2.dg;
 parsdata(1).n_hyb = pars_LD2.n_hyb;
 
@@ -157,12 +158,10 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     % update characteristic sizes
     pars_LD2 = PAR.SIZING(pars_LD2);
     
-    % update projected area sizes (if necessary)
-    if ~strcmp(opts_mobil.mtd, 'interp')
-        pars_LD2.da = 2 * sqrt(PAR.PROJECTION(pars_LD2, [], n_mc_prj,...
-            n_ang_prj, [], opts_prj) / pi);
-    end
-    
+    % % update projected area sizes
+    % pars_LD2.da = 2 * sqrt(PAR.PROJECTION(pars_LD2, [], n_mc_prj,...
+    %     n_ang_prj, [], opts_prj) / pi);
+
     % update mobility properties
     pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
     
@@ -173,7 +172,7 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     ensdata.kn_diff(k,1:2) = [mean(pars_LD2.kn_diff), std(pars_LD2.kn_diff)];
     ensdata.dpp(k,1:2) = [geomean(pars_LD2.dpp_g(:,1)), UTILS.GEOSTD(pars_LD2.dpp_g(:,1))];
     ensdata.sigmapp(k,1:2) = [geomean(pars_LD2.dpp_g(:,2)), UTILS.GEOSTD(pars_LD2.dpp_g(:,2))];
-    ensdata.da(k,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
+    % ensdata.da(k,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
     ensdata.dm(k,1:2) = [geomean(pars_LD2.dm), UTILS.GEOSTD(pars_LD2.dm)];
     
     if ensdata.n_agg(k) <= (r_n_agg(ind_dat) * ensdata.n_agg(1))
@@ -183,7 +182,7 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
         parsdata(ind_dat).npp = pars_LD2.n;
         parsdata(ind_dat).dpp = pars_LD2.dpp_g(:,1);
         parsdata(ind_dat).sigmapp = pars_LD2.dpp_g(:,2);
-        parsdata(ind_dat).da = pars_LD2.da;
+        % parsdata(ind_dat).da = pars_LD2.da;
         parsdata(ind_dat).dg = pars_LD2.dg;
         parsdata(ind_dat).n_hyb = pars_LD2.n_hyb;
                         
@@ -213,7 +212,7 @@ ensdata.kn_kin(k:end,:) = [];
 ensdata.kn_diff(k:end,:) = [];
 ensdata.dpp(k:end,:) = [];
 ensdata.sigmapp(k:end,:) = [];
-ensdata.da(k:end,:) = [];
+% ensdata.da(k:end,:) = [];
 ensdata.dm(k:end,:) = [];
 
 
