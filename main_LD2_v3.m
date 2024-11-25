@@ -71,18 +71,13 @@ opts_fl.amb = 'room';
 [fl.mu, fl.lambda] = TRANSP.FLPROPS(fl, params_const, opts_fl);
 
 % calculate initial mobility properties
+opts_mobil.c_dt = 100; % adjust the timesteps
 opts_mobil.mtd = 'interp'; % choose the method of mobility size calculation
 pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
 
-% adjust the volume fraction 
-pp0_ens = cat(1, pars_LD2.pp{:});
-params_ud.Value(2) = (pi * sum(pp0_ens(:,2).^3) / (6 * params_ud.Value(1)))^(1/3);
-params_ud.Value(3) = params_ud.Value(2);
-params_ud.Value(4) = params_ud.Value(2);
-
 % Assign random initial locations and velocities to aggregates
-params_ud.Value(1) = 0;
-[pars_LD2, params_ud] = PAR.INIT_LOC(pars_LD2, params_ud);
+opts_loc.vf = 'on';
+[pars_LD2, params_ud] = PAR.INIT_LOC(pars_LD2, params_ud, [], opts_loc);
 pars_LD2.v = PAR.INIT_VEL(pars_LD2.pp, pars_LD2.n, fl.temp, params_const);
 
 opts_grow.indupdate = 'off'; % flag to update aggregate ids upon each...
@@ -157,12 +152,6 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     % update characteristic sizes
     pars_LD2 = PAR.SIZING(pars_LD2);
     
-    % update projected area sizes (if necessary)
-    if ~strcmp(opts_mobil.mtd, 'interp')
-        pars_LD2.da = 2 * sqrt(PAR.PROJECTION(pars_LD2, [], n_mc_prj,...
-            n_ang_prj, [], opts_prj) / pi);
-    end
-    
     % update mobility properties
     pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
     
@@ -173,10 +162,15 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     ensdata.kn_diff(k,1:2) = [mean(pars_LD2.kn_diff), std(pars_LD2.kn_diff)];
     ensdata.dpp(k,1:2) = [geomean(pars_LD2.dpp_g(:,1)), UTILS.GEOSTD(pars_LD2.dpp_g(:,1))];
     ensdata.sigmapp(k,1:2) = [geomean(pars_LD2.dpp_g(:,2)), UTILS.GEOSTD(pars_LD2.dpp_g(:,2))];
-    ensdata.da(k,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
     ensdata.dm(k,1:2) = [geomean(pars_LD2.dm), UTILS.GEOSTD(pars_LD2.dm)];
     
     if ensdata.n_agg(k) <= (r_n_agg(ind_dat) * ensdata.n_agg(1))
+
+        % update projected area sizes (if necessary)
+        if ~strcmp(opts_mobil.mtd, 'interp')
+            pars_LD2.da = 2 * sqrt(PAR.PROJECTION(pars_LD2, [], n_mc_prj,...
+                n_ang_prj, [], opts_prj) / pi);
+        end        
         
         % save data of individual aggregates in selected times
         parsdata(ind_dat).pp = pars_LD2.pp;
@@ -191,7 +185,7 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
         
     end
 
-    if mod(k,250) == 1
+    if mod(k,1000) == 1
         dt = datestr(datetime('now')); % current date and time
         dt = regexprep(dt, ':', '-');
         dt = regexprep(dt, ' ', '_');
