@@ -72,7 +72,7 @@ opts_fl.amb = 'room';
 
 % calculate initial mobility properties
 opts_mobil.c_dt = 100; % adjust the timesteps
-opts_mobil.mtd = 'interp'; % choose the method of mobility size calculation
+opts_mobil.mtd = 'continuum'; % choose the method of mobility size calculation
 pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
 
 % Assign random initial locations and velocities to aggregates
@@ -184,12 +184,15 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
         ind_dat = ind_dat + 1; % update data saving index
         
     end
-
+    
+    % save workspace once in a while (to recover iterations in case they...
+        % ...are interrupted)
     if mod(k,1000) == 1
         dt = datestr(datetime('now')); % current date and time
         dt = regexprep(dt, ':', '-');
         dt = regexprep(dt, ' ', '_');
-        save(strcat('outputs\', dt, '.mat'))
+        save(strcat('outputs\', datestr(datetime('today')), '\', dt,...
+            '.mat'))
     end
 
     UTILS.TEXTBAR([k, k_max]); % update progress textbar
