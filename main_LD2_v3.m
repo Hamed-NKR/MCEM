@@ -6,8 +6,8 @@ close all
 %% Load scaled first-stage LD aggregates %%
 
 % address of data library to be imported
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp13';
-fname = '18NOV24';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp10';
+fname = 'SCAT-19NOV24';
 varname = 'pars_out';
 
 % load previously scaled stage 1 aggregate data
@@ -123,6 +123,13 @@ parsdata(1).da = pars_LD2.da;
 parsdata(1).dg = pars_LD2.dg;
 parsdata(1).n_hyb = pars_LD2.n_hyb;
 
+% make a directory to save the workspace data
+dir_wsp = strcat('outputs\', 'LD2-', datestr(datetime('today')),...
+    '_', fname);
+if ~isfolder(dir_wsp)
+    mkdir(dir_wsp); % if it doesn't exist, create the directory
+end
+
 %% perform Langevin dynamics simulations %%
 
 disp(' ')
@@ -191,8 +198,7 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
         dt = datestr(datetime('now')); % current date and time
         dt = regexprep(dt, ':', '-');
         dt = regexprep(dt, ' ', '_');
-        save(strcat('outputs\', datestr(datetime('today')), '\', dt,...
-            '.mat'))
+        save(strcat(dir_wsp, '\', dt, '.mat'))
     end
 
     UTILS.TEXTBAR([k, k_max]); % update progress textbar
@@ -213,5 +219,6 @@ ensdata.sigmapp(k:end,:) = [];
 ensdata.da(k:end,:) = [];
 ensdata.dm(k:end,:) = [];
 
-
+% save the final workspace
+save(strcat(dir_wsp, '\', dt, '_Final', '.mat'))
 
