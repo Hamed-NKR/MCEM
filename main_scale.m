@@ -42,17 +42,17 @@ gsd_da = 1.67; % geometric standard deviation
 gm_dpp = 16.67; % ensemble geometric mean of primary particle diameter distribution
 gsd_dpp = 1.22; % ensemble geometric standard deviation
 
-cn_scale = 0.5; % proportion of random aggregates chosen for filtering
+cn_scale = 0.6; % proportion of random aggregates chosen for filtering
 
 % address of aggregate library to be imported for scaling and filtering
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp10';
-fname = 'classicDLCA_lib0_stdint10';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp13';
+fname = 'wsp-sigmapp-13';
 varname = 'pp0';
 vardir = '';
 
 % resolution for projected area calculation
-n_mc = 1e2;
-n_ang = 5;
+n_mc = 1e4;
+n_ang = 25;
 
 n_bin_filter = 20;
 
