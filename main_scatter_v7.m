@@ -39,8 +39,7 @@ buc_inv = @(x) (b0_buc * x) .^ (1 / m_buc); % inverse combined...
 gm_da = 83.22; % geometric mean of projected area diameter distribution
 gsd_da = 1.67; % geometric standard deviation of ~
 gm_dpp = 16.67; % geometric mean of primary particle diameter distribution
-% gsd_dpp = 1.22; % geometric standard deviation of ~
-gsd_dpp = 1.01;
+gsd_dpp = 1.22; % geometric standard deviation of ~
 
 cn_scat = 0.5; % proportion of random aggregates chosen for bivariate sampling
 
