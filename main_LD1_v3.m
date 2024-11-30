@@ -21,7 +21,7 @@ s_pp0 = 1.4;
 npp0_min = 10; % number of primary particles for smallest aggregates to be stored
 npp0_max = 1000; % number of primary particles for largest aggregates to be stored
 
-j_max = 1e4; % maximum number of iterations in each LD simulation
+j_max = 3e4; % maximum number of iterations in each LD simulation
 
 % flag for caclculation method of mobility diameter
 % opts0_mobil.mtd = 'interp';
@@ -180,6 +180,12 @@ for i = 1 : n_trial % run n_trial number of Langevin dynamics (LD) simulations
         % connect colliding particles
         pars0 = COL.GROW(pars0);
 
+        % update characteristic sizes
+        pars0 = PAR.SIZING(pars0);
+        
+        % update mobility properties
+        pars0 = TRANSP.MOBIL(pars0, fl0, params0_const, opts0_mobil);        
+
         if sum(cat(1, pars0.n) >= npp0_temporal(jj)) >=...
                 round(0.9 * length(cat(1, pars0.n)))
             % save data when 90% of aggregates reach npp0_temporal(jj)
@@ -209,7 +215,7 @@ for i = 1 : n_trial % run n_trial number of Langevin dynamics (LD) simulations
             % save properties of aggregates
             parsdata0(jj,i).dpp = pars0.dpp_g(:,1);
             parsdata0(jj,i).sigmapp = pars0.dpp_g(:,2);
-            parsdata0(jj,i).dm = pars0.da;
+            parsdata0(jj,i).dm = pars0.dm;
             parsdata0(jj,i).dg = pars0.dg;
             parsdata0(jj,i).da = pars0.da;
 
@@ -228,12 +234,6 @@ for i = 1 : n_trial % run n_trial number of Langevin dynamics (LD) simulations
 
         end
         
-        % update characteristic sizes
-        pars0 = PAR.SIZING(pars0);
-        
-        % update mobility properties
-        pars0 = TRANSP.MOBIL(pars0, fl0, params0_const, opts0_mobil);
-
         % record real-time ensemble data
         ensdata0.t(j+1,i) = min(pars0.delt) + ensdata0.t(j,i);
         ensdata0.n_agg(j+1,i) = length(pars0.n);

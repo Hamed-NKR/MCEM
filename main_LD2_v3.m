@@ -156,13 +156,13 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
 
     % count number of subaggregates
     pars_LD2.n_hyb = COL.HYBRIDITY(pars_LD2.pp, pars_LD2.n);
-
+    
     % update characteristic sizes
     pars_LD2 = PAR.SIZING(pars_LD2);
-
+    
     % update mobility properties
     pars_LD2 = TRANSP.MOBIL(pars_LD2, fl, params_const, opts_mobil);
-
+    
     ensdata.t(k) = ensdata.t(k-1) + min(pars_LD2.delt);
     ensdata.n_agg(k) = length(pars_LD2.pp);
     ensdata.tau(k,1:2) = [mean(pars_LD2.tau), std(pars_LD2.tau)];
@@ -174,7 +174,7 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     if strcmp(opts_mobil.mtd, 'interp')
         ensdata.da(k,1:2) = [geomean(pars_LD2.da), UTILS.GEOSTD(pars_LD2.da)];
     end
-
+    
     if ensdata.n_agg(k) <= (r_n_agg(ind_dat) * ensdata.n_agg(1))
 
         % update projected area sizes (if necessary)
@@ -207,9 +207,9 @@ while (k <= k_max) && (ind_dat <= n_dat) && (length(pars_LD2.n) > 1)
     end
 
     UTILS.TEXTBAR([k, k_max]); % update progress textbar
-
+    
     k = k + 1; % update iteration index
-
+    
 end
 
 % Remove unused elements from the data storage structures
