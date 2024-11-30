@@ -44,8 +44,8 @@ gsd_dpp = 1.22; % geometric standard deviation of ~
 cn_scat = 0.5; % proportion of random aggregates chosen for bivariate sampling
 
 % address of aggregate library to be imported for scaling and dispersion
-fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp10';
-fname = 'classicDLCA_lib0_stdint10';
+fdir = 'D:\HN\DLCA\LIBS';
+fname = 'wsp-sigmapp-13';
 varname = 'pp0';
 vardir = '';
 
