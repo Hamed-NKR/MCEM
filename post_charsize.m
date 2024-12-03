@@ -5,15 +5,16 @@ clc
 clear
 clf('reset')
 close all
+warning('off')
 
 %% initialize %%
 
 % address of data library to be imported
-fdir = 'D:\HN\AUG24Onward\DLCA';
-fname = 'lib-scaled-disperse-sigmapp13';
+fdir = 'D:\Hamed\CND\PhD\My Articles\DLCA2\mainscatter_sigmapp13\SCAT';
+fname = 'SCAT-18NOV24';
 varname = 'pars_out';
 
-ind_agg = 706;
+ind_agg = [];
 
 rho0 = 1860; % material density
 
@@ -62,9 +63,9 @@ pars_render.dae = TRANSP.AERODYN(pars_render.pp, pars_render.dm, rho0);
 
 %% visualize aggregate strcuture %%
 
-f1 = figure(1);
-f1.Position = [50, 50, 600, 600];
-set(f1, 'color', 'white');
+f0 = figure(7);
+f0.Position = [0, 0, 600, 600];
+set(f0, 'color', 'white');
 
 % select a random aggregate if not already selected
 if isempty(ind_agg)
@@ -77,16 +78,31 @@ opts_rnd.cm = sky;
 opts_rnd.cloc = 0.4;
 
 % render the aggregate
-plt1_agg = UTILS.PLOTPP(pars_render.pp{ind_agg}(:,3),...
+plt0_agg = UTILS.PLOTPP(pars_render.pp{ind_agg}(:,3),...
     pars_render.pp{ind_agg}(:,4), pars_render.pp{ind_agg}(:,5),...
     pars_render.pp{ind_agg}(:,2), [], opts_rnd);
 
-hold on
 
 %% draw primary particle diameter %%
 
 % determine center of mass
 r_com = PAR.COM(pars_render.pp(ind_agg), pars_render.n(ind_agg));
+
+f1 = figure(1);
+f1.Position = [50, 50, 600, 600];
+set(f1, 'color', 'white');
+
+% select a random aggregate if not already selected
+if isempty(ind_agg)
+    ind_agg = randperm(n_agg, 1);
+end
+
+% render the aggregate
+plt1_agg = UTILS.PLOTPP(pars_render.pp{ind_agg}(:,3),...
+    pars_render.pp{ind_agg}(:,4), pars_render.pp{ind_agg}(:,5),...
+    pars_render.pp{ind_agg}(:,2), [], opts_rnd);
+
+hold on
 
 % get geometric mean and sd
 dpp = geomean(pars_render.dpp_g);
@@ -208,6 +224,9 @@ plt_dae = setgraphics(plt_dae);
 if ~isfolder('outputs')
     mkdir('outputs'); % If the directory doesn't exist, create it 
 end
+
+exportgraphics(f0, 'outputs\render0.png', 'BackgroundColor',...
+    'none', 'ContentType', 'vector', 'Resolution', 300) % save dpp figure
 
 exportgraphics(f1, 'outputs\render_dpp.png', 'BackgroundColor',...
     'none', 'ContentType', 'vector', 'Resolution', 300) % save dpp figure
