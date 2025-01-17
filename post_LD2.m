@@ -121,8 +121,8 @@ n_dm_uc = 1e4; % number of data
 uc2 = @(y) rho_eff_100 * (y / 100) .^ (D_m - 3); % on-demand function...
     % ...for the forward correlation in the mass-mobility domain...
     % ...(rho_eff in [kg/m3] as a function of dm in [nm])
-r_uc2 = (dm_lim_uc(2) / dm_lim_uc(1)) ^ (1 / (n_da_uc - 1));
-dm_uc = dm_lim_uc(1) * ones(n_da_uc,1) .* r_uc2 .^ (((1 : n_da_uc) - 1)');
+r_uc2 = (dm_lim_uc(2) / dm_lim_uc(1)) ^ (1 / (n_dm_uc - 1));
+dm_uc = dm_lim_uc(1) * ones(n_dm_uc,1) .* r_uc2 .^ (((1 : n_dm_uc) - 1)');
 rho_eff_uc = uc2(dm_uc);
 plt2{end} = plot(dm_uc, rho_eff_uc, 'Color', [0.4940 0.1840 0.5560],...
     'LineStyle', '-.', 'LineWidth', 3);
