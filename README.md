@@ -2,13 +2,13 @@ Post-flame agglomeration algorithm (PFAL): A hierarchical procedure to produce m
 ===
 
 ## Introduction
-The present code generates fractal structures that resemble soot through aggregation of initial populations of primary particles. We used two stages of discrete element modeling using Langevin dynamics equations based on an earlier works published in [1] and [2]. We calibrated the aggregates between these two stages based on the universal correlation of primary particle size and aggregate size proposed in [3]. The intention for generation of such structures is to explain atypical observations on soot that show in the form of hybridity in primary particle size as reported in [4]. We used the present PFAL package to produce hybrid soot and predicted, for the first time, that those hybrid structures have unique behaviours in terms of projected area and effective density. The results are published in [5]. Examples of real hybrid soot imaged by the author under transmission electron microscope can be found below:
+The present code generates fractal structures that resemble soot through aggregation of initial populations of primary particles. We used two stages of discrete element modeling here, using Langevin dynamics equations based on an earlier works published in [1] and [2]. We calibrated the aggregates between these two stages based on the universal correlation of primary particle size and aggregate size proposed in [3]. The intention for generation of such structures is to explain atypical observations on soot that show in the form of hybridity in primary particle size as reported in [4]. We used the present PFAL package to produce hybrid soot and predicted, for the first time, that those hybrid structures have unique behaviours in terms of projected area and effective density. The results are published in [5]. Examples of real hybrid soot imaged by the author under transmission electron microscope can be found below:
 
 ![untitled](https://github.com/user-attachments/assets/db858f62-1e22-471c-90ad-dc06329de681)
 
 Discrete element models such as the individual stages of Langeving dynamics modeling used here generally follow a series of simulation steps to produce fractal aggregates:
 1. Reading input parameters given by the user related to aggregation phenomena (e.g. number, size and polydispersity of primary particles, volume fraction,...),
-2. Random initializing the locations and velocities of primary particles,
+2. Randomly initializing the locations and velocities of primary particles,
 3. Calculating the mobility of particles
 4. Moving the particles via the interactions of brownian motion, drag and inertia,
 5. Imposing periodic conditions on the boundaries (escaping particles return back to the domain from the other side),
